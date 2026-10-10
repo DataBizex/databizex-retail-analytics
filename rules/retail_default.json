@@ -1,0 +1,203 @@
+{
+  "name": "Retail sales (default)",
+  "version": 1,
+  "rules": [
+    {
+      "name": "Missing values (all columns)",
+      "column": "*",
+      "type": "not_null",
+      "params": {
+        "each_column": "Missing values: {column}"
+      },
+      "severity": "warning",
+      "description": "Total empty cells"
+    },
+    {
+      "name": "Missing values: order_id",
+      "column": "order_id",
+      "type": "not_null",
+      "severity": "warning"
+    },
+    {
+      "name": "Missing values: order_date",
+      "column": "order_date",
+      "type": "not_null",
+      "severity": "warning"
+    },
+    {
+      "name": "Missing values: country",
+      "column": "country",
+      "type": "not_null",
+      "severity": "warning"
+    },
+    {
+      "name": "Missing values: product",
+      "column": "product",
+      "type": "not_null",
+      "severity": "warning"
+    },
+    {
+      "name": "Missing values: category",
+      "column": "category",
+      "type": "not_null",
+      "severity": "warning"
+    },
+    {
+      "name": "Missing values: quantity",
+      "column": "quantity",
+      "type": "not_null",
+      "severity": "error"
+    },
+    {
+      "name": "Missing values: unit_price",
+      "column": "unit_price",
+      "type": "not_null",
+      "severity": "error"
+    },
+    {
+      "name": "Missing values: discount_pct",
+      "column": "discount_pct",
+      "type": "not_null",
+      "severity": "error"
+    },
+    {
+      "name": "Missing values: unit_cost",
+      "column": "unit_cost",
+      "type": "not_null",
+      "severity": "error"
+    },
+    {
+      "name": "Exact duplicate rows",
+      "column": "*",
+      "type": "unique",
+      "params": {
+        "columns": []
+      },
+      "severity": "error",
+      "description": "Rows identical to an earlier row in every column"
+    },
+    {
+      "name": "Invalid dates: order_date",
+      "column": "order_date",
+      "type": "dtype",
+      "params": {
+        "kind": "date"
+      },
+      "severity": "warning",
+      "description": "Non-empty values that are not a valid YYYY-MM-DD date"
+    },
+    {
+      "name": "Invalid numeric: quantity",
+      "column": "quantity",
+      "type": "dtype",
+      "params": {
+        "kind": "numeric"
+      },
+      "severity": "error",
+      "description": "Non-empty values that are not numbers"
+    },
+    {
+      "name": "Invalid numeric: unit_price",
+      "column": "unit_price",
+      "type": "dtype",
+      "params": {
+        "kind": "numeric"
+      },
+      "severity": "error",
+      "description": "Non-empty values that are not numbers"
+    },
+    {
+      "name": "Invalid numeric: discount_pct",
+      "column": "discount_pct",
+      "type": "dtype",
+      "params": {
+        "kind": "numeric"
+      },
+      "severity": "error",
+      "description": "Non-empty values that are not numbers"
+    },
+    {
+      "name": "Invalid numeric: unit_cost",
+      "column": "unit_cost",
+      "type": "dtype",
+      "params": {
+        "kind": "numeric"
+      },
+      "severity": "error",
+      "description": "Non-empty values that are not numbers"
+    },
+    {
+      "name": "discount_pct outside 0-100",
+      "column": "discount_pct",
+      "type": "range",
+      "params": {
+        "min": 0,
+        "max": 100
+      },
+      "severity": "error"
+    },
+    {
+      "name": "Negative values: quantity",
+      "column": "quantity",
+      "type": "range",
+      "params": {
+        "min": 0
+      },
+      "severity": "error"
+    },
+    {
+      "name": "Negative values: unit_price",
+      "column": "unit_price",
+      "type": "range",
+      "params": {
+        "min": 0
+      },
+      "severity": "error"
+    },
+    {
+      "name": "Negative values: unit_cost",
+      "column": "unit_cost",
+      "type": "range",
+      "params": {
+        "min": 0
+      },
+      "severity": "error"
+    },
+    {
+      "name": "unit_price below unit_cost",
+      "column": "unit_price",
+      "type": "cross_column",
+      "params": {
+        "other": "unit_cost",
+        "operator": ">=",
+        "compare_as": "numeric"
+      },
+      "severity": "warning",
+      "description": "Rows where unit_price < unit_cost (list price below cost)"
+    },
+    {
+      "name": "Outliers (IQR): quantity",
+      "column": "quantity",
+      "type": "outlier",
+      "params": {
+        "method": "iqr",
+        "factor": 3.0
+      },
+      "severity": "warning",
+      "description": "Outside Q1 - 3 x IQR .. Q3 + 3 x IQR; flagged only, never removed",
+      "comment": "Retail prices are right-skewed, so the standard 1.5x IQR fence flags a large share of legitimate premium products; 3.0x marks only extreme values. IQR is preferred over z-score because z-score assumes an approximately normal distribution, which price data rarely is. z-score stays available (method: zscore) for custom rule files."
+    },
+    {
+      "name": "Outliers (IQR): unit_price",
+      "column": "unit_price",
+      "type": "outlier",
+      "params": {
+        "method": "iqr",
+        "factor": 3.0
+      },
+      "severity": "warning",
+      "description": "Outside Q1 - 3 x IQR .. Q3 + 3 x IQR; flagged only, never removed",
+      "comment": "Retail prices are right-skewed, so the standard 1.5x IQR fence flags a large share of legitimate premium products; 3.0x marks only extreme values. IQR is preferred over z-score because z-score assumes an approximately normal distribution, which price data rarely is. z-score stays available (method: zscore) for custom rule files."
+    }
+  ]
+}
