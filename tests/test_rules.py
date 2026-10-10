@@ -216,6 +216,27 @@ def test_default_rule_set_reproduces_demo_counts():
     assert sum(count[f"Negative values: {c}"] for c in ["quantity", "unit_price", "unit_cost"]) == 6
 
 
+def test_default_has_order_id_key_rule_with_no_conflicting_ids_on_demo():
+    rule = next(r for r in default_rules() if r.name == "Duplicate order_id")
+    assert (rule.type, rule.params, rule.severity) == ("unique", {"columns": ["order_id"]}, "error")
+
+    df = load_file(sample_data_path()).df
+    raw = validate(df, default_rules())[0].set_index("check")["count"]
+    # Every repeated order_id in the demo is one of the 25 exact duplicate rows ...
+    assert raw["Duplicate order_id"] == raw["Exact duplicate rows"] == 25
+    # ... so once those are removed the IDs are unique: no order_id with different values.
+    cleaned, _ = remove_exact_duplicates(df)
+    assert validate(cleaned, [rule])[0]["count"].iloc[0] == 0
+
+
+def test_order_id_key_rule_catches_what_exact_duplicates_miss():
+    df = pd.DataFrame({"order_id": ["A1", "A2", "A1"], "quantity": [1, 2, 5]})
+    rule = next(r for r in default_rules() if r.name == "Duplicate order_id")
+    exact = Rule("exact", "*", "unique", {"columns": []})
+    count = validate(df, [exact, rule])[0].set_index("check")["count"]
+    assert count["exact"] == 0 and count["Duplicate order_id"] == 1
+
+
 def test_default_outliers_use_iqr_3x_and_zscore_stays_available(tmp_path):
     outlier_rules = [r for r in default_rules() if r.type == "outlier"]
     assert {r.column for r in outlier_rules} == {"quantity", "unit_price"}

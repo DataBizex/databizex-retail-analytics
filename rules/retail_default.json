@@ -77,6 +77,19 @@
       "description": "Rows identical to an earlier row in every column"
     },
     {
+      "name": "Duplicate order_id",
+      "column": "*",
+      "type": "unique",
+      "params": {
+        "columns": [
+          "order_id"
+        ]
+      },
+      "severity": "error",
+      "description": "Rows whose order_id already appeared in an earlier row",
+      "comment": "A repeated order_id with different values indicates a broken export or a bad join, which whole-row duplicate detection cannot catch. Exact duplicate rows are counted here too, since they also repeat the order_id."
+    },
+    {
       "name": "Invalid dates: order_date",
       "column": "order_date",
       "type": "dtype",

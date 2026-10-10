@@ -43,7 +43,8 @@ wrong and nobody can tell why. Teams need to:
 **Data Quality**
 - Rule-based checks read from a JSON rule set. The shipped default
   (`rules/retail_default.json`) checks missing values (per column and total), exact
-  duplicate rows, invalid `order_date`, non-numeric values, `discount_pct` outside
+  duplicate rows, repeated `order_id` (catches the same ID with different values, e.g.
+  from a broken export or bad join), invalid `order_date`, non-numeric values, `discount_pct` outside
   0–100, negative quantity / unit_price / unit_cost, unit_price below unit_cost, and
   outliers (IQR with a 3.0x multiplier on quantity and unit_price).
 - **Load rule set...** validates any other tabular data (HR, finance, ...) with its own rules.

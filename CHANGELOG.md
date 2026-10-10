@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with identical counts. It adds a `unit_price below unit_cost` warning and outlier
   warnings for quantity and unit_price (IQR with a 3.0x multiplier, since retail prices
   are right-skewed; the reasoning is in the rule file's `comment` field).
+- Default rule `Duplicate order_id` (unique on `order_id`, severity error). It catches an
+  order_id repeated with different values (a broken export or bad join), which whole-row
+  duplicate detection cannot. Exact duplicate rows are counted by it too.
 - Optional `comment` field on rules, for notes that are not shown in the app.
 - Outlier detection with the IQR (configurable `factor`) and z-score methods. Outliers are
   counted and flagged as warnings only, never removed or excluded from KPIs.
