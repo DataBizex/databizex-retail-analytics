@@ -32,6 +32,7 @@ echo [4/4] Packaging with PyInstaller ...
 python -m PyInstaller --noconfirm --clean --onedir --windowed --name DataBizex ^
     --add-data "sample_data;sample_data" ^
     --add-data "powerbi;powerbi" ^
+    --add-data "rules;rules" ^
     --exclude-module tkinter ^
     run_databizex.py
 if errorlevel 1 goto :fail
@@ -47,6 +48,7 @@ if /i "%~1"=="--onefile" (
         --workpath build\onefile ^
         --add-data "sample_data;sample_data" ^
         --add-data "powerbi;powerbi" ^
+        --add-data "rules;rules" ^
         --exclude-module tkinter ^
         run_databizex.py
     if errorlevel 1 goto :fail

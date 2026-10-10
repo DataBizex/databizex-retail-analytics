@@ -41,10 +41,23 @@ wrong and nobody can tell why. Teams need to:
   is renamed; extra columns are kept.
 
 **Data Quality**
-- Missing values (per column and total), exact duplicate rows,
-  invalid `order_date`, non-numeric values, `discount_pct` outside 0–100,
-  negative quantity / unit_price / unit_cost.
-- Summary table: check, count, status (OK / Issue / Unavailable).
+- Rule-based checks read from a JSON rule set. The shipped default
+  (`rules/retail_default.json`) checks missing values (per column and total), exact
+  duplicate rows, invalid `order_date`, non-numeric values, `discount_pct` outside
+  0–100, negative quantity / unit_price / unit_cost, unit_price below unit_cost, and
+  outliers (IQR with a 3.0x multiplier on quantity and unit_price).
+- **Load rule set...** validates any other tabular data (HR, finance, ...) with its own rules.
+  Rule types: not_null, dtype, range, allowed_values, regex, unique (on key columns),
+  cross_column, outlier. See the docstring of `app/data/rules.py` for the file format.
+- Summary table: check, count, status (OK / Issue / Unavailable), severity (error / warning).
+- Quality score: completeness, validity, uniqueness and consistency (% of rows that pass
+  all rules of that kind) and their average as an overall score out of 100.
+- Outliers are flagged as warnings only; they are never removed or excluded from KPIs.
+  The default uses IQR with a 3.0x multiplier (`factor`) rather than the usual 1.5x:
+  retail prices are right-skewed, so the 1.5x fence flags a large share of legitimate
+  premium products, while 3.0x marks only extreme values. IQR is preferred over z-score
+  because z-score assumes an approximately normal distribution, which price data rarely
+  is. `method: zscore` (with `threshold`) remains available in custom rule files.
 - **Remove exact duplicates** on the in-memory working copy only.
 - Before/after table: original import vs working data.
 - Rows with missing values are never deleted or filled with zero.
@@ -101,7 +114,7 @@ databizex-retail-analytics/
 │   ├── main.py               entry point, logging, --smoke-test mode
 │   ├── paths.py              resource paths (source + PyInstaller bundle)
 │   ├── ui/                   main_window.py, data_table.py  (PySide6 only)
-│   ├── data/                 loader.py, profiler.py, cleaner.py
+│   ├── data/                 loader.py, profiler.py, cleaner.py, rules.py, column_mapping.py
 │   ├── analytics/            kpis.py  (KPI definitions, row validity)
 │   ├── database/             duckdb_manager.py  (table `sales`, SQL queries)
 │   └── exports/              exporter.py  (CSV, Excel, Power BI package)
@@ -109,6 +122,7 @@ databizex-retail-analytics/
 ├── scripts/                  generate_sample_data.py, capture_screenshots.py
 ├── tests/                    pytest suite
 ├── powerbi/                  POWER_BI_GUIDE.md, data_dictionary.md
+├── rules/                    retail_default.json (default validation rule set)
 ├── screenshots/
 ├── run_databizex.py          launcher used by PyInstaller
 └── build_windows.bat
@@ -185,7 +199,8 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 The tests use small fixtures with hand-checked results. They cover
 loading valid, empty, header-only, headerless, unsupported and corrupt
 files, plus missing-value profiling and duplicate detection and removal
-(the source file stays unchanged). KPI values and DuckDB aggregations are
+(the source file stays unchanged). Every validation rule type, the quality
+score formula and the default rule set's counts on the demo file are tested. KPI values and DuckDB aggregations are
 checked on a 5-row dataset, and the CSV, Excel and Power BI exports are
 tested too.
 
@@ -252,7 +267,10 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 - Column names must match the expected schema for checks and KPIs, or be mapped
   in the column mapping dialog. The mapping is not saved between sessions.
 - The whole file is loaded into memory; very large files (millions of rows) will be slow.
-- Only exact duplicates are removed; near-duplicates (e.g. same order_id, different values) are not detected.
+- Only exact duplicates are removed. A `unique` rule on key columns (e.g. `order_id`) reports
+  near-duplicates, but they are not removed.
+- Rule sets are JSON only and are not remembered between sessions; row-level rule flags are
+  computed but not yet shown or exported in the app.
 - No free-form SQL editor; only the predefined queries run.
 - The packaged app is about 225 MB as a folder (or a 97 MB single exe with slower start). No installer yet.
 - Executables are not code-signed, so Windows SmartScreen may warn on first launch from a download.
@@ -261,7 +279,8 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 ## Future improvements
 
 - Remember column mappings per file layout.
-- Configurable date formats and duplicate rules (e.g. by `order_id`).
+- Configurable date formats; removing duplicates by key columns (detection already works via `unique` rules).
+- Show and export the row-level rule flags (which rows failed which rule).
 - Read-only custom SQL editor with a SELECT-only guard.
 - Background thread for loading very large files.
 - Windows installer with Inno Setup once the build is stable.

@@ -67,6 +67,7 @@ def run_smoke_test(window, output: Path) -> None:
     try:
         report["sample_loaded"] = window.load_sample()
         report["rows_original"] = len(window.original_df)
+        report["rule_count"] = len(window.rules)
         quality = window.quality_table.model_._df
         report["duplicates_found"] = int(quality.loc[quality["check"] == "Exact duplicate rows", "count"].iloc[0])
         report["missing_cells"] = int(quality.loc[quality["check"] == "Missing values (all columns)", "count"].iloc[0])
