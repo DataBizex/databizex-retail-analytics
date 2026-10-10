@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import sys
+import tempfile
 import traceback
 from pathlib import Path
 
@@ -18,6 +19,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from app import APP_NAME, __version__
+from app.exports.exporter import export_excel, generate_powerbi_package
 from app.paths import user_data_dir
 
 logger = logging.getLogger("databizex")
@@ -74,6 +76,10 @@ def run_smoke_test(window, output: Path) -> None:
         report["kpis"] = {k: (None if v != v else v) for k, v in window.kpi_headline.items()}
         report["kpi_basis"] = window.kpi_basis
         report["preview_rows_in_gui"] = window.preview_table.model_.rowCount()
+        with tempfile.TemporaryDirectory() as tmp:
+            written = generate_powerbi_package(window.working_df, Path(tmp), "smoke-test", window.kpi_basis)
+            report["powerbi_files"] = sorted(p.name for p in written)
+            report["xlsx_export_bytes"] = export_excel(window.working_df, Path(tmp) / "w.xlsx").stat().st_size
         report["ok"] = True
     except Exception as exc:  # noqa: BLE001 - recorded in the report
         report["ok"] = False
