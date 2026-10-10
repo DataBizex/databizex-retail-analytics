@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Detection of regional number formats per column: decimal comma (`43,92`), dot or other
+  thousands separators (`1.234,56`) and US-style thousands commas (`1,234.56`).
+- Detection of date formats per column: `YYYY-MM-DD`, `DD.MM.YYYY`, `DD/MM/YYYY` and
+  `MM/DD/YYYY`. Ambiguous day/month order is read as DD/MM and flagged.
+- **Import Options** dialog after loading a file whose delimiter, encoding, number or date
+  format is not the default. It states what was detected, and every setting can be
+  overridden. Changing the delimiter or encoding reads the file again.
+- Numbers and dates are converted in the working copy only (`app/data/formats.py`). Values
+  that do not fit the chosen format keep their original text, so quality checks still
+  report them.
+- Import settings and converted columns are shown in the source line and written to the
+  Power BI `package_info.txt`.
+
+### Changed
+
+- `load_file()` accepts optional `delimiter` and `encoding` overrides and records which
+  ones were used.
+
 ## [0.2.0] - 2026-10-10
 
 ### Added

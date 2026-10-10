@@ -31,6 +31,15 @@ wrong and nobody can tell why. Teams need to:
 **Import & Preview**
 - Open `.csv` or `.xlsx` (legacy `.xls` is rejected with an explanation).
 - Detects `,` `;` tab or `|` delimiters, UTF-8 or Windows-1252 encoding.
+- Detects regional number and date formats per column: decimal comma (`43,92`,
+  `1.234,56`), thousands separators, and `YYYY-MM-DD`, `DD.MM.YYYY`, `DD/MM/YYYY` or
+  `MM/DD/YYYY` dates (ambiguous day/month order is read as DD/MM and flagged).
+- **Import Options** dialog when anything differs from the default (comma, UTF-8, dot
+  decimal, ISO dates): shows what was detected; delimiter, encoding, decimal and
+  thousands separator and date format can each be changed. Numbers and dates are
+  converted in the working copy only; values that do not fit keep their text, so the
+  quality checks still report them. The settings appear in the source line and in the
+  Power BI `package_info.txt`.
 - Preview of the first 100 rows (the full dataset is never put in the GUI).
 - Row/column counts, inferred dtypes, missing and unique counts, numeric statistics.
 - Empty, header-only, unreadable and headerless files handled without crashing.
@@ -264,7 +273,13 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 
 - Legacy `.xls` files are not supported (save as `.xlsx` or `.csv`).
 - Only the first sheet of an Excel file is read.
-- Dates must be ISO `YYYY-MM-DD` (or real Excel dates); other formats are flagged invalid.
+- Dates must be `YYYY-MM-DD`, `DD.MM.YYYY`, `DD/MM/YYYY` or `MM/DD/YYYY` (or real Excel
+  dates), without a time part. One date format and one pair of separators apply to the
+  whole file.
+- A column whose every value looks like `1.234` (dot thousands, no decimals) is read as a
+  decimal number before the import options apply.
+- The Import & Preview tab profiles the file as read; converted numbers show up in the
+  quality checks and KPIs, not in the numeric statistics table.
 - Column names must match the expected schema for checks and KPIs, or be mapped
   in the column mapping dialog. The mapping is not saved between sessions.
 - The whole file is loaded into memory; very large files (millions of rows) will be slow.

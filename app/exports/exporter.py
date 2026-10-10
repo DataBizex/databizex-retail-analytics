@@ -89,10 +89,11 @@ def powerbi_frame(working: pd.DataFrame, unavailable: Collection[str] = ()) -> p
 
 def generate_powerbi_package(working: pd.DataFrame, folder: str | Path,
                              source_name: str = "", data_state: str = "",
-                             unavailable: Collection[str] = ()) -> list[Path]:
+                             unavailable: Collection[str] = (), import_settings: str = "") -> list[Path]:
     """Write sales_clean.csv, the guide, the data dictionary and package_info.txt.
 
     unavailable: columns marked "not available" in the column mapping.
+    import_settings: how the file was read and its numbers/dates parsed (formats.import_summary).
     """
     folder = Path(folder)
     if not folder.is_dir():
@@ -117,6 +118,7 @@ def generate_powerbi_package(working: pd.DataFrame, folder: str | Path,
         f"Generated: {datetime.now():%Y-%m-%d %H:%M}",
         f"Source file: {source_name or '(unknown)'}",
         f"Data state: {data_state or '(not specified)'}",
+        *([f"Import settings: {import_settings}"] if import_settings else []),
         f"Rows in working dataset: {summary.total_rows}",
         f"Rows exported to {POWERBI_CSV_NAME} (valid for KPIs): {summary.kpi_rows}",
         f"Rows excluded (invalid/missing quantity, price, discount or cost): {summary.excluded_rows}",
