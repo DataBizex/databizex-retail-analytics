@@ -71,7 +71,9 @@ class DataFrameModel(QAbstractTableModel):
 class DataTable(QTableView):
     """QTableView preconfigured for read-only DataFrame display."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None, stretch_last: bool = True) -> None:
+        """stretch_last=False keeps every column at its content width (scrolling if needed),
+        so a narrow panel never squeezes the last column's text."""
         super().__init__(parent)
         self.model_ = DataFrameModel()
         self.setModel(self.model_)
@@ -79,7 +81,7 @@ class DataTable(QTableView):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.setAlternatingRowColors(True)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
-        self.horizontalHeader().setStretchLastSection(True)
+        self.horizontalHeader().setStretchLastSection(stretch_last)
         self.verticalHeader().setDefaultSectionSize(22)
 
     def show_frame(self, df: pd.DataFrame | None, float_decimals: int | None = None) -> None:

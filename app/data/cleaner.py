@@ -47,9 +47,12 @@ def count_exact_duplicates(df: pd.DataFrame) -> int:
 
 
 def remove_exact_duplicates(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
-    """Return a NEW DataFrame without exact duplicates (first occurrence kept)."""
+    """Return a NEW DataFrame without exact duplicates (first occurrence kept).
+
+    The index is kept, so each remaining row keeps its source row number.
+    """
     mask = df.duplicated(keep="first")
-    return df.loc[~mask].reset_index(drop=True).copy(), int(mask.sum())
+    return df.loc[~mask].copy(), int(mask.sum())
 
 
 def run_quality_checks(df: pd.DataFrame, rules: list[Rule] | None = None) -> pd.DataFrame:

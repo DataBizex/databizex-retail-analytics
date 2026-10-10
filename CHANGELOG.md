@@ -21,11 +21,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   report them.
 - Import settings and converted columns are shown in the source line and written to the
   Power BI `package_info.txt`.
+- **Failed rows** view on the Data Quality tab: a dropdown of every rule with failures
+  (with counts) plus "All failed rows" (error rules only), and a table of the matching
+  working rows with `source_row` first and a `failed_rules` column. Shows up to 500 rows
+  and states the full count. It refreshes after duplicate removal, reset and loading a
+  rule set.
+- **Export failed rows to CSV...** on the Data Quality and Export & Reporting tabs. It
+  writes every matching row (not only the 500 shown) and records the export in the
+  export log.
+- Each working row keeps its source file line number (header = line 1; for Excel, the
+  sheet row) through import conversion, column mapping and duplicate removal. The number
+  never reaches KPI queries or the Power BI package.
 
 ### Changed
 
+- Numeric statistics on the Import & Preview tab include columns where at least 80% of the
+  non-empty values are numbers (parsed like the quality checks), computed on the values that
+  parse and on import-converted values. New `non_numeric` and `note` columns show how many
+  values were ignored; the data itself is not changed.
 - `load_file()` accepts optional `delimiter` and `encoding` overrides and records which
-  ones were used.
+  ones were used, plus the source line number of every row (`LoadResult.source_rows`).
+- `remove_exact_duplicates()` keeps the row index instead of renumbering, so rows keep
+  their source line numbers.
+
+### Fixed
+
+- The `note` column of the numeric statistics table was cut off; columns are now sized
+  to their contents.
 
 ## [0.2.0] - 2026-10-10
 

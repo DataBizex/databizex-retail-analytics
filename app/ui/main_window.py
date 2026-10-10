@@ -51,7 +51,8 @@ from app.data.formats import (
     detect_formats,
     import_summary,
 )
-from app.data.loader import FILE_DIALOG_FILTER, DataLoadError, load_file
+from app.data.failed_rows import ALL_FAILED, failed_rule_choices, failed_rows
+from app.data.loader import FILE_DIALOG_FILTER, DataLoadError, load_file, with_source_rows
 from app.data.profiler import dataset_overview, numeric_summary, profile_columns
 from app.data.rules import (
     RULES_FILE_FILTER,
@@ -86,6 +87,7 @@ ABOUT_TEXT = (
     "preparing data for Power BI. DataBizex.com"
 )
 KPI_TABLE_KEYS = ["by_country", "by_category", "by_month", "top_products"]
+FAILED_ROWS_SHOWN = 500
 SCORE_TITLES = {
     "overall": "Quality score",
     "completeness": "Completeness",
@@ -148,6 +150,11 @@ class MainWindow(QMainWindow):
         self.source_path: Path | None = None
         self.original_df: pd.DataFrame | None = None
         self.working_df: pd.DataFrame | None = None
+        # Source file line number of each original row; the working copy is indexed by these.
+        self.source_rows: list[int] = []
+        # Latest validation of the working copy, for the failed-rows view and export.
+        self.quality_summary: pd.DataFrame | None = None
+        self.row_flags: pd.DataFrame | None = None
         # Import options (delimiter, encoding, number and date formats) for the current file.
         self.import_options = ImportOptions()
         self.conversion: ConversionResult | None = None
@@ -252,7 +259,7 @@ class MainWindow(QMainWindow):
         QVBoxLayout(profile_box).addWidget(table := DataTable())
         self.profile_table = table
         stats_box = QGroupBox("Numeric statistics (columns with at least 80% numbers)")
-        QVBoxLayout(stats_box).addWidget(table := DataTable())
+        QVBoxLayout(stats_box).addWidget(table := DataTable(stretch_last=False))
         self.stats_table = table
         lower.addWidget(profile_box)
         lower.addWidget(stats_box)
@@ -311,7 +318,31 @@ class MainWindow(QMainWindow):
         splitter.addWidget(quality_box)
         splitter.addWidget(change_box)
         splitter.setSizes([700, 500])
-        layout.addWidget(splitter, 1)
+
+        failed_box = QGroupBox("Failed rows (working data)")
+        failed_layout = QVBoxLayout(failed_box)
+        failed_top = QHBoxLayout()
+        self.failed_combo = QComboBox()
+        self.failed_combo.setMinimumWidth(320)
+        self.failed_combo.currentIndexChanged.connect(self._show_failed_rows)
+        self.failed_count_label = QLabel()
+        self.failed_count_label.setStyleSheet("color: #555;")
+        self.export_failed_btn = QPushButton("Export failed rows to CSV...")
+        self.export_failed_btn.clicked.connect(self.export_failed_rows)
+        failed_top.addWidget(QLabel("Rule:"))
+        failed_top.addWidget(self.failed_combo)
+        failed_top.addWidget(self.failed_count_label)
+        failed_top.addStretch(1)
+        failed_top.addWidget(self.export_failed_btn)
+        failed_layout.addLayout(failed_top)
+        self.failed_table = DataTable()
+        failed_layout.addWidget(self.failed_table)
+
+        vertical = QSplitter(Qt.Vertical)
+        vertical.addWidget(splitter)
+        vertical.addWidget(failed_box)
+        vertical.setSizes([420, 300])
+        layout.addWidget(vertical, 1)
         return tab
 
     def _build_kpi_tab(self) -> QWidget:
@@ -386,6 +417,9 @@ class MainWindow(QMainWindow):
              "The working copy as an .xlsx workbook (one sheet)."),
             ("Export quality report to CSV...", self.export_quality_report,
              "The quality summary table for the working data."),
+            ("Export failed rows to CSV...", self.export_failed_rows,
+             "Every working row that failed the rule chosen under Failed rows on the Data Quality tab "
+             "(default: all rows failing an error rule), with source_row and failed_rules columns."),
             ("Export KPI tables to CSV...", self.export_kpi_tables,
              "Headline KPIs and every KPI result table, one CSV per table, into a folder you choose."),
             ("Generate Power BI package...", self.export_powerbi,
@@ -508,6 +542,7 @@ class MainWindow(QMainWindow):
 
         self.source_path = path
         self.original_df = result.df
+        self.source_rows = result.source_rows
         self.import_options = options
         self.column_mapping = self._ask_column_mapping(result.df) if needs_mapping(result.df) else None
         self._make_working_copy()
@@ -543,7 +578,9 @@ class MainWindow(QMainWindow):
     def _make_working_copy(self) -> None:
         """Set working_df from original_df: number/date conversion, then the column mapping if chosen."""
         self.unavailable_columns, self.mapping_notes = [], []
-        self.conversion = apply_import_options(self.original_df, self.import_options)
+        # Indexed by source line number, which survives conversion, mapping and duplicate removal.
+        indexed = with_source_rows(self.original_df, self.source_rows)
+        self.conversion = apply_import_options(indexed, self.import_options)
         converted = self.conversion.df
         if self.column_mapping:
             try:
@@ -620,6 +657,52 @@ class MainWindow(QMainWindow):
             value = getattr(score, key) if score is not None else None
             text = "n/a" if value is None else f"{value:.1f}" + (" / 100" if key == "overall" else "%")
             self.score_labels[key].setText(f"{title}: <b>{text}</b>")
+
+    def _refresh_failed_rows(self) -> None:
+        """Rebuild the rule dropdown from the latest validation, keeping the selection if it still applies."""
+        current = self.failed_combo.currentData()
+        self.failed_combo.blockSignals(True)
+        self.failed_combo.clear()
+        if self.quality_summary is not None:
+            for key, label in failed_rule_choices(self.quality_summary, self.row_flags):
+                self.failed_combo.addItem(label, key)
+        index = self.failed_combo.findData(current) if current is not None else -1
+        self.failed_combo.setCurrentIndex(max(index, 0))
+        self.failed_combo.blockSignals(False)
+        self._show_failed_rows()
+
+    def _show_failed_rows(self) -> None:
+        key = self.failed_combo.currentData()
+        if key is None or self.working_df is None:
+            self.failed_table.show_frame(None)
+            self.failed_count_label.setText("")
+            return
+        table, total = failed_rows(self.working_df, self.quality_summary, self.row_flags, key,
+                                   limit=FAILED_ROWS_SHOWN)
+        self.failed_table.show_frame(table, float_decimals=2)
+        if total > len(table):
+            self.failed_count_label.setText(f"Showing {len(table):,} of {total:,} rows")
+        else:
+            self.failed_count_label.setText(f"Showing all {total:,} rows" if total else "No rows")
+
+    def export_failed_rows(self) -> None:
+        if not self._require_data():
+            return
+        key = self.failed_combo.currentData()
+        if key is None:
+            QMessageBox.information(self, "No failed rows", "No rule has failed rows in the working data.")
+            return
+        stem = "all_failed" if key == ALL_FAILED else "".join(c if c.isalnum() else "_" for c in key).strip("_")
+        path = self._ask_save_path("Export failed rows (CSV)", f"{self._default_stem()}_{stem}.csv", "CSV (*.csv)")
+        if not path:
+            return
+        if self.source_path and path.resolve() == self.source_path.resolve():
+            self._error("Export blocked", "Choose a different file: the source file is never overwritten.")
+            return
+        table, total = failed_rows(self.working_df, self.quality_summary, self.row_flags, key)
+        if self._run_export("Exporting failed rows", export_csv, table, path):
+            self._log_export(f"Failed rows exported: {path} ({total:,} rows, rule: {self.failed_combo.currentText()})")
+            QMessageBox.information(self, "Export complete", f"Saved {total:,} rows:\n{path}")
 
     # ------------------------------------------------------------------ KPIs
     def run_kpis(self) -> bool:
@@ -836,9 +919,12 @@ class MainWindow(QMainWindow):
         for widget in [self.dedupe_btn, self.reset_btn, self.run_kpi_btn, *self.export_buttons]:
             widget.setEnabled(has_data)
         self._refresh_state_label()
+        self.export_failed_btn.setEnabled(has_data)
         if not has_data:
             self.import_info.setText("No file loaded.")
             self._show_score(None)
+            self.quality_summary, self.row_flags = None, None
+            self._refresh_failed_rows()
             self._clear_kpis()
             return
 
@@ -855,8 +941,10 @@ class MainWindow(QMainWindow):
         imported = self.conversion.df if self.conversion is not None else self.original_df
         self.stats_table.show_frame(numeric_summary(imported), float_decimals=2)
         summary, row_flags = validate(df, self.rules)
+        self.quality_summary, self.row_flags = summary, row_flags
         self.quality_table.show_frame(summary)
         self._show_score(quality_score(self.rules, summary, row_flags))
+        self._refresh_failed_rows()
         self.change_table.show_frame(change_summary(self.original_df, df, self.rules))
         self.reset_btn.setEnabled(self.duplicates_removed > 0)
 

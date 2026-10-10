@@ -42,6 +42,8 @@ wrong and nobody can tell why. Teams need to:
   Power BI `package_info.txt`.
 - Preview of the first 100 rows (the full dataset is never put in the GUI).
 - Row/column counts, inferred dtypes, missing and unique counts, numeric statistics.
+  A column gets statistics when at least 80% of its non-empty values are numbers (same
+  parser as the quality checks); the rest are counted as `non_numeric` and left in the data.
 - Empty, header-only, unreadable and headerless files handled without crashing.
 - **Load sample data** button for the bundled demo file.
 - **Map Your Columns** dialog when `quantity`, `unit_price`, `discount_pct`,
@@ -63,6 +65,10 @@ wrong and nobody can tell why. Teams need to:
 - Quality score: completeness, validity, uniqueness and consistency (% of rows that pass
   all rules of that kind) and their average as an overall score out of 100.
 - Outliers are flagged as warnings only; they are never removed or excluded from KPIs.
+- **Failed rows**: pick a rule (or "All failed rows", which covers error rules) to see the
+  rows that failed it, with `source_row` (the line in the source file, header = line 1) and
+  `failed_rules` (every rule the row failed). Up to 500 rows are shown; **Export failed rows
+  to CSV...** writes all of them.
   The default uses IQR with a 3.0x multiplier (`factor`) rather than the usual 1.5x:
   retail prices are right-skewed, so the 1.5x fence flags a large share of legitimate
   premium products, while 3.0x marks only extreme values. IQR is preferred over z-score
@@ -83,7 +89,7 @@ wrong and nobody can tell why. Teams need to:
 - The SQL text for each result is shown in the app.
 
 **Export & Reporting**
-- Working data to CSV or Excel; quality report and KPI tables to CSV.
+- Working data to CSV or Excel; quality report, failed rows and KPI tables to CSV.
 - **Generate Power BI package**: `sales_clean.csv`, `data_dictionary.md`,
   `POWER_BI_GUIDE.md`, `package_info.txt`.
 - Success messages appear only after the file was written.
@@ -278,8 +284,8 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
   whole file.
 - A column whose every value looks like `1.234` (dot thousands, no decimals) is read as a
   decimal number before the import options apply.
-- The Import & Preview tab profiles the file as read; converted numbers show up in the
-  quality checks and KPIs, not in the numeric statistics table.
+- The Import & Preview preview and column profile show the file as read; only the numeric
+  statistics use the import-converted values.
 - Column names must match the expected schema for checks and KPIs, or be mapped
   in the column mapping dialog. The mapping is not saved between sessions.
 - The whole file is loaded into memory; very large files (millions of rows) will be slow.
