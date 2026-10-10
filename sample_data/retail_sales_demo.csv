@@ -1,0 +1,1526 @@
+order_id,order_date,country,product,category,quantity,unit_price,discount_pct,unit_cost
+ORD-00001,2024-01-01,Netherlands,Blackout Curtains,Textiles,12,49.0,15,20.5
+ORD-00002,2024-01-02,Germany,Cutting Board,Kitchen,11,12.0,10,4.4
+ORD-00003,2024-01-02,France,Cotton Duvet Cover,Textiles,2,39.0,0,16.5
+ORD-00004,2025-02-30,Germany,Office Chair,Furniture,1,149.0,20,79.0
+ORD-00005,2024-01-02,Germany,Shoe Cabinet,Storage,6,69.0,0,32.0
+ORD-00006,2024-01-03,Belgium,Floor Lamp,Lighting,2,79.0,10,34.0
+ORD-00007,2024-01-03,France,Chef Knife,Kitchen,12,34.0,10,13.0
+ORD-00008,2024-01-04,Italy,Fabric Armchair,Furniture,2,229.0,10,118.0
+ORD-00009,2024-01-05,France,Wall Spotlight,Lighting,7,24.0,0,10.2
+ORD-00010,2024-01-07,France,Ceramic Dinner Plate,Kitchen,3,4.5,5,1.6
+ORD-00011,2024-01-08,Italy,Wall Shelf,Storage,4,25.0,20,10.4
+ORD-00012,2024-01-10,Italy,Ceramic Dinner Plate,Kitchen,12,4.5,0,1.6
+ORD-00013,2024-01-10,Spain,Bedside Table,Furniture,1,59.0,0,27.0
+ORD-00014,2024-01-10,Italy,Pendant Light,Lighting,5,49.0,0,21.0
+ORD-00015,2024-01-11,Netherlands,Floor Rug 160x230,Textiles,4,129.0,25,61.0
+ORD-00015,2024-01-11,Netherlands,Floor Rug 160x230,Textiles,4,129.0,25,61.0
+ORD-00016,2024-01-11,Italy,Office Chair,Furniture,1,149.0,0,79.0
+ORD-00017,2024-01-11,Germany,Fabric Armchair,Furniture,2,229.0,10,118.0
+ORD-00018,2024-01-12,Germany,Floor Rug 160x230,Textiles,1,129.0,0,61.0
+ORD-00019,2024-01-13,Spain,Wall Spotlight,Lighting,4,24.0,10,10.2
+ORD-00020,2024-01-14,Spain,Floor Lamp,Lighting,2,79.0,0,34.0
+ORD-00021,2024-01-14,Netherlands,Fabric Armchair,Furniture,2,229.0,0,118.0
+ORD-00022,2024-01-14,Germany,Bath Towel,Textiles,5,9.0,0,3.3
+ORD-00023,2024-01-15,Italy,Bedside Table,Furniture,4,59.0,10,27.0
+ORD-00024,2024-01-16,Netherlands,Oak Dining Table,Furniture,1,349.0,10,182.0
+ORD-00025,2024-01-16,Spain,Wardrobe,Storage,2,299.0,20,158.0
+ORD-00026,2024-01-16,Germany,Shoe Cabinet,Storage,5,69.0,25,32.0
+ORD-00027,2024-01-16,France,Desk Lamp,Lighting,11,29.0,0,12.5
+ORD-00028,2024-01-17,France,Wardrobe,Storage,3,299.0,10,158.0
+ORD-00029,2024-01-20,Germany,Cotton Duvet Cover,Textiles,11,39.0,10,16.5
+ORD-00030,2024-01-20,Germany,Fabric Armchair,Furniture,3,229.0,20,118.0
+ORD-00031,2024-01-20,Belgium,Chef Knife,Kitchen,3,34.0,0,13.0
+ORD-00032,2024-01-21,Spain,Cotton Duvet Cover,Textiles,7,39.0,5,16.5
+ORD-00033,2024-01-21,Germany,Two-Seat Sofa,Furniture,3,499.0,15,265.0
+ORD-00034,2024-01-22,Germany,Cutting Board,Kitchen,8,12.0,10,4.4
+ORD-00035,2024-01-24,France,Fabric Armchair,Furniture,1,229.0,10,118.0
+ORD-00036,2024-01-25,Germany,Cookware Set,Kitchen,1,119.0,20,58.0
+ORD-00037,2024-01-25,Germany,Cookware Set,Kitchen,5,119.0,0,58.0
+ORD-00038,2024-01-25,Italy,Oak Dining Table,Furniture,1,349.0,20,182.0
+ORD-00039,2024-01-26,France,Wall Shelf,Storage,3,25.0,15,10.4
+ORD-00040,2024-01-27,Germany,Glass Storage Jars (3),Kitchen,9,14.0,10,5.1
+ORD-00041,2024-01-27,France,Wall Shelf,Storage,9,25.0,5,10.4
+ORD-00042,2024-01-27,Italy,Wardrobe,Storage,3,#REF!,10,158.0
+ORD-00043,2024-01-28,France,Bookcase,Storage,5,89.0,0,43.0
+ORD-00044,2024-01-28,Spain,Blackout Curtains,Textiles,5,49.0,15,20.5
+ORD-00045,2024-01-28,Germany,Bookcase,Storage,4,89.0,0,43.0
+ORD-00046,2024-01-29,Germany,Desk Lamp,Lighting,5,29.0,20,12.5
+ORD-00047,2024-01-29,Germany,Fabric Armchair,Furniture,2,229.0,0,118.0
+ORD-00048,2024-01-30,Belgium,Cotton Duvet Cover,Textiles,8,39.0,10,16.5
+ORD-00049,2024-01-30,France,Cookware Set,Kitchen,1,119.0,5,58.0
+ORD-00050,2024-01-30,Germany,Office Chair,Furniture,2,149.0,0,79.0
+ORD-00051,2024-01-30,Spain,Shoe Cabinet,Storage,6,69.0,5,32.0
+ORD-00052,2024-01-31,Netherlands,Bookcase,Storage,3,89.0,0,43.0
+ORD-00053,2024-01-31,Italy,Floor Rug 160x230,Textiles,1,129.0,0,61.0
+ORD-00054,2024-02-01,Netherlands,Two-Seat Sofa,Furniture,2,499.0,0,265.0
+ORD-00055,2024-02-01,Italy,Bedside Table,Furniture,1,59.0,0,27.0
+ORD-00056,2024-02-01,Italy,Office Chair,Furniture,1,149.0,0,79.0
+ORD-00057,2024-02-02,France,Floor Lamp,Lighting,1,79.0,5,34.0
+ORD-00058,2024-02-02,Spain,Oak Dining Table,Furniture,1,349.0,10,182.0
+ORD-00059,2024-02-02,Germany,Floor Rug 160x230,Textiles,6,129.0,10,61.0
+ORD-00060,2024-02-02,Spain,Bath Towel,Textiles,2,9.0,0,3.3
+ORD-00061,2024-02-02,Netherlands,Ceramic Dinner Plate,Kitchen,1,4.5,10,1.6
+ORD-00062,2024-02-03,Germany,Cotton Duvet Cover,Textiles,3,39.0,25,16.5
+ORD-00062,2024-02-03,Germany,Cotton Duvet Cover,Textiles,3,39.0,25,16.5
+ORD-00063,2024-02-03,Germany,Cutting Board,Kitchen,10,12.0,10,4.4
+ORD-00064,2024-02-03,Spain,Wall Spotlight,Lighting,7,24.0,0,10.2
+ORD-00065,2024-02-03,Germany,Office Chair,Furniture,5,149.0,10,79.0
+ORD-00066,2024-02-06,Spain,Wardrobe,Storage,3,299.0,0,158.0
+ORD-00067,2024-02-07,Germany,Floor Lamp,Lighting,2,79.0,0,34.0
+ORD-00068,2024-02-07,Germany,LED Strip 2m,Lighting,1,19.0,0,7.8
+ORD-00068,2024-02-07,Germany,LED Strip 2m,Lighting,1,19.0,0,7.8
+ORD-00069,2024-02-08,Spain,Storage Box Set,Storage,1,19.0,15,7.2
+ORD-00070,2024-02-08,Spain,Wall Shelf,Storage,7,25.0,10,10.4
+ORD-00071,2024-02-08,Germany,Floor Lamp,Lighting,4,79.0,10,34.0
+ORD-00072,2024-02-09,Belgium,LED Strip 2m,Lighting,2,19.0,0,7.8
+ORD-00073,2024-02-09,Germany,Storage Box Set,Storage,10,19.0,5,7.2
+ORD-00074,2024-02-09,Spain,Shoe Cabinet,Storage,6,69.0,25,32.0
+ORD-00075,2024-02-09,Germany,Bath Towel,Textiles,1,9.0,25,3.3
+ORD-00076,2024-02-11,France,Storage Box Set,Storage,6,19.0,0,7.2
+ORD-00077,2024-02-11,Netherlands,Wall Spotlight,Lighting,6,24.0,0,10.2
+ORD-00078,2024-02-11,Italy,Two-Seat Sofa,Furniture,2,499.0,0,265.0
+ORD-00079,2024-02-12,Italy,Wall Shelf,Storage,12,25.0,0,10.4
+ORD-00080,2024-02-12,Spain,Wardrobe,Storage,2,299.0,25,158.0
+ORD-00081,2024-02-12,Germany,Storage Box Set,Storage,12,19.0,0,7.2
+ORD-00082,2024-02-12,France,Pendant Light,Lighting,6,49.0,0,21.0
+ORD-00083,2024-02-12,Italy,Pendant Light,Lighting,12,49.0,15,21.0
+ORD-00084,2024-02-13,France,Pendant Light,Lighting,1,49.0,15,21.0
+ORD-00085,2024-02-13,Italy,Chef Knife,Kitchen,9,34.0,10,13.0
+ORD-00086,2024-02-13,Spain,Desk Lamp,Lighting,4,29.0,0,12.5
+ORD-00087,2024-02-14,Germany,Office Chair,Furniture,6,149.0,10,79.0
+ORD-00088,2024-02-14,Netherlands,Desk Lamp,Lighting,11,29.0,5,12.5
+ORD-00089,2024-02-14,Germany,Desk Lamp,Lighting,10,29.0,5,12.5
+ORD-00090,2024-02-15,Spain,LED Strip 2m,Lighting,7,19.0,0,7.8
+ORD-00091,2024-02-16,Germany,Bookcase,Storage,3,89.0,5,43.0
+ORD-00092,2024-02-16,France,Cutting Board,Kitchen,6,12.0,20,4.4
+ORD-00093,2024-02-17,France,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-00094,2024-02-17,Germany,Two-Seat Sofa,Furniture,2,499.0,0,265.0
+ORD-00095,2024-02-17,Germany,LED Strip 2m,Lighting,5,19.0,0,7.8
+ORD-00096,2024-02-18,France,Floor Lamp,Lighting,3,79.0,10,34.0
+ORD-00097,2024-02-19,Netherlands,Bedside Table,Furniture,3,59.0,0,27.0
+ORD-00098,2024-02-19,Italy,Floor Rug 160x230,Textiles,5,129.0,15,61.0
+ORD-00099,2024-02-19,Italy,Wardrobe,Storage,1,299.0,10,158.0
+ORD-00100,2024-02-19,Germany,Office Chair,Furniture,4,149.0,20,79.0
+ORD-00101,2024-02-20,France,Cutting Board,Kitchen,12,12.0,0,4.4
+ORD-00102,2024-02-20,Italy,Bookcase,Storage,1,89.0,10,43.0
+ORD-00103,2024-02-20,Germany,Glass Storage Jars (3),Kitchen,11,14.0,20,5.1
+ORD-00104,2024-02-20,Italy,LED Strip 2m,Lighting,1,19.0,10,7.8
+ORD-00105,2024-02-20,Netherlands,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-00105,2024-02-20,Netherlands,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-00106,2024-02-21,Netherlands,LED Strip 2m,Lighting,11,19.0,5,7.8
+ORD-00107,2024-02-22,Germany,Wool Throw,Textiles,1,45.0,0,19.0
+ORD-00108,2024-02-23,Germany,Shoe Cabinet,Storage,1,69.0,10,32.0
+ORD-00109,2024-02-23,Germany,Wall Shelf,Storage,11,25.0,15,10.4
+ORD-00110,2024-02-23,Italy,Wall Shelf,Storage,6,25.0,25,10.4
+ORD-00111,2024-02-24,France,LED Strip 2m,Lighting,1,19.0,5,7.8
+ORD-00112,2024-02-24,Italy,Cookware Set,Kitchen,5,119.0,0,58.0
+ORD-00113,2024-02-24,Germany,Cotton Duvet Cover,Textiles,4,39.0,0,16.5
+ORD-00114,2024-02-25,Italy,Fabric Armchair,Furniture,1,229.0,15,118.0
+ORD-00115,2024-02-26,Italy,Bookcase,Storage,6,89.0,0,43.0
+ORD-00116,2024-02-26,Belgium,Pendant Light,Lighting,5,49.0,0,21.0
+ORD-00117,2024-02-26,Italy,Wall Spotlight,Lighting,4,24.0,0,10.2
+ORD-00118,2024-02-27,Spain,Two-Seat Sofa,Furniture,2,499.0,20,265.0
+ORD-00119,2024-02-27,Spain,Shoe Cabinet,Storage,1,69.0,10,32.0
+ORD-00120,2024-02-27,Germany,Desk Lamp,Lighting,7,29.0,20,-
+ORD-00121,2024-02-27,Germany,Wool Throw,Textiles,12,45.0,0,19.0
+ORD-00122,2024-02-28,France,Wall Spotlight,Lighting,3,24.0,0,10.2
+ORD-00123,2024-02-28,Netherlands,Desk Lamp,Lighting,11,29.0,25,12.5
+ORD-00124,2024-02-29,Germany,Bookcase,Storage,1,89.0,0,43.0
+ORD-00125,2024-03-01,France,Glass Storage Jars (3),Kitchen,3,14.0,10,5.1
+ORD-00126,2024-03-01,France,Shoe Cabinet,Storage,4,69.0,0,32.0
+ORD-00127,2024-03-01,Italy,Shoe Cabinet,Storage,5,69.0,25,32.0
+ORD-00128,2024-03-01,Netherlands,Office Chair,Furniture,3,149.0,20,79.0
+ORD-00129,2024-03-01,Netherlands,Cookware Set,Kitchen,3,119.0,0,58.0
+ORD-00130,2024-03-01,France,Ceramic Dinner Plate,Kitchen,2,4.5,5,1.6
+ORD-00131,2024-03-02,France,Floor Lamp,Lighting,3,79.0,0,34.0
+ORD-00132,2024-03-02,Italy,Storage Box Set,Storage,4,19.0,25,7.2
+ORD-00133,2024-03-03,France,Cutting Board,Kitchen,11,12.0,20,4.4
+ORD-00134,2024-03-03,Italy,Wall Shelf,Storage,10,25.0,25,10.4
+ORD-00135,2024-03-03,Netherlands,Bath Towel,Textiles,8,9.0,20,3.3
+ORD-00136,2024-03-03,Germany,Fabric Armchair,Furniture,1,229.0,0,118.0
+ORD-00137,2024-03-04,Spain,Floor Rug 160x230,Textiles,6,129.0,25,61.0
+ORD-00138,2024-03-04,Germany,Ceramic Dinner Plate,Kitchen,12,4.5,0,1.6
+ORD-00139,2024-03-04,Italy,Bookcase,Storage,5,89.0,25,43.0
+ORD-00140,2024-03-05,Germany,Oak Dining Table,Furniture,3,349.0,20,182.0
+ORD-00141,2024-03-05,Spain,Ceramic Dinner Plate,Kitchen,2,4.5,25,1.6
+ORD-00142,2024-03-06,Germany,Cotton Duvet Cover,Textiles,3,39.0,10,16.5
+ORD-00143,2024-03-08,Belgium,Floor Rug 160x230,Textiles,4,129.0,0,61.0
+ORD-00144,2024-03-10,Netherlands,Two-Seat Sofa,Furniture,2,499.0,25,265.0
+ORD-00145,2024-03-10,Italy,Cookware Set,Kitchen,4,119.0,0,58.0
+ORD-00146,2024-03-11,Belgium,Cutting Board,Kitchen,8,12.0,20,4.4
+ORD-00147,2024-03-12,Netherlands,Glass Storage Jars (3),Kitchen,11,14.0,25,5.1
+ORD-00148,2024-03-12,France,Floor Rug 160x230,Textiles,4,129.0,0,61.0
+ORD-00149,2024-03-13,Italy,Chef Knife,Kitchen,5,34.0,5,13.0
+ORD-00150,2024-03-13,Netherlands,Bath Towel,Textiles,2,9.0,10,3.3
+ORD-00151,2024-03-13,Spain,Wardrobe,Storage,2,299.0,10,158.0
+ORD-00152,2024-03-13,Belgium,Oak Dining Table,Furniture,1,349.0,10,182.0
+ORD-00153,2024-03-14,Belgium,Bath Towel,Textiles,7,9.0,10,3.3
+ORD-00154,2024-03-14,France,Cookware Set,Kitchen,4,119.0,15,58.0
+ORD-00155,2024-03-14,Italy,Blackout Curtains,Textiles,8,49.0,0,20.5
+ORD-00156,2024-03-15,Spain,Cutting Board,Kitchen,1,12.0,10,4.4
+ORD-00157,2024-03-16,Spain,Chef Knife,Kitchen,10,34.0,0,13.0
+ORD-00158,2024-03-16,Germany,Two-Seat Sofa,Furniture,3,499.0,10,265.0
+ORD-00159,2024-03-17,Germany,Bedside Table,Furniture,two,59.0,20,27.0
+ORD-00160,2024-03-17,France,Two-Seat Sofa,Furniture,3,499.0,0,265.0
+ORD-00161,2024-03-17,France,Cotton Duvet Cover,Textiles,10,39.0,15,16.5
+ORD-00162,2024-03-18,Belgium,Bedside Table,Furniture,1,59.0,25,27.0
+ORD-00163,2024-03-19,Germany,Bedside Table,Furniture,1,59.0,15,27.0
+ORD-00164,2024-03-19,France,Cotton Duvet Cover,Textiles,12,39.0,10,16.5
+ORD-00165,2024-03-19,France,Cookware Set,Kitchen,6,119.0,20,58.0
+ORD-00166,2024-03-19,France,Shoe Cabinet,Storage,3,69.0,0,32.0
+ORD-00167,2024-03-19,Germany,Glass Storage Jars (3),Kitchen,4,14.0,20,5.1
+ORD-00168,2024-03-20,Spain,Wool Throw,Textiles,9,45.0,0,unknown
+ORD-00169,2024-03-20,Italy,Wall Shelf,Storage,2,25.0,10,10.4
+ORD-00170,2024-03-20,Netherlands,Floor Lamp,Lighting,1,79.0,10,34.0
+ORD-00171,2024-03-20,Netherlands,Bookcase,Storage,3,89.0,20,43.0
+ORD-00172,2024-03-20,France,Office Chair,Furniture,3,149.0,0,79.0
+ORD-00173,2024-03-21,France,Cotton Duvet Cover,Textiles,5,39.0,20,16.5
+ORD-00174,2024-03-22,Belgium,Wall Shelf,Storage,4,25.0,10,10.4
+ORD-00175,2024-03-22,Italy,Ceramic Dinner Plate,Kitchen,6,4.5,0,1.6
+ORD-00176,2024-03-22,Spain,Shoe Cabinet,Storage,2,69.0,0,32.0
+ORD-00177,2024-03-23,Germany,Cutting Board,Kitchen,12,12.0,10,4.4
+ORD-00178,2024-03-23,France,Wall Spotlight,Lighting,2,24.0,0,10.2
+ORD-00179,2024-03-23,Netherlands,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-00180,2024-03-23,Belgium,Wall Spotlight,Lighting,1,24.0,5,10.2
+ORD-00181,2024-03-23,France,Floor Rug 160x230,Textiles,6,129.0,0,61.0
+ORD-00182,2024-03-24,Netherlands,Ceramic Dinner Plate,Kitchen,2,4.5,10,1.6
+ORD-00182,2024-03-24,Netherlands,Ceramic Dinner Plate,Kitchen,2,4.5,10,1.6
+ORD-00183,2024-03-24,Netherlands,Blackout Curtains,Textiles,3,49.0,15,20.5
+ORD-00184,2024-03-24,France,Pendant Light,Lighting,6,49.0,10,21.0
+ORD-00185,2024-03-24,Belgium,Wall Shelf,Storage,9,25.0,10,10.4
+ORD-00186,2024-03-25,Italy,Wardrobe,Storage,3,299.0,10,158.0
+ORD-00187,2024-03-25,Germany,Cutting Board,Kitchen,2,12.0,0,4.4
+ORD-00188,2024-03-25,Spain,Blackout Curtains,Textiles,11,49.0,10,20.5
+ORD-00189,2024-03-26,Germany,Glass Storage Jars (3),Kitchen,11,14.0,15,5.1
+ORD-00190,2024-03-26,France,Blackout Curtains,Textiles,8,49.0,0,20.5
+ORD-00191,2024-03-26,Netherlands,Storage Box Set,Storage,6,19.0,25,7.2
+ORD-00191,2024-03-26,Netherlands,Storage Box Set,Storage,6,19.0,25,7.2
+ORD-00192,2024-03-27,Netherlands,Fabric Armchair,Furniture,2,229.0,0,118.0
+ORD-00193,2024-03-27,Netherlands,Fabric Armchair,Furniture,3,229.0,20,118.0
+ORD-00194,2024-03-27,France,Bookcase,Storage,6,89.0,15,43.0
+ORD-00195,2024-03-27,Belgium,Storage Box Set,Storage,5,19.0,0,7.2
+ORD-00196,2024-03-28,Germany,Fabric Armchair,Furniture,3,229.0,0,118.0
+ORD-00197,2024-03-28,Spain,Storage Box Set,Storage,4,19.0,25,7.2
+ORD-00198,2024-03-29,Netherlands,Oak Dining Table,Furniture,3,349.0,10,182.0
+ORD-00199,2024-03-29,Netherlands,Desk Lamp,Lighting,12,29.0,15,12.5
+ORD-00200,2024-03-29,Belgium,Two-Seat Sofa,Furniture,3,499.0,10,265.0
+ORD-00201,2024-03-30,Germany,Cutting Board,Kitchen,10,12.0,10,4.4
+ORD-00202,2024-03-30,Belgium,Storage Box Set,Storage,4,19.0,0,7.2
+ORD-00203,2024-04-01,Spain,Floor Lamp,Lighting,5,79.0,15,34.0
+ORD-00204,2024-04-01,Spain,Storage Box Set,Storage,11,19.0,0,7.2
+ORD-00205,2024-04-01,Netherlands,Ceramic Dinner Plate,Kitchen,5,4.5,0,1.6
+ORD-00206,2024-04-01,France,Two-Seat Sofa,Furniture,3,499.0,10,265.0
+ORD-00207,2024-04-02,Spain,Office Chair,Furniture,1,149.0,20,79.0
+ORD-00208,2024-04-03,France,Oak Dining Table,Furniture,3,349.0,20,182.0
+ORD-00209,2024-04-03,France,Wool Throw,Textiles,6,45.0,0,19.0
+ORD-00210,2024-04-04,Italy,Cotton Duvet Cover,Textiles,7,39.0,20,16.5
+ORD-00211,2024-04-04,France,LED Strip 2m,Lighting,8,19.0,10,7.8
+ORD-00212,2024-04-04,Belgium,LED Strip 2m,Lighting,8,19.0,20,7.8
+ORD-00213,2024-04-05,Germany,Bookcase,Storage,2,89.0,5,43.0
+ORD-00214,2024-04-05,Netherlands,Fabric Armchair,Furniture,3,229.0,15,118.0
+ORD-00215,2024-04-06,Germany,Floor Rug 160x230,Textiles,1,129.0,0,61.0
+ORD-00216,2024-04-07,Germany,Glass Storage Jars (3),Kitchen,2,14.0,20,5.1
+ORD-00217,2024-04-07,Italy,Pendant Light,Lighting,2,49.0,0,21.0
+ORD-00218,2024-04-08,Spain,Floor Rug 160x230,Textiles,2,129.0,0,61.0
+ORD-00219,2024-04-09,Spain,Shoe Cabinet,Storage,1,69.0,10,32.0
+ORD-00220,2024-04-10,Belgium,Oak Dining Table,Furniture,3,349.0,15,182.0
+ORD-00221,2024-04-10,Belgium,Cookware Set,Kitchen,5,119.0,0,58.0
+ORD-00222,2024-04-10,Spain,Floor Rug 160x230,Textiles,1,129.0,0,61.0
+ORD-00223,2024-04-11,Netherlands,Wall Spotlight,Lighting,1,24.0,0,10.2
+ORD-00224,2024-04-12,Spain,Ceramic Dinner Plate,Kitchen,5,4.5,10,1.6
+ORD-00225,2024-04-12,France,LED Strip 2m,Lighting,5,19.0,0,7.8
+ORD-00226,2024-04-12,Spain,Blackout Curtains,Textiles,5,49.0,25,20.5
+ORD-00226,2024-04-12,Spain,Blackout Curtains,Textiles,5,49.0,25,20.5
+ORD-00227,2024-04-12,Italy,Shoe Cabinet,Storage,2,69.0,10,32.0
+ORD-00228,2024-04-13,France,Bedside Table,Furniture,3,59.0,10,27.0
+ORD-00229,2024-04-13,France,Fabric Armchair,Furniture,1,229.0,20,118.0
+ORD-00230,2024-04-14,France,Wool Throw,Textiles,3,45.0,5,19.0
+ORD-00231,2024-04-14,Germany,Cutting Board,Kitchen,9,12.0,10,4.4
+ORD-00232,2024-04-15,France,LED Strip 2m,Lighting,5,19.0,15,7.8
+ORD-00233,2024-04-15,Netherlands,Desk Lamp,Lighting,8,29.0,20,12.5
+ORD-00234,2024-04-15,Germany,Cutting Board,Kitchen,5,12.0,10,4.4
+ORD-00235,2024-04-17,Germany,Shoe Cabinet,Storage,4,69.0,0,32.0
+ORD-00236,2024-04-17,Netherlands,Ceramic Dinner Plate,Kitchen,8,4.5,15,1.6
+ORD-00237,2024-04-17,France,Bath Towel,Textiles,10,9.0,0,3.3
+ORD-00238,2024-04-19,Germany,Blackout Curtains,Textiles,12,49.0,25,20.5
+ORD-00239,2024-04-19,France,Cotton Duvet Cover,Textiles,11,39.0,0,16.5
+ORD-00240,2024-00-10,France,Bath Towel,Textiles,7,9.0,10,3.3
+ORD-00241,2024-04-20,France,Pendant Light,Lighting,1,49.0,5,21.0
+ORD-00242,2024-04-21,Italy,Bedside Table,Furniture,6,59.0,0,27.0
+ORD-00243,2024-04-21,Germany,Wardrobe,Storage,1,299.0,0,158.0
+ORD-00244,2024-04-22,Germany,Bath Towel,Textiles,1,9.0,15,3.3
+ORD-00245,2024-04-24,France,Bookcase,Storage,3,89.0,0,43.0
+ORD-00246,2024-04-25,Germany,Shoe Cabinet,Storage,5,69.0,0,32.0
+ORD-00247,2024-04-26,Italy,Bookcase,Storage,4,89.0,10,43.0
+ORD-00248,2024-04-26,France,LED Strip 2m,Lighting,4,19.0,25,7.8
+ORD-00249,2024-04-26,Germany,Cutting Board,Kitchen,7,12.0,0,4.4
+ORD-00250,2024-04-27,Italy,Chef Knife,Kitchen,7,34.0,10,13.0
+ORD-00251,2024-04-27,Italy,Storage Box Set,Storage,8,19.0,15,7.2
+ORD-00252,2024-04-28,France,Glass Storage Jars (3),Kitchen,8,14.0,15,5.1
+ORD-00253,2024-04-28,Germany,Bookcase,Storage,2,89.0,15,43.0
+ORD-00254,2024-04-29,Belgium,Wall Shelf,Storage,8,25.0,5,10.4
+ORD-00255,2024-04-30,France,Wall Shelf,Storage,9,25.0,0,10.4
+ORD-00255,2024-04-30,France,Wall Shelf,Storage,9,25.0,0,10.4
+ORD-00256,2024-04-30,France,Oak Dining Table,Furniture,3,349.0,,182.0
+ORD-00257,2024-05-01,,LED Strip 2m,Lighting,5,19.0,10,7.8
+ORD-00258,2024-05-01,Spain,Cookware Set,Kitchen,3,119.0,5,58.0
+ORD-00259,2024-05-01,Italy,Chef Knife,Kitchen,12,34.0,0,13.0
+ORD-00260,2024-05-03,Netherlands,Wool Throw,Textiles,2,45.0,25,19.0
+ORD-00261,2024-05-03,Germany,Cookware Set,Kitchen,1,119.0,0,58.0
+ORD-00262,2024-05-03,Netherlands,Cotton Duvet Cover,Textiles,5,39.0,10,16.5
+ORD-00263,2024-05-04,Spain,Bath Towel,Textiles,4,9.0,0,3.3
+ORD-00264,2024-05-04,Germany,Bedside Table,Furniture,2,59.0,5,27.0
+ORD-00265,2024-05-06,Spain,Office Chair,Furniture,3,149.0,5,79.0
+ORD-00266,2024-05-06,France,Floor Lamp,Lighting,5,79.0,0,34.0
+ORD-00267,2024-05-06,Belgium,Cookware Set,Kitchen,1,119.0,10,58.0
+ORD-00268,2024-05-07,Italy,Bedside Table,Furniture,3,59.0,5,27.0
+ORD-00269,2024-05-07,Germany,Floor Rug 160x230,Textiles,5,129.0,25,61.0
+ORD-00270,2024-05-07,Italy,Two-Seat Sofa,Furniture,3,499.0,5,265.0
+ORD-00271,2024-05-07,Spain,Floor Rug 160x230,Textiles,6,129.0,5,61.0
+ORD-00272,2024-05-08,France,Desk Lamp,Lighting,5,29.0,15,12.5
+ORD-00273,2024-05-08,Italy,Cutting Board,Kitchen,12,12.0,15,4.4
+ORD-00274,2024-05-09,Belgium,Office Chair,Furniture,6,149.0,15,79.0
+ORD-00275,2024-05-09,Germany,Two-Seat Sofa,Furniture,3,499.0,10,265.0
+ORD-00276,2024-05-09,Germany,Cookware Set,Kitchen,2,119.0,0,58.0
+ORD-00277,2024-05-10,Italy,Floor Lamp,Lighting,1,79.0,10,34.0
+ORD-00278,2024-05-11,Spain,Fabric Armchair,Furniture,1,229.0,0,118.0
+ORD-00279,2024-05-11,Germany,Fabric Armchair,Furniture,2,229.0,0,118.0
+ORD-00280,2024-05-11,Belgium,Office Chair,Furniture,4,149.0,0,79.0
+ORD-00281,2024-05-12,France,LED Strip 2m,Lighting,4,19.0,20,7.8
+ORD-00282,2024-05-12,Netherlands,Pendant Light,Lighting,2,49.0,0,21.0
+ORD-00283,2024-05-12,Netherlands,Floor Lamp,Lighting,2,79.0,5,34.0
+ORD-00284,2024-05-14,Netherlands,Cotton Duvet Cover,Textiles,6,39.0,0,16.5
+ORD-00285,2024-05-16,Italy,Wardrobe,Storage,1,299.0,5,158.0
+ORD-00286,2024-05-17,Spain,Glass Storage Jars (3),Kitchen,7,14.0,20,5.1
+ORD-00287,2024-05-17,Spain,Wool Throw,Textiles,9,45.0,0,19.0
+ORD-00288,2024-05-17,France,Floor Rug 160x230,Textiles,1,129.0,10,61.0
+ORD-00289,2024-05-18,France,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-00290,2024-05-18,Spain,Cookware Set,Kitchen,1,119.0,20,58.0
+ORD-00291,2024-05-18,Netherlands,Floor Lamp,Lighting,4,79.0,10,34.0
+ORD-00292,2024-05-19,Belgium,Desk Lamp,Lighting,3,29.0,10,12.5
+ORD-00293,2024-05-19,France,Office Chair,Furniture,5,149.0,5,79.0
+ORD-00294,2024-05-20,Spain,LED Strip 2m,Lighting,9,19.0,0,7.8
+ORD-00295,2024-05-20,France,Bookcase,Storage,1,89.0,0,43.0
+ORD-00296,2024-05-20,Italy,Cookware Set,Kitchen,1,119.0,250,58.0
+ORD-00297,2024-05-20,Germany,Wall Shelf,Storage,1,25.0,0,10.4
+ORD-00298,2024-05-20,Spain,Wardrobe,Storage,2,299.0,5,158.0
+ORD-00299,2024-05-21,Germany,Storage Box Set,Storage,3,19.0,0,7.2
+ORD-00300,2024-05-21,France,Storage Box Set,Storage,4,19.0,10,7.2
+ORD-00301,2024-05-21,Belgium,Shoe Cabinet,Storage,6,69.0,0,32.0
+ORD-00302,2024-05-22,Belgium,Wool Throw,Textiles,6,45.0,15,19.0
+ORD-00303,2024-05-22,France,Oak Dining Table,Furniture,3,349.0,25,182.0
+ORD-00304,2024-05-22,Netherlands,Glass Storage Jars (3),Kitchen,9,14.0,10,5.1
+ORD-00305,2024-05-22,Germany,Storage Box Set,Storage,4,19.0,0,7.2
+ORD-00306,2024-05-22,Italy,Desk Lamp,Lighting,1,29.0,20,12.5
+ORD-00307,2024-05-22,France,Wall Shelf,Storage,3,25.0,5,10.4
+ORD-00308,2024-05-23,France,Wall Shelf,Storage,3,25.0,0,10.4
+ORD-00309,2024-05-23,Spain,Oak Dining Table,Furniture,3,349.0,15,182.0
+ORD-00310,2024-05-23,Germany,Bath Towel,Textiles,7,9.0,5,3.3
+ORD-00311,2024-05-23,Germany,Bookcase,Storage,6,89.0,0,43.0
+ORD-00312,2024-05-25,France,Floor Lamp,Lighting,1,79.0,20,34.0
+ORD-00313,2024-05-25,Germany,Chef Knife,Kitchen,2,34.0,0,13.0
+ORD-00314,2024-05-25,France,Cotton Duvet Cover,Textiles,6,39.0,15,16.5
+ORD-00315,2024-05-25,France,Wall Shelf,Storage,4,25.0,0,10.4
+ORD-00316,2024-05-25,Germany,Wall Shelf,Storage,10,25.0,0,10.4
+ORD-00317,2024-05-26,Spain,Wall Shelf,Storage,10,25.0,0,10.4
+ORD-00318,2024-05-27,Germany,Wall Spotlight,Lighting,8,24.0,5,10.2
+ORD-00319,2024-05-27,France,Bedside Table,Furniture,5,59.0,5,27.0
+ORD-00320,2024-05-27,Spain,Wool Throw,Textiles,1,45.0,15,19.0
+ORD-00321,2024-05-28,Germany,Two-Seat Sofa,Furniture,2,499.0,10,265.0
+ORD-00322,2024-05-29,Germany,Ceramic Dinner Plate,Kitchen,2,4.5,0,1.6
+ORD-00323,2024-05-30,Germany,Storage Box Set,Storage,12,19.0,15,7.2
+ORD-00324,2024-06-01,Netherlands,Floor Rug 160x230,Textiles,5,129.0,0,61.0
+ORD-00325,2024-06-02,Spain,Bookcase,Storage,5,89.0,0,43.0
+ORD-00326,2024-06-03,Belgium,Chef Knife,Kitchen,11,34.0,25,13.0
+ORD-00327,2024-06-03,Italy,LED Strip 2m,Lighting,9,19.0,15,7.8
+ORD-00328,2024-06-03,France,Blackout Curtains,Textiles,10,49.0,0,20.5
+ORD-00329,2024-06-03,Belgium,Glass Storage Jars (3),Kitchen,3,14.0,15,5.1
+ORD-00330,2024-06-05,France,Two-Seat Sofa,Furniture,1,499.0,25,265.0
+ORD-00331,2024-06-05,Germany,Blackout Curtains,Textiles,7,49.0,10,20.5
+ORD-00332,2024-06-05,Netherlands,Bath Towel,Textiles,12,9.0,5,3.3
+ORD-00333,2024-06-05,Italy,Shoe Cabinet,Storage,2,69.0,0,32.0
+ORD-00334,2024-06-06,Netherlands,Office Chair,Furniture,2,149.0,20,79.0
+ORD-00335,2024-06-07,Italy,Fabric Armchair,Furniture,1,229.0,25,118.0
+ORD-00336,2024-06-08,France,Fabric Armchair,Furniture,3,229.0,10,118.0
+ORD-00337,2024-06-08,Germany,Desk Lamp,Lighting,3,29.0,25,12.5
+ORD-00338,2024-06-08,Italy,Two-Seat Sofa,Furniture,3,499.0,10,265.0
+ORD-00338,2024-06-08,Italy,Two-Seat Sofa,Furniture,3,499.0,10,265.0
+ORD-00339,2024-06-09,Spain,Wardrobe,Storage,3,299.0,0,158.0
+ORD-00340,2024-06-09,Spain,Cotton Duvet Cover,Textiles,10,39.0,10,16.5
+ORD-00341,2024-06-09,Germany,Storage Box Set,Storage,2,19.0,0,7.2
+ORD-00342,2024-06-10,France,Pendant Light,Lighting,9,49.0,10,21.0
+ORD-00343,2024-06-10,France,Bookcase,Storage,6,89.0,25,43.0
+ORD-00344,2024-06-10,France,Office Chair,Furniture,4,149.0,5,79.0
+ORD-00345,2024-06-10,France,Wool Throw,Textiles,7,45.0,0,19.0
+ORD-00346,2024-06-10,Spain,Wool Throw,Textiles,12,45.0,0,19.0
+ORD-00347,2024-06-12,Italy,Wool Throw,Textiles,6,45.0,0,19.0
+ORD-00348,2024-06-12,Germany,Office Chair,Furniture,3,149.0,10,79.0
+ORD-00349,2024-06-13,Germany,Cotton Duvet Cover,Textiles,3,39.0,0,16.5
+ORD-00350,2024-06-13,Belgium,Fabric Armchair,Furniture,2,229.0,25,118.0
+ORD-00351,2024-06-13,France,Two-Seat Sofa,Furniture,1,499.0,10,265.0
+ORD-00352,2024-06-14,Spain,Desk Lamp,Lighting,9,29.0,,12.5
+ORD-00353,2024-06-14,France,Oak Dining Table,Furniture,2,349.0,20,182.0
+ORD-00354,2024-06-15,Germany,Wardrobe,Storage,2,299.0,0,158.0
+ORD-00355,2024-06-15,Italy,Ceramic Dinner Plate,Kitchen,10,4.5,10,1.6
+ORD-00356,2024-06-15,Netherlands,Storage Box Set,Storage,1,19.0,0,7.2
+ORD-00357,2024-06-15,Spain,LED Strip 2m,Lighting,10,19.0,10,7.8
+ORD-00358,2024-06-16,Spain,Wool Throw,Textiles,11,45.0,0,19.0
+ORD-00359,2024-06-16,Germany,Blackout Curtains,Textiles,3,49.0,0,20.5
+ORD-00360,2024-06-18,Spain,Office Chair,Furniture,6,149.0,15,79.0
+ORD-00361,2024-06-18,France,Wall Spotlight,Lighting,12,24.0,20,10.2
+ORD-00362,2024-06-18,Spain,Fabric Armchair,Furniture,1,229.0,5,118.0
+ORD-00363,2024-06-19,Germany,Fabric Armchair,Furniture,2,229.0,10,118.0
+ORD-00364,2024-06-20,Spain,Glass Storage Jars (3),Kitchen,11,14.0,15,5.1
+ORD-00365,2024-06-21,France,Blackout Curtains,Textiles,5,49.0,0,20.5
+ORD-00366,2024-06-22,Germany,Ceramic Dinner Plate,Kitchen,11,4.5,10,1.6
+ORD-00367,2024-06-22,France,Ceramic Dinner Plate,Kitchen,3,4.5,0,1.6
+ORD-00368,2024-06-23,France,Fabric Armchair,Furniture,2,229.0,20,118.0
+ORD-00369,2024-06-24,Germany,Cookware Set,Kitchen,4,119.0,0,58.0
+ORD-00370,2024-06-24,France,Glass Storage Jars (3),Kitchen,7,14.0,0,5.1
+ORD-00371,2024-06-24,Germany,Pendant Light,Lighting,6,49.0,10,21.0
+ORD-00372,2024-06-25,Netherlands,Bedside Table,Furniture,1,59.0,0,27.0
+ORD-00373,2024-06-26,France,Floor Lamp,Lighting,4,79.0,0,34.0
+ORD-00374,2024-06-26,Spain,Bath Towel,Textiles,10,9.0,0,3.3
+ORD-00375,2024-06-26,Germany,Oak Dining Table,Furniture,2,349.0,0,182.0
+ORD-00376,2024-06-27,France,Fabric Armchair,Furniture,2,229.0,25,118.0
+ORD-00377,2024-06-27,Germany,Floor Lamp,Lighting,4,79.0,10,34.0
+ORD-00378,2024-06-28,France,Ceramic Dinner Plate,Kitchen,6,4.5,5,1.6
+ORD-00379,2024-06-28,France,Floor Rug 160x230,Textiles,4,129.0,0,61.0
+ORD-00380,2024-06-29,Italy,Bookcase,Storage,5,89.0,20,43.0
+ORD-00381,2024-06-29,Germany,Cutting Board,Kitchen,3,12.0,5,4.4
+ORD-00382,2024-06-30,Belgium,Wool Throw,Textiles,10,45.0,0,19.0
+ORD-00383,2024-06-30,Italy,Ceramic Dinner Plate,Kitchen,11,4.5,15,1.6
+ORD-00384,2024-06-30,Netherlands,Cotton Duvet Cover,Textiles,6,39.0,0,16.5
+ORD-00385,2024-07-01,Italy,Bath Towel,Textiles,6,9.0,20,3.3
+ORD-00386,2024-07-01,Italy,Cutting Board,Kitchen,6,12.0,10,4.4
+ORD-00387,2024-07-02,,Wall Shelf,Storage,1,25.0,0,10.4
+ORD-00388,2024-07-02,Belgium,Floor Rug 160x230,Textiles,6,129.0,0,61.0
+ORD-00389,2024-07-03,Germany,Ceramic Dinner Plate,Kitchen,3,4.5,0,1.6
+ORD-00390,2024-07-03,France,Blackout Curtains,Textiles,6,49.0,15,20.5
+ORD-00391,2024-07-04,Germany,Bath Towel,Textiles,12,9.0,10,3.3
+ORD-00392,2024-07-04,Germany,Fabric Armchair,Furniture,1,229.0,15,118.0
+ORD-00393,2024-07-05,Spain,Glass Storage Jars (3),Kitchen,6,14.0,15,5.1
+ORD-00394,2024-07-05,France,Wardrobe,Storage,2,299.0,15,158.0
+ORD-00395,2024-07-06,France,Wool Throw,Textiles,1,45.0,15,19.0
+ORD-00396,2024-07-06,Netherlands,Wardrobe,Storage,3,299.0,10,158.0
+ORD-00397,2024-07-06,Germany,Blackout Curtains,Textiles,9,49.0,0,20.5
+ORD-00398,2024-07-06,Italy,Cutting Board,Kitchen,4,12.0,20,4.4
+ORD-00399,2024-07-07,Netherlands,Glass Storage Jars (3),Kitchen,3,14.0,20,5.1
+ORD-00400,2024-07-07,Belgium,Wall Shelf,Storage,9,25.0,20,10.4
+ORD-00401,2024-07-07,France,Cutting Board,Kitchen,10,12.0,10,4.4
+ORD-00402,2024-07-08,Germany,Bedside Table,Furniture,4,59.0,0,27.0
+ORD-00403,2024-07-08,France,Bedside Table,Furniture,2,59.0,15,27.0
+ORD-00404,2024-07-08,France,Wall Spotlight,Lighting,10,24.0,0,10.2
+ORD-00405,2024-07-08,Italy,Ceramic Dinner Plate,Kitchen,3,4.5,0,1.6
+ORD-00406,2024-07-09,Netherlands,LED Strip 2m,Lighting,4,19.0,0,7.8
+ORD-00407,2024-07-09,Spain,Wool Throw,Textiles,11,45.0,0,19.0
+ORD-00408,2024-07-09,Italy,Office Chair,Furniture,5,149.0,15,79.0
+ORD-00409,2024-07-09,Germany,Ceramic Dinner Plate,Kitchen,10,4.5,0,1.6
+ORD-00410,2024-07-10,Spain,Glass Storage Jars (3),Kitchen,5,14.0,10,5.1
+ORD-00411,2024-07-10,Spain,Storage Box Set,Storage,12,19.0,0,7.2
+ORD-00412,2024-07-11,Italy,Cookware Set,Kitchen,6,119.0,25,58.0
+ORD-00413,2024-07-12,Germany,Wall Spotlight,Lighting,6,24.0,0,10.2
+ORD-00414,2024-07-12,Belgium,Desk Lamp,Lighting,3,29.0,0,12.5
+ORD-00415,2024-07-12,Germany,Office Chair,Furniture,3,149.0,0,79.0
+ORD-00416,2024-07-12,France,Shoe Cabinet,Storage,3,69.0,15,32.0
+ORD-00417,2024-07-13,France,Bath Towel,Textiles,7,9.0,0,3.3
+ORD-00418,2024-07-13,Germany,Bookcase,Storage,1,89.0,10,43.0
+ORD-00419,2024-07-14,Germany,LED Strip 2m,Lighting,3,19.0,10,7.8
+ORD-00420,2024-07-14,Netherlands,Blackout Curtains,Textiles,1,49.0,5,20.5
+ORD-00421,2024-07-14,France,Ceramic Dinner Plate,Kitchen,8,-4.5,25,1.6
+ORD-00422,2024-07-14,France,Two-Seat Sofa,Furniture,3,499.0,25,265.0
+ORD-00423,2024-07-14,Belgium,Floor Rug 160x230,Textiles,5,129.0,0,61.0
+ORD-00424,2024-07-15,Germany,Cutting Board,Kitchen,12,12.0,0,4.4
+ORD-00425,2024-07-16,France,Shoe Cabinet,Storage,6,69.0,0,32.0
+ORD-00426,2024-07-17,Spain,Oak Dining Table,Furniture,1,349.0,5,182.0
+ORD-00427,2024-07-17,Italy,Bath Towel,Textiles,5,9.0,10,3.3
+ORD-00428,2024-07-17,Belgium,Floor Rug 160x230,Textiles,3,129.0,20,61.0
+ORD-00429,2024-07-18,Spain,LED Strip 2m,Lighting,6,19.0,10,7.8
+ORD-00430,2024-07-18,Italy,Fabric Armchair,Furniture,3,229.0,10,118.0
+ORD-00431,2024-07-19,Germany,Bath Towel,Textiles,6,9.0,5,3.3
+ORD-00432,2024-07-21,Italy,Bath Towel,Textiles,1,9.0,20,3.3
+ORD-00433,2024-07-21,France,Fabric Armchair,Furniture,1,229.0,20,118.0
+ORD-00434,2024-07-21,Italy,Desk Lamp,Lighting,10,29.0,0,12.5
+ORD-00435,2024-07-22,Belgium,Fabric Armchair,Furniture,3,229.0,10,118.0
+ORD-00436,2024-07-22,Italy,Ceramic Dinner Plate,Kitchen,11,4.5,25,1.6
+ORD-00437,2024-07-22,Netherlands,Wall Spotlight,Lighting,5,24.0,25,10.2
+ORD-00438,2024-07-23,Netherlands,Fabric Armchair,Furniture,1,229.0,0,118.0
+ORD-00439,2024-07-23,France,LED Strip 2m,Lighting,4,19.0,0,7.8
+ORD-00440,2024-07-29,Germany,Desk Lamp,Lighting,9,29.0,0,12.5
+ORD-00441,2024-07-29,Netherlands,Bookcase,Storage,1,89.0,10,43.0
+ORD-00442,2024-07-29,Germany,Bedside Table,Furniture,1,59.0,20,27.0
+ORD-00443,2024-07-30,France,Floor Lamp,Lighting,3,79.0,5,34.0
+ORD-00444,2024-07-31,Italy,Floor Rug 160x230,Textiles,1,129.0,0,61.0
+ORD-00445,2024-08-01,France,Shoe Cabinet,Storage,5,69.0,0,32.0
+ORD-00446,2024-08-02,Germany,Wool Throw,Textiles,8,45.0,10,19.0
+ORD-00447,2024-08-03,Italy,Wall Shelf,Storage,12,25.0,0,10.4
+ORD-00448,2024-08-03,France,Wall Shelf,Storage,2,25.0,0,10.4
+ORD-00449,2024-08-03,Italy,Wardrobe,Storage,3,299.0,0,158.0
+ORD-00450,2024-08-04,Italy,Bedside Table,Furniture,4,59.0,0,27.0
+ORD-00450,2024-08-04,Italy,Bedside Table,Furniture,4,59.0,0,27.0
+ORD-00451,2024-08-05,,Two-Seat Sofa,Furniture,1,499.0,20,265.0
+ORD-00452,2024-08-06,France,Wardrobe,Storage,2,299.0,10,158.0
+ORD-00453,2024-08-06,Italy,Shoe Cabinet,Storage,3,69.0,0,32.0
+ORD-00454,2024-08-08,Belgium,Two-Seat Sofa,Furniture,2,499.0,0,265.0
+ORD-00455,2024-08-10,Italy,Cookware Set,Kitchen,4,119.0,10,58.0
+ORD-00456,2024-08-10,France,Wall Spotlight,Lighting,7,24.0,25,10.2
+ORD-00457,2024-08-11,Spain,Office Chair,Furniture,5,149.0,0,79.0
+ORD-00458,2024-08-11,Spain,Two-Seat Sofa,Furniture,1,499.0,15,265.0
+ORD-00459,2024-08-12,Germany,Bedside Table,Furniture,2,59.0,0,27.0
+ORD-00460,2024-08-12,Italy,Bedside Table,Furniture,1,59.0,25,27.0
+ORD-00461,2024-08-12,France,Oak Dining Table,Furniture,1,349.0,0,182.0
+ORD-00462,2024-08-12,Spain,Fabric Armchair,Furniture,2,229.0,0,118.0
+ORD-00463,2024-08-12,Netherlands,Wardrobe,Storage,3,299.0,0,158.0
+ORD-00464,2024-08-13,Spain,Cotton Duvet Cover,Textiles,1,39.0,20,16.5
+ORD-00465,20245-01-01,Belgium,Pendant Light,Lighting,8,49.0,25,21.0
+ORD-00466,2024-08-13,Spain,Cotton Duvet Cover,Textiles,7,39.0,20,16.5
+ORD-00467,2024-08-13,Italy,Fabric Armchair,Furniture,3,229.0,0,118.0
+ORD-00468,2024-08-16,France,Office Chair,Furniture,4,149.0,0,79.0
+ORD-00469,2024-08-16,Spain,Office Chair,Furniture,6,149.0,0,79.0
+ORD-00470,2024-08-16,Belgium,Ceramic Dinner Plate,Kitchen,10,4.5,0,1.6
+ORD-00471,2024-08-19,France,Two-Seat Sofa,Furniture,1,499.0,5,265.0
+ORD-00472,2024-08-20,Germany,Cookware Set,Kitchen,2,119.0,0,58.0
+ORD-00473,2024-08-21,Netherlands,Wall Shelf,Storage,8,25.0,5,10.4
+ORD-00474,2024-08-21,Spain,Bookcase,Storage,1,89.0,0,43.0
+ORD-00475,2024-08-21,Spain,Office Chair,Furniture,2,149.0,10,79.0
+ORD-00476,2024-08-21,France,Ceramic Dinner Plate,Kitchen,2,4.5,20,1.6
+ORD-00477,2024-08-22,Italy,Bedside Table,Furniture,1,59.0,5,27.0
+ORD-00478,2024-08-22,Germany,Cotton Duvet Cover,Textiles,10,39.0,10,16.5
+ORD-00479,2024-08-22,Netherlands,Glass Storage Jars (3),Kitchen,10,14.0,15,5.1
+ORD-00480,2024-08-22,Italy,Floor Lamp,Lighting,1,79.0,10,34.0
+ORD-00481,2024-08-23,Spain,Desk Lamp,Lighting,5,29.0,10,12.5
+ORD-00482,2024-08-23,France,Fabric Armchair,Furniture,2,229.0,5,118.0
+ORD-00483,2024-08-23,Germany,Storage Box Set,Storage,5,19.0,0,7.2
+ORD-00484,2024-08-23,Italy,Shoe Cabinet,Storage,3,69.0,0,32.0
+ORD-00485,2024-08-24,France,Bedside Table,Furniture,1,59.0,10,27.0
+ORD-00486,2024-08-25,Germany,Two-Seat Sofa,Furniture,3,499.0,0,265.0
+ORD-00487,2024-08-26,Netherlands,Glass Storage Jars (3),Kitchen,6,14.0,20,5.1
+ORD-00488,2024-08-27,Italy,Floor Lamp,Lighting,6,79.0,15,34.0
+ORD-00489,2024-08-27,Italy,Glass Storage Jars (3),Kitchen,3,14.0,5,5.1
+ORD-00490,2024-08-28,France,Office Chair,Furniture,2,149.0,25,79.0
+ORD-00491,2024-08-28,Italy,Oak Dining Table,Furniture,2,349.0,15,182.0
+ORD-00492,2024-08-28,France,Bath Towel,Textiles,9,9.0,0,3.3
+ORD-00492,2024-08-28,France,Bath Towel,Textiles,9,9.0,0,3.3
+ORD-00493,2024-08-30,Spain,Wall Spotlight,Lighting,12,24.0,0,10.2
+ORD-00494,2024-08-30,France,Wardrobe,Storage,1,299.0,5,158.0
+ORD-00495,2024-08-30,Netherlands,Bedside Table,Furniture,2,59.0,0,27.0
+ORD-00496,2024-08-31,Germany,Wall Spotlight,Lighting,3,24.0,20,10.2
+ORD-00497,2024-08-31,France,Wool Throw,Textiles,9,45.0,5,19.0
+ORD-00498,2024-09-01,France,Shoe Cabinet,Storage,2,69.0,0,32.0
+ORD-00499,2024-09-01,Germany,Bookcase,Storage,6,89.0,20,43.0
+ORD-00500,2024-09-01,France,Glass Storage Jars (3),Kitchen,7,14.0,0,5.1
+ORD-00501,2024-09-02,Spain,Floor Rug 160x230,Textiles,5,129.0,10,61.0
+ORD-00502,2024-09-02,Netherlands,Wall Spotlight,Lighting,12,24.0,25,10.2
+ORD-00503,2024-09-04,Germany,Pendant Light,Lighting,5,49.0,0,21.0
+ORD-00503,2024-09-04,Germany,Pendant Light,Lighting,5,49.0,0,21.0
+ORD-00504,2024-09-05,Spain,Office Chair,Furniture,4,149.0,0,79.0
+ORD-00505,2024-09-06,Italy,Bath Towel,Textiles,10,9.0,25,3.3
+ORD-00506,2024-09-06,Germany,Cookware Set,Kitchen,2,119.0,25,58.0
+ORD-00507,2024-09-07,Germany,Two-Seat Sofa,Furniture,3,499.0,5,265.0
+ORD-00508,2024-09-08,Belgium,Wardrobe,Storage,3,299.0,0,158.0
+ORD-00509,2024-09-08,France,Chef Knife,Kitchen,2,34.0,10,13.0
+ORD-00510,2024-09-08,France,Cotton Duvet Cover,Textiles,3,39.0,20,16.5
+ORD-00511,2024-09-08,Italy,Cotton Duvet Cover,Textiles,3,39.0,10,16.5
+ORD-00512,2024-09-09,Italy,Chef Knife,Kitchen,2,34.0,10,13.0
+ORD-00513,2024-09-10,Italy,Glass Storage Jars (3),Kitchen,8,-14.0,10,5.1
+ORD-00514,2024-09-10,Spain,LED Strip 2m,Lighting,12,19.0,0,7.8
+ORD-00515,2024-09-10,France,LED Strip 2m,Lighting,8,19.0,10,7.8
+ORD-00516,2024-09-11,Germany,Cutting Board,Kitchen,9,12.0,10,4.4
+ORD-00517,2024-09-11,Belgium,Wool Throw,Textiles,5,45.0,15,19.0
+ORD-00518,2024-09-12,Netherlands,Cutting Board,Kitchen,12,12.0,10,4.4
+ORD-00519,2024-09-12,Netherlands,Fabric Armchair,Furniture,3,229.0,25,118.0
+ORD-00520,2024-09-13,France,Wall Spotlight,Lighting,10,24.0,15,10.2
+ORD-00521,2024-09-13,Germany,Office Chair,Furniture,2,149.0,10,79.0
+ORD-00522,2024-09-13,Netherlands,Two-Seat Sofa,Furniture,1,499.0,20,265.0
+ORD-00523,2024-09-13,Germany,Fabric Armchair,Furniture,1,229.0,20,118.0
+ORD-00524,2024-09-14,Italy,Shoe Cabinet,Storage,4,69.0,0,32.0
+ORD-00525,2024-09-14,Italy,Chef Knife,Kitchen,7,34.0,0,13.0
+ORD-00526,2024-09-14,Belgium,Wool Throw,Textiles,11,45.0,0,19.0
+ORD-00527,2024-09-14,Germany,Cutting Board,Kitchen,10,12.0,0,4.4
+ORD-00528,2024-09-15,Italy,Cotton Duvet Cover,Textiles,2,39.0,0,16.5
+ORD-00529,2024-09-17,Netherlands,Wall Shelf,Storage,3,25.0,0,10.4
+ORD-00530,2024-09-17,Netherlands,Bookcase,Storage,1,89.0,10,43.0
+ORD-00531,2024-09-18,Spain,Office Chair,Furniture,1,149.0,10,79.0
+ORD-00532,2024-09-18,Germany,Cutting Board,Kitchen,6,12.0,25,4.4
+ORD-00533,2024-09-19,Italy,Cutting Board,Kitchen,5,12.0,0,4.4
+ORD-00534,2024-09-20,France,Office Chair,Furniture,3,149.0,5,79.0
+ORD-00535,2024-09-20,Germany,Pendant Light,Lighting,2,49.0,20,21.0
+ORD-00536,2024-09-21,Spain,Office Chair,Furniture,2,149.0,0,79.0
+ORD-00537,2024-09-22,Germany,Cotton Duvet Cover,Textiles,3,39.0,0,16.5
+ORD-00538,2024-09-22,France,Floor Rug 160x230,Textiles,4,129.0,10,61.0
+ORD-00539,2024-09-22,Spain,Wool Throw,Textiles,11,45.0,15,19.0
+ORD-00540,2024-09-24,Spain,Ceramic Dinner Plate,Kitchen,9,4.5,20,1.6
+ORD-00541,2024-09-24,Germany,Desk Lamp,Lighting,5,29.0,5,12.5
+ORD-00542,2024-09-24,Italy,Floor Lamp,Lighting,2,79.0,0,34.0
+ORD-00543,2024-09-26,France,Cookware Set,Kitchen,3,119.0,10,58.0
+ORD-00544,2024-09-27,Spain,Wall Spotlight,Lighting,1,24.0,25,10.2
+ORD-00545,2024-09-27,Belgium,Wall Shelf,Storage,12,25.0,0,10.4
+ORD-00546,2024-09-27,Spain,Storage Box Set,Storage,1,19.0,10,7.2
+ORD-00547,2024-09-27,Germany,Cutting Board,Kitchen,1,12.0,10,4.4
+ORD-00548,2024-09-28,Netherlands,Floor Lamp,Lighting,3,79.0,0,34.0
+ORD-00549,2024-09-28,Italy,Bath Towel,Textiles,6,9.0,5,3.3
+ORD-00550,2024-09-29,Germany,Ceramic Dinner Plate,Kitchen,6,4.5,0,1.6
+ORD-00551,2024-09-29,France,Bedside Table,Furniture,1,59.0,25,27.0
+ORD-00552,2024-09-29,Belgium,Storage Box Set,Storage,12,19.0,10,7.2
+ORD-00552,2024-09-29,Belgium,Storage Box Set,Storage,12,19.0,10,7.2
+ORD-00553,2024-09-30,Germany,Cotton Duvet Cover,Textiles,5,39.0,5,16.5
+ORD-00554,2024-09-30,Germany,Office Chair,Furniture,4,149.0,0,79.0
+ORD-00555,2024-10-01,Germany,Wool Throw,Textiles,6,45.0,25,19.0
+ORD-00556,2024-10-01,Spain,Bath Towel,Textiles,6,9.0,10,3.3
+ORD-00557,2024-10-02,France,Cutting Board,Kitchen,12,12.0,5,4.4
+ORD-00558,2024-10-04,France,Chef Knife,Kitchen,8,34.0,10,13.0
+ORD-00559,2024-10-06,Spain,Fabric Armchair,Furniture,1,229.0,0,118.0
+ORD-00560,2024-10-06,France,Floor Rug 160x230,Textiles,6,129.0,10,61.0
+ORD-00561,2024-10-06,Germany,Bath Towel,Textiles,11,9.0,10,3.3
+ORD-00562,2024-10-06,Spain,Wool Throw,Textiles,10,45.0,0,19.0
+ORD-00563,2024-10-07,Spain,Chef Knife,Kitchen,7,34.0,10,13.0
+ORD-00564,2024-10-07,France,Two-Seat Sofa,Furniture,1,499.0,15,265.0
+ORD-00565,2024-10-08,France,Shoe Cabinet,Storage,4,69.0,10,32.0
+ORD-00566,2024-10-08,Netherlands,Floor Lamp,Lighting,4,79.0,10,34.0
+ORD-00567,2024-10-08,France,Cotton Duvet Cover,Textiles,1,39.0,0,16.5
+ORD-00568,2024-10-09,Spain,Bath Towel,Textiles,8,9.0,0,3.3
+ORD-00569,2024-10-09,Italy,Glass Storage Jars (3),Kitchen,4,14.0,0,5.1
+ORD-00570,2024-10-09,France,Blackout Curtains,Textiles,4,49.0,20,20.5
+ORD-00571,2024-10-09,Belgium,Wardrobe,Storage,2,299.0,5,158.0
+ORD-00572,2024-10-09,France,Cotton Duvet Cover,Textiles,2,39.0,0,16.5
+ORD-00573,2024-10-09,France,Cutting Board,Kitchen,1,12.0,150,4.4
+ORD-00574,2024-10-10,Netherlands,Floor Rug 160x230,Textiles,1,129.0,5,61.0
+ORD-00575,2024-10-10,Germany,Chef Knife,Kitchen,5,34.0,0,13.0
+ORD-00576,2024-10-11,Spain,Pendant Light,Lighting,8,49.0,0,21.0
+ORD-00577,2024-10-12,Germany,Cotton Duvet Cover,Textiles,6,39.0,20,16.5
+ORD-00577,2024-10-12,Germany,Cotton Duvet Cover,Textiles,6,39.0,20,16.5
+ORD-00578,2024-10-12,France,Wardrobe,Storage,2,299.0,10,158.0
+ORD-00578,2024-10-12,France,Wardrobe,Storage,2,299.0,10,158.0
+ORD-00579,2024-10-12,Spain,Floor Lamp,Lighting,6,79.0,0,34.0
+ORD-00580,2024-10-12,Netherlands,Shoe Cabinet,Storage,5,69.0,0,32.0
+ORD-00581,2024-10-14,Netherlands,Blackout Curtains,Textiles,4,49.0,0,20.5
+ORD-00582,2024-10-14,Belgium,Floor Rug 160x230,Textiles,3,129.0,25,61.0
+ORD-00583,2024-10-15,Italy,Oak Dining Table,Furniture,2,349.0,15,182.0
+ORD-00584,2024-10-15,Italy,Shoe Cabinet,Storage,4,69.0,,32.0
+ORD-00585,2024-10-17,Spain,Floor Rug 160x230,Textiles,5,129.0,20,61.0
+ORD-00586,2024-10-18,Germany,Floor Rug 160x230,Textiles,5,129.0,0,61.0
+ORD-00587,2024-10-19,Spain,Wall Shelf,Storage,8,25.0,0,10.4
+ORD-00588,2024-10-19,Belgium,Cotton Duvet Cover,Textiles,9,39.0,15,16.5
+ORD-00589,2024-10-19,Netherlands,Floor Lamp,Lighting,6,79.0,15,34.0
+ORD-00590,2024-10-19,Germany,Cutting Board,Kitchen,8,12.0,0,4.4
+ORD-00591,2024-10-20,Italy,Wall Spotlight,Lighting,5,24.0,0,10.2
+ORD-00592,2024-10-20,Spain,LED Strip 2m,Lighting,2,19.0,20,7.8
+ORD-00593,2024-10-22,France,Pendant Light,Lighting,2,49.0,5,21.0
+ORD-00594,2024-10-23,Italy,Floor Rug 160x230,Textiles,3,129.0,10,61.0
+ORD-00595,2024-10-24,France,Floor Rug 160x230,Textiles,6,129.0,25,61.0
+ORD-00596,2024-10-24,Belgium,Office Chair,Furniture,5,149.0,5,79.0
+ORD-00597,2024-10-24,Germany,Office Chair,Furniture,2,149.0,0,79.0
+ORD-00598,2024-10-25,Spain,Cotton Duvet Cover,Textiles,11,39.0,15,16.5
+ORD-00599,2024-10-25,Germany,Desk Lamp,Lighting,6,29.0,0,12.5
+ORD-00600,2024-10-26,Belgium,Wall Shelf,Storage,12,25.0,0,10.4
+ORD-00601,2024-10-28,France,Ceramic Dinner Plate,Kitchen,7,4.5,0,1.6
+ORD-00602,2024-10-29,Germany,Cutting Board,Kitchen,4,12.0,0,4.4
+ORD-00603,2024-10-29,Spain,Wardrobe,Storage,1,299.0,0,158.0
+ORD-00604,2024-10-29,Netherlands,Wall Spotlight,Lighting,8,24.0,10,10.2
+ORD-00605,2024-10-29,France,Cotton Duvet Cover,Textiles,9,39.0,0,16.5
+ORD-00606,2024-10-29,France,Shoe Cabinet,Storage,1,69.0,10,32.0
+ORD-00607,2024-10-31,Spain,Ceramic Dinner Plate,Kitchen,9,4.5,0,1.6
+ORD-00608,2024-11-01,Netherlands,Desk Lamp,Lighting,9,29.0,0,12.5
+ORD-00609,2024-11-02,Belgium,Fabric Armchair,Furniture,1,229.0,10,118.0
+ORD-00610,2024-11-02,France,Blackout Curtains,Textiles,12,49.0,0,20.5
+ORD-00611,2024-11-03,France,Bookcase,Storage,5,89.0,0,43.0
+ORD-00612,2024-11-03,France,Fabric Armchair,Furniture,3,229.0,0,118.0
+ORD-00613,2024-11-03,Belgium,Bedside Table,Furniture,2,59.0,0,27.0
+ORD-00614,2024-11-04,France,Wall Spotlight,Lighting,10,24.0,0,10.2
+ORD-00615,2024-11-05,Germany,Bath Towel,Textiles,9,9.0,0,3.3
+ORD-00616,2024-11-05,Germany,Chef Knife,Kitchen,12,34.0,10,13.0
+ORD-00617,2024-11-05,France,Chef Knife,Kitchen,1,34.0,5,13.0
+ORD-00618,2024-11-06,France,Bookcase,Storage,5,89.0,20,43.0
+ORD-00619,2024-11-07,Belgium,Two-Seat Sofa,Furniture,3,499.0,5,265.0
+ORD-00620,2024-11-08,Germany,Ceramic Dinner Plate,Kitchen,6,4.5,0,1.6
+ORD-00621,2024-11-08,France,Bookcase,Storage,1,89.0,20,43.0
+ORD-00622,2024-11-08,Netherlands,Office Chair,Furniture,1,149.0,0,79.0
+ORD-00623,2024-11-09,Italy,Fabric Armchair,Furniture,2,229.0,25,118.0
+ORD-00624,2024-11-09,Belgium,Glass Storage Jars (3),Kitchen,9,14.0,15,5.1
+ORD-00625,2024-11-09,Spain,Cookware Set,Kitchen,6,119.0,25,58.0
+ORD-00626,2024-11-10,Belgium,Floor Rug 160x230,Textiles,3,129.0,0,61.0
+ORD-00627,2024-11-10,Netherlands,Glass Storage Jars (3),Kitchen,12,14.0,20,5.1
+ORD-00628,2024-11-10,Spain,Bookcase,Storage,4,89.0,10,43.0
+ORD-00629,2024-11-11,Belgium,Cotton Duvet Cover,Textiles,10,39.0,0,16.5
+ORD-00630,2024-11-11,Germany,Cutting Board,Kitchen,10,12.0,5,4.4
+ORD-00631,2024-11-11,Italy,Glass Storage Jars (3),Kitchen,8,14.0,15,5.1
+ORD-00632,2024-11-12,Spain,Wool Throw,Textiles,12,45.0,25,19.0
+ORD-00633,2024-11-12,Netherlands,Wall Shelf,Storage,8,25.0,10,10.4
+ORD-00634,2024-11-12,Spain,Floor Rug 160x230,Textiles,1,129.0,0,61.0
+ORD-00635,2024-11-13,Spain,Storage Box Set,Storage,6,19.0,25,7.2
+ORD-00636,2024-11-13,France,Fabric Armchair,Furniture,3,229.0,0,118.0
+ORD-00637,2024-11-14,Italy,Pendant Light,Lighting,8,49.0,0,21.0
+ORD-00638,2024-11-14,Germany,Bath Towel,Textiles,9,9.0,0,3.3
+ORD-00639,2024-11-14,Belgium,Fabric Armchair,Furniture,1,229.0,5,118.0
+ORD-00640,2024-11-15,France,Cotton Duvet Cover,Textiles,11,39.0,20,16.5
+ORD-00641,2024-11-16,France,Cutting Board,Kitchen,1,12.0,25,4.4
+ORD-00642,2024-11-16,Spain,Pendant Light,Lighting,7,49.0,25,21.0
+ORD-00643,2024-11-17,Spain,Desk Lamp,Lighting,12,29.0,20,12.5
+ORD-00644,2024-11-17,Germany,Office Chair,Furniture,5,149.0,5,79.0
+ORD-00645,2024-11-18,Spain,Fabric Armchair,Furniture,3,229.0,0,118.0
+ORD-00646,2024-11-18,Netherlands,Wall Spotlight,Lighting,2,24.0,5,10.2
+ORD-00647,2024-11-18,Italy,Pendant Light,Lighting,2,49.0,0,21.0
+ORD-00648,2024-11-19,France,Wool Throw,Textiles,3,45.0,25,19.0
+ORD-00649,2024-11-21,Italy,Bedside Table,Furniture,5,59.0,5,27.0
+ORD-00650,2024-11-22,France,Oak Dining Table,Furniture,3,349.0,0,182.0
+ORD-00651,2024-11-23,Germany,Glass Storage Jars (3),Kitchen,11,14.0,0,5.1
+ORD-00652,2024-11-23,Italy,Cookware Set,Kitchen,4,119.0,0,58.0
+ORD-00653,2024-11-23,Belgium,Shoe Cabinet,Storage,1,69.0,15,32.0
+ORD-00654,2024-11-23,Spain,Wall Shelf,Storage,11,25.0,15,10.4
+ORD-00655,2024-11-23,Italy,Two-Seat Sofa,Furniture,2,499.0,0,265.0
+ORD-00656,2024-11-23,France,Glass Storage Jars (3),Kitchen,5,14.0,25,5.1
+ORD-00657,2024-11-24,Spain,Office Chair,Furniture,6,149.0,10,79.0
+ORD-00658,2024-11-25,France,Blackout Curtains,Textiles,9,49.0,20,20.5
+ORD-00659,2024-11-25,France,Chef Knife,Kitchen,7,34.0,10,13.0
+ORD-00660,2024-11-26,France,Pendant Light,Lighting,3,49.0,5,21.0
+ORD-00660,2024-11-26,France,Pendant Light,Lighting,3,49.0,5,21.0
+ORD-00661,2024-11-26,Germany,Floor Rug 160x230,Textiles,4,129.0,25,61.0
+ORD-00662,2024-11-27,Germany,Wool Throw,Textiles,6,45.0,0,19.0
+ORD-00663,2024-11-27,France,Oak Dining Table,Furniture,2,349.0,15,182.0
+ORD-00664,2024-11-28,France,Oak Dining Table,Furniture,3,349.0,0,182.0
+ORD-00665,2024-11-28,Italy,Oak Dining Table,Furniture,2,349.0,0,182.0
+ORD-00666,2024-11-28,Italy,Cotton Duvet Cover,Textiles,7,39.0,15,16.5
+ORD-00667,2024-11-28,France,Fabric Armchair,Furniture,2,229.0,10,118.0
+ORD-00668,2024-11-28,France,Glass Storage Jars (3),Kitchen,6,14.0,5,5.1
+ORD-00669,2024-11-29,France,Bookcase,Storage,6,89.0,10,43.0
+ORD-00670,2024-11-29,Spain,Office Chair,Furniture,3,149.0,0,79.0
+ORD-00671,2024-12-01,Germany,Glass Storage Jars (3),Kitchen,5,14.0,10,5.1
+ORD-00672,2024-12-01,Germany,Wardrobe,Storage,3,299.0,15,158.0
+ORD-00673,2024-12-02,Spain,Floor Lamp,Lighting,3,79.0,20,34.0
+ORD-00674,2024-12-02,Germany,Bath Towel,Textiles,8,9.0,0,3.3
+ORD-00675,2024-12-02,Netherlands,Cotton Duvet Cover,Textiles,2,39.0,0,16.5
+ORD-00676,2024-12-03,Germany,Floor Lamp,Lighting,1,79.0,10,34.0
+ORD-00677,2024-12-03,Belgium,Glass Storage Jars (3),Kitchen,10,14.0,0,5.1
+ORD-00678,2024-12-03,Italy,Cutting Board,Kitchen,4,12.0,25,4.4
+ORD-00679,2024-12-04,Germany,Wall Shelf,Storage,7,25.0,0,10.4
+ORD-00680,2024-12-04,France,Wall Shelf,Storage,5,25.0,0,10.4
+ORD-00681,2024-12-05,France,Shoe Cabinet,Storage,6,69.0,120,32.0
+ORD-00682,2024-12-05,Germany,Office Chair,Furniture,4,149.0,,79.0
+ORD-00683,2024-12-05,Germany,Cookware Set,Kitchen,1,119.0,0,58.0
+ORD-00684,2024-12-05,Germany,Bath Towel,Textiles,8,9.0,10,3.3
+ORD-00685,2024-12-06,Italy,Blackout Curtains,Textiles,12,49.0,0,20.5
+ORD-00686,2024-12-06,Belgium,Cookware Set,Kitchen,5,119.0,15,58.0
+ORD-00687,2024-12-07,Netherlands,Pendant Light,Lighting,5,49.0,25,21.0
+ORD-00688,2024-12-08,France,Storage Box Set,Storage,5,19.0,0,7.2
+ORD-00689,2024-12-08,Spain,Wardrobe,Storage,3,299.0,0,158.0
+ORD-00690,2024-12-09,Italy,Glass Storage Jars (3),Kitchen,4,14.0,20,5.1
+ORD-00691,2024-12-09,France,Desk Lamp,Lighting,8,29.0,10,12.5
+ORD-00692,2024-12-10,Spain,Wall Shelf,Storage,12,25.0,10,10.4
+ORD-00693,2024-12-10,France,Desk Lamp,Lighting,11,29.0,15,12.5
+ORD-00694,2024-12-11,Netherlands,Bath Towel,Textiles,8,9.0,5,3.3
+ORD-00695,2024-12-12,France,Wool Throw,Textiles,9,45.0,10,19.0
+ORD-00696,2024-12-12,Italy,Floor Rug 160x230,Textiles,2,129.0,25,61.0
+ORD-00697,2024-12-14,Spain,Oak Dining Table,Furniture,1,349.0,10,182.0
+ORD-00698,2024-12-15,France,Two-Seat Sofa,Furniture,2,499.0,5,265.0
+ORD-00699,2024-12-15,Spain,Cotton Duvet Cover,Textiles,3,39.0,15,16.5
+ORD-00700,2024-12-15,Germany,Blackout Curtains,Textiles,5,49.0,0,20.5
+ORD-00701,2024-12-15,Spain,Glass Storage Jars (3),Kitchen,6,14.0,5,5.1
+ORD-00702,2024-12-15,Spain,Bookcase,Storage,5,89.0,25,43.0
+ORD-00703,2024-12-16,Netherlands,Shoe Cabinet,Storage,6,69.0,0,32.0
+ORD-00704,2024-12-16,Spain,Oak Dining Table,Furniture,1,349.0,25,182.0
+ORD-00705,2024-12-16,Netherlands,Desk Lamp,Lighting,6,29.0,10,12.5
+ORD-00706,2024-12-16,Germany,Wool Throw,Textiles,7,45.0,0,19.0
+ORD-00707,2024-12-17,Germany,Blackout Curtains,Textiles,2,49.0,10,20.5
+ORD-00708,2024-12-19,Belgium,Chef Knife,Kitchen,3,34.0,10,13.0
+ORD-00709,2024-12-20,Netherlands,Blackout Curtains,Textiles,7,49.0,10,20.5
+ORD-00710,2024-12-20,Italy,Wardrobe,Storage,3,299.0,15,158.0
+ORD-00711,2024-12-20,France,Wall Shelf,Storage,11,25.0,15,10.4
+ORD-00712,2024-12-21,Germany,Cotton Duvet Cover,Textiles,5,39.0,0,16.5
+ORD-00713,2024-12-21,France,Storage Box Set,Storage,11,19.0,10,7.2
+ORD-00714,2024-12-22,Germany,Wall Shelf,Storage,2,25.0,0,10.4
+ORD-00715,2024-12-22,Italy,Bookcase,Storage,4,89.0,10,43.0
+ORD-00716,2024-12-23,Germany,Floor Lamp,Lighting,5,79.0,10,34.0
+ORD-00717,2024-12-24,Netherlands,Cotton Duvet Cover,Textiles,8,39.0,15,16.5
+ORD-00718,2024-12-24,Italy,Bookcase,Storage,5,89.0,0,43.0
+ORD-00719,2024-12-24,Belgium,Office Chair,Furniture,4,149.0,0,79.0
+ORD-00720,2024-12-24,Germany,Chef Knife,Kitchen,4,34.0,0,13.0
+ORD-00721,2024-12-24,Germany,Wall Shelf,Storage,4,25.0,0,10.4
+ORD-00722,2024-12-24,Germany,Storage Box Set,Storage,7,19.0,10,7.2
+ORD-00723,2024-12-25,Spain,Ceramic Dinner Plate,Kitchen,7,4.5,0,1.6
+ORD-00724,2024-12-26,Spain,Shoe Cabinet,Storage,3,69.0,0,32.0
+ORD-00725,2024-12-26,Italy,Wall Shelf,Storage,4,25.0,20,10.4
+ORD-00726,2024-12-28,Netherlands,Wardrobe,Storage,1,299.0,0,158.0
+ORD-00727,2024-12-28,Germany,Cotton Duvet Cover,Textiles,4,39.0,0,16.5
+ORD-00728,2024-12-29,Netherlands,Bookcase,Storage,1,89.0,10,43.0
+ORD-00729,2024-12-29,Germany,Pendant Light,Lighting,7,49.0,0,21.0
+ORD-00730,2024-12-30,France,Wall Spotlight,Lighting,10,24.0,10,10.2
+ORD-00731,2024-12-31,France,Wall Spotlight,Lighting,5,24.0,0,10.2
+ORD-00732,2024-12-31,Spain,Cotton Duvet Cover,Textiles,3,39.0,0,16.5
+ORD-00733,2025-01-01,Germany,LED Strip 2m,Lighting,1,19.0,0,7.8
+ORD-00734,2025-01-03,Spain,Floor Rug 160x230,Textiles,3,129.0,0,61.0
+ORD-00735,2025-01-03,France,Wardrobe,Storage,1,299.0,5,158.0
+ORD-00736,2025-01-03,Belgium,,Kitchen,10,14.0,25,5.1
+ORD-00737,2025-01-03,France,Wool Throw,Textiles,1,45.0,15,19.0
+ORD-00738,2025-01-04,Italy,Desk Lamp,Lighting,8,29.0,0,12.5
+ORD-00739,2025-01-04,Germany,Fabric Armchair,Furniture,2,229.0,10,118.0
+ORD-00740,2025-01-06,Spain,Bedside Table,Furniture,3,59.0,5,27.0
+ORD-00741,2025-01-06,Spain,Bedside Table,Furniture,1,59.0,0,27.0
+ORD-00742,2025-01-07,Spain,Pendant Light,Lighting,8,49.0,20,21.0
+ORD-00743,2025-01-09,Germany,Fabric Armchair,Furniture,1,229.0,20,118.0
+ORD-00744,2025-01-09,Italy,Bookcase,Storage,5,89.0,0,43.0
+ORD-00745,2025-01-10,France,Cutting Board,Kitchen,8,12.0,20,4.4
+ORD-00746,2025-01-10,Germany,Chef Knife,Kitchen,4,34.0,0,13.0
+ORD-00747,2025-01-10,Germany,Wool Throw,Textiles,3,45.0,0,19.0
+ORD-00748,2025-01-11,France,Storage Box Set,Storage,2,19.0,15,7.2
+ORD-00749,2025-01-11,France,Bookcase,Storage,5,89.0,0,43.0
+ORD-00750,2025-01-12,Germany,Bath Towel,Textiles,2,9.0,25,3.3
+ORD-00751,2025-01-12,Germany,Blackout Curtains,Textiles,9,49.0,20,20.5
+ORD-00752,2025-01-14,Italy,Desk Lamp,Lighting,2,29.0,10,12.5
+ORD-00753,2025-01-15,Italy,Pendant Light,Lighting,4,49.0,0,21.0
+ORD-00754,2025-01-15,Netherlands,Desk Lamp,Lighting,3,29.0,0,12.5
+ORD-00755,2025-01-15,Germany,Wall Spotlight,Lighting,3,24.0,0,10.2
+ORD-00756,2025-01-16,France,Oak Dining Table,Furniture,1,349.0,0,182.0
+ORD-00757,2025-01-16,Germany,Bookcase,Storage,3,89.0,0,43.0
+ORD-00758,2025-01-16,Spain,Storage Box Set,Storage,11,19.0,10,7.2
+ORD-00759,2025-01-16,Netherlands,Shoe Cabinet,Storage,2,69.0,0,32.0
+ORD-00760,2025-01-17,Germany,Bath Towel,Textiles,5,9.0,15,3.3
+ORD-00761,2025-01-17,Netherlands,Floor Rug 160x230,Textiles,,129.0,0,61.0
+ORD-00762,2025-01-18,Germany,Chef Knife,Kitchen,6,34.0,10,13.0
+ORD-00763,2025-01-18,Italy,Glass Storage Jars (3),Kitchen,11,14.0,20,5.1
+ORD-00764,2025-01-19,Germany,Cotton Duvet Cover,Textiles,9,39.0,15,16.5
+ORD-00765,2025-01-19,Germany,Floor Rug 160x230,Textiles,5,129.0,5,61.0
+ORD-00766,2025-01-19,Germany,Pendant Light,Lighting,3,49.0,0,21.0
+ORD-00767,2025-01-19,France,Bath Towel,Textiles,10,9.0,0,3.3
+ORD-00768,2025-01-21,Belgium,Ceramic Dinner Plate,Kitchen,9,4.5,10,1.6
+ORD-00769,2025-01-21,Germany,Cookware Set,Kitchen,1,119.0,10,58.0
+ORD-00770,2025-01-22,Netherlands,Bath Towel,Textiles,11,9.0,10,3.3
+ORD-00771,2025-01-22,Netherlands,Wall Spotlight,Lighting,10,24.0,10,10.2
+ORD-00772,2025-01-22,Belgium,Shoe Cabinet,Storage,3,69.0,0,32.0
+ORD-00773,2025-01-23,Netherlands,Oak Dining Table,Furniture,1,349.0,0,182.0
+ORD-00774,2025-01-24,France,Pendant Light,Lighting,5,49.0,10,21.0
+ORD-00775,2025-01-24,Spain,Cutting Board,Kitchen,5,12.0,20,4.4
+ORD-00776,2025-01-24,Spain,Bedside Table,Furniture,6,59.0,25,27.0
+ORD-00777,2025-01-24,Italy,Wool Throw,Textiles,3,45.0,0,19.0
+ORD-00778,2025-01-24,Belgium,Desk Lamp,Lighting,3,29.0,20,12.5
+ORD-00779,2025-01-25,Italy,Blackout Curtains,Textiles,2,49.0,5,20.5
+ORD-00780,2025-01-25,Spain,Bookcase,Storage,3,89.0,0,43.0
+ORD-00781,2025-01-25,Spain,Glass Storage Jars (3),Kitchen,1,14.0,0,5.1
+ORD-00782,2025-01-26,Germany,Wall Spotlight,Lighting,5,24.0,10,10.2
+ORD-00783,TBD,France,Desk Lamp,Lighting,12,29.0,15,12.5
+ORD-00784,2025-01-27,Germany,Cutting Board,Kitchen,2,12.0,5,4.4
+ORD-00785,2025-01-28,Italy,Office Chair,Furniture,5,149.0,25,79.0
+ORD-00786,2025-01-28,Belgium,Two-Seat Sofa,Furniture,2,499.0,10,265.0
+ORD-00787,2025-01-28,Germany,Floor Rug 160x230,Textiles,-4,129.0,0,61.0
+ORD-00788,2025-01-29,Netherlands,Wall Spotlight,Lighting,4,24.0,5,10.2
+ORD-00789,2025-01-29,Spain,Wall Shelf,Storage,2,25.0,0,10.4
+ORD-00790,2025-01-29,France,Office Chair,Furniture,2,149.0,25,79.0
+ORD-00791,2025-01-30,France,Bookcase,Storage,3,89.0,0,43.0
+ORD-00792,2025-01-30,Netherlands,Oak Dining Table,Furniture,1,349.0,10,182.0
+ORD-00793,2025-01-31,Spain,Bath Towel,Textiles,10,9.0,5,3.3
+ORD-00794,2025-02-01,Italy,Office Chair,Furniture,3,149.0,25,79.0
+ORD-00795,2025-02-01,Italy,Ceramic Dinner Plate,Kitchen,11,4.5,10,1.6
+ORD-00796,2025-02-02,France,Bookcase,Storage,1,89.0,0,43.0
+ORD-00797,2025-02-03,Netherlands,Office Chair,Furniture,6,149.0,10,79.0
+ORD-00798,2025-02-03,Netherlands,Pendant Light,Lighting,10,49.0,0,21.0
+ORD-00799,2025-02-04,Spain,Bedside Table,Furniture,3,59.0,0,27.0
+ORD-00800,2025-02-04,Spain,Ceramic Dinner Plate,Kitchen,1,4.5,25,1.6
+ORD-00801,2025-02-05,Spain,Blackout Curtains,Textiles,10,49.0,25,20.5
+ORD-00802,2025-02-05,France,Wool Throw,Textiles,4,45.0,20,19.0
+ORD-00803,2025-02-05,Germany,Chef Knife,Kitchen,8,34.0,0,13.0
+ORD-00804,2025-02-05,France,Cotton Duvet Cover,Textiles,12,39.0,5,16.5
+ORD-00805,2025-02-05,France,Bedside Table,Furniture,5,59.0,25,27.0
+ORD-00806,2025-02-06,Netherlands,Office Chair,Furniture,4,149.0,0,79.0
+ORD-00807,2025-02-06,Spain,Bedside Table,Furniture,6,59.0,0,27.0
+ORD-00808,2025-02-06,Italy,Office Chair,Furniture,6,149.0,0,79.0
+ORD-00809,2025-02-09,Italy,Floor Rug 160x230,Textiles,3,129.0,0,61.0
+ORD-00810,2025-02-09,France,Floor Rug 160x230,Textiles,4,129.0,5,61.0
+ORD-00811,2025-02-09,Belgium,Glass Storage Jars (3),Kitchen,5,14.0,0,5.1
+ORD-00812,2025-02-10,Italy,Desk Lamp,Lighting,3,29.0,0,12.5
+ORD-00813,2025-02-11,France,Desk Lamp,Lighting,7,29.0,5,12.5
+ORD-00814,2025-02-12,Italy,,Furniture,1,349.0,0,182.0
+ORD-00815,2025-02-12,Italy,Cotton Duvet Cover,Textiles,3,39.0,10,16.5
+ORD-00816,2025-02-13,Italy,Chef Knife,Kitchen,3,34.0,10,13.0
+ORD-00817,2025-02-13,Belgium,Wool Throw,Textiles,11,45.0,15,19.0
+ORD-00818,2025-02-13,Germany,Wall Shelf,Storage,8,25.0,5,10.4
+ORD-00819,2025-02-14,Germany,Fabric Armchair,Furniture,2,229.0,15,118.0
+ORD-00820,2025-02-15,Germany,Wardrobe,Storage,2,299.0,0,158.0
+ORD-00821,2025-02-15,France,Wall Spotlight,Lighting,12,24.0,15,10.2
+ORD-00822,2025-02-16,France,Wool Throw,Textiles,2,45.0,0,19.0
+ORD-00823,2025-02-17,Spain,Bookcase,Storage,4,89.0,0,43.0
+ORD-00824,2025-02-17,Belgium,Floor Rug 160x230,Textiles,3,129.0,5,61.0
+ORD-00825,2025-02-17,Germany,Ceramic Dinner Plate,Kitchen,7,4.5,10,1.6
+ORD-00826,2025-02-17,Germany,Wool Throw,Textiles,10,45.0,0,19.0
+ORD-00827,2025-02-18,Germany,,Textiles,2,129.0,0,61.0
+ORD-00828,2025-02-18,Spain,Cookware Set,Kitchen,3,119.0,15,58.0
+ORD-00829,2025-02-19,Germany,Office Chair,Furniture,1,149.0,10,79.0
+ORD-00830,2025-02-19,Spain,Fabric Armchair,Furniture,1,229.0,0,118.0
+ORD-00831,2025-02-20,France,Fabric Armchair,Furniture,,229.0,25,118.0
+ORD-00832,2025-02-20,Italy,Shoe Cabinet,Storage,6,69.0,0,32.0
+ORD-00833,2025-02-22,Germany,Ceramic Dinner Plate,Kitchen,11,4.5,5,1.6
+ORD-00834,2025-02-22,Spain,Office Chair,Furniture,4,149.0,0,79.0
+ORD-00835,2025-02-22,Italy,Wool Throw,Textiles,10,45.0,20,19.0
+ORD-00836,2025-02-23,Belgium,Floor Rug 160x230,Textiles,2,129.0,0,61.0
+ORD-00837,2025-02-24,Netherlands,Wool Throw,Textiles,8,45.0,25,19.0
+ORD-00838,2025-02-24,Belgium,Bookcase,Storage,5,89.0,0,43.0
+ORD-00839,2025-02-26,Netherlands,Floor Lamp,Lighting,3,79.0,0,34.0
+ORD-00840,2025-02-27,Germany,Cookware Set,Kitchen,1,119.0,0,58.0
+ORD-00841,2025-02-27,Germany,Wall Shelf,Storage,5,25.0,0,10.4
+ORD-00842,2025-02-27,Germany,Cookware Set,Kitchen,1,119.0,0,58.0
+ORD-00843,2025-02-27,Germany,Wool Throw,Textiles,2,45.0,20,19.0
+ORD-00844,2025-02-28,France,Cutting Board,Kitchen,9,12.0,0,4.4
+ORD-00845,2025-03-01,Netherlands,Glass Storage Jars (3),Kitchen,11,14.0,0,5.1
+ORD-00846,2025-03-02,Germany,Wardrobe,Storage,1,299.0,25,158.0
+ORD-00847,2025-03-03,Germany,Two-Seat Sofa,Furniture,3,499.0,0,265.0
+ORD-00848,2025-03-03,Belgium,Bookcase,Storage,3,89.0,25,43.0
+ORD-00849,2025-03-04,Netherlands,Cutting Board,Kitchen,5,12.0,0,4.4
+ORD-00850,2025-03-04,Italy,Oak Dining Table,Furniture,2,349.0,20,182.0
+ORD-00851,2025-03-04,Netherlands,Two-Seat Sofa,Furniture,2,499.0,15,265.0
+ORD-00852,2025-03-04,France,Cookware Set,Kitchen,3,119.0,0,58.0
+ORD-00853,2025-03-05,Spain,Office Chair,Furniture,6,149.0,0,79.0
+ORD-00854,2025-03-05,Germany,Shoe Cabinet,Storage,1,69.0,0,32.0
+ORD-00855,2025-03-05,France,Shoe Cabinet,Storage,1,69.0,0,32.0
+ORD-00856,2025-03-08,Spain,Bath Towel,Textiles,5,9.0,0,3.3
+ORD-00857,2025-03-09,Netherlands,Oak Dining Table,Furniture,3,349.0,5,182.0
+ORD-00858,2025-03-09,Germany,Floor Lamp,Lighting,6,79.0,5,34.0
+ORD-00859,2025-03-09,Spain,Wall Shelf,Storage,5,25.0,15,10.4
+ORD-00860,2025-03-11,Belgium,Wardrobe,Storage,1,299.0,0,158.0
+ORD-00861,2025-03-11,Italy,Shoe Cabinet,Storage,4,69.0,5,32.0
+ORD-00862,2025-03-11,France,Ceramic Dinner Plate,Kitchen,5,4.5,0,1.6
+ORD-00863,2025-03-11,France,Wall Shelf,Storage,9,25.0,25,10.4
+ORD-00864,2025-03-12,Netherlands,Bookcase,Storage,5,89.0,20,43.0
+ORD-00865,2025-03-12,Germany,Cutting Board,Kitchen,3,12.0,0,4.4
+ORD-00866,2025-03-12,Netherlands,Glass Storage Jars (3),Kitchen,6,14.0,0,5.1
+ORD-00867,2025-03-12,Germany,Floor Lamp,Lighting,1,79.0,5,34.0
+ORD-00868,2025-03-13,Spain,LED Strip 2m,Lighting,8,19.0,0,7.8
+ORD-00869,2025-03-15,Spain,Two-Seat Sofa,Furniture,3,499.0,0,265.0
+ORD-00870,2025-03-15,Spain,Cutting Board,Kitchen,6,12.0,0,4.4
+ORD-00871,2025-03-15,Germany,Wall Spotlight,Lighting,3,"49,00 EUR",25,10.2
+ORD-00872,2025-03-16,Netherlands,Ceramic Dinner Plate,Kitchen,7,4.5,0,1.6
+ORD-00873,2025-03-17,Italy,Wall Spotlight,Lighting,-9,24.0,0,10.2
+ORD-00874,2025-03-18,France,Wall Shelf,Storage,12,25.0,10,10.4
+ORD-00875,2025-03-19,France,Wall Shelf,Storage,3,25.0,15,10.4
+ORD-00876,2025-03-19,France,Wardrobe,Storage,1,299.0,10,158.0
+ORD-00877,2025-03-19,Germany,Bath Towel,Textiles,4,9.0,25,3.3
+ORD-00878,2025-03-20,France,Cutting Board,Kitchen,10,12.0,10,4.4
+ORD-00879,2025-03-20,Spain,Wool Throw,Textiles,12,45.0,25,19.0
+ORD-00880,2025-03-21,Netherlands,Oak Dining Table,Furniture,1,349.0,5,182.0
+ORD-00881,2025-03-21,Italy,Bookcase,Storage,5,89.0,25,43.0
+ORD-00882,2025-03-21,Germany,Desk Lamp,Lighting,10,29.0,5,12.5
+ORD-00883,2025-03-22,,Desk Lamp,Lighting,10,29.0,0,12.5
+ORD-00884,2025-03-23,Germany,Ceramic Dinner Plate,Kitchen,12,4.5,5,1.6
+ORD-00885,2025-03-23,Italy,Cotton Duvet Cover,Textiles,7,39.0,5,16.5
+ORD-00886,2025-03-24,France,Chef Knife,Kitchen,8,34.0,20,13.0
+ORD-00887,2025-03-25,Netherlands,Floor Rug 160x230,Textiles,6,129.0,10,61.0
+ORD-00888,2025-03-26,Belgium,Floor Rug 160x230,Textiles,6,129.0,10,61.0
+ORD-00889,2025-03-26,Spain,Bath Towel,Textiles,10,9.0,25,3.3
+ORD-00890,2025-03-26,Italy,Cutting Board,Kitchen,7,12.0,0,4.4
+ORD-00891,2025-03-27,France,Pendant Light,Lighting,1,49.0,0,21.0
+ORD-00892,2025-03-27,Germany,LED Strip 2m,Lighting,10,19.0,5,7.8
+ORD-00893,2025-03-27,Germany,Fabric Armchair,Furniture,3,229.0,10,118.0
+ORD-00894,2025-03-30,France,Floor Rug 160x230,Textiles,6,129.0,0,61.0
+ORD-00895,2025-03-31,Belgium,Glass Storage Jars (3),Kitchen,7,14.0,20,5.1
+ORD-00896,2025-03-31,Germany,Wall Shelf,Storage,8,25.0,0,10.4
+ORD-00897,2025-03-31,Netherlands,Two-Seat Sofa,Furniture,2,499.0,20,265.0
+ORD-00898,2025-04-01,France,Wall Shelf,Storage,6,25.0,10,10.4
+ORD-00899,2025-04-01,Germany,Cotton Duvet Cover,Textiles,10,39.0,25,16.5
+ORD-00900,2025-04-01,Netherlands,Chef Knife,Kitchen,6,34.0,0,13.0
+ORD-00901,2025-04-02,France,Bedside Table,Furniture,1,59.0,20,27.0
+ORD-00902,2025-04-03,Italy,LED Strip 2m,Lighting,5,19.0,0,7.8
+ORD-00903,2025-04-03,Italy,Pendant Light,Lighting,1,49.0,25,21.0
+ORD-00904,2025-04-03,France,Oak Dining Table,Furniture,2,349.0,5,182.0
+ORD-00905,2025-04-03,France,Desk Lamp,Lighting,8,29.0,0,12.5
+ORD-00906,2025-04-04,France,Cookware Set,Kitchen,5,119.0,0,58.0
+ORD-00907,2025-04-04,France,LED Strip 2m,Lighting,12,19.0,10,7.8
+ORD-00908,2025-04-04,France,Cotton Duvet Cover,Textiles,7,39.0,5,16.5
+ORD-00909,2025-04-05,Italy,Blackout Curtains,Textiles,7,49.0,0,20.5
+ORD-00910,2025-04-05,Germany,Chef Knife,Kitchen,11,34.0,10,13.0
+ORD-00911,2025-04-06,Belgium,Glass Storage Jars (3),Kitchen,2,14.0,15,5.1
+ORD-00912,2025-04-07,Italy,LED Strip 2m,Lighting,1,19.0,0,7.8
+ORD-00913,2025-04-07,France,Shoe Cabinet,Storage,2,69.0,5,32.0
+ORD-00914,2025-04-07,Germany,Wardrobe,Storage,2,299.0,0,158.0
+ORD-00915,2025-04-07,Italy,Floor Lamp,Lighting,2,79.0,25,34.0
+ORD-00916,2025-04-08,France,Desk Lamp,Lighting,6,29.0,0,12.5
+ORD-00917,2025-04-08,Spain,Wool Throw,Textiles,12,45.0,10,19.0
+ORD-00918,2025-04-09,France,Shoe Cabinet,Storage,4,69.0,0,32.0
+ORD-00919,2025-04-11,Netherlands,Shoe Cabinet,Storage,4,69.0,10,32.0
+ORD-00920,2025-04-11,France,Fabric Armchair,Furniture,3,229.0,5,118.0
+ORD-00921,2025-04-11,Spain,Ceramic Dinner Plate,Kitchen,3,4.5,0,1.6
+ORD-00922,2025-04-11,Netherlands,Storage Box Set,Storage,12,19.0,15,7.2
+ORD-00923,2025-04-12,France,Blackout Curtains,Textiles,10,49.0,10,20.5
+ORD-00924,2025-04-13,France,Cutting Board,Kitchen,8,12.0,15,4.4
+ORD-00925,2025-04-13,France,Cotton Duvet Cover,Textiles,6,39.0,10,16.5
+ORD-00926,2025-04-13,Germany,Wardrobe,Storage,2,299.0,0,158.0
+ORD-00927,2025-04-13,Germany,Floor Rug 160x230,Textiles,3,129.0,0,61.0
+ORD-00928,2025-04-14,Spain,Fabric Armchair,Furniture,1,229.0,0,118.0
+ORD-00929,2025-04-14,Netherlands,Ceramic Dinner Plate,Kitchen,6,4.5,0,1.6
+ORD-00930,2025-04-15,Germany,Fabric Armchair,Furniture,3,229.0,0,118.0
+ORD-00931,2025-04-15,Germany,Ceramic Dinner Plate,Kitchen,10,4.5,0,1.6
+ORD-00932,2025-04-15,Belgium,Cookware Set,Kitchen,3,119.0,0,58.0
+ORD-00933,2025-04-16,France,Office Chair,Furniture,1,149.0,0,79.0
+ORD-00934,2025-04-17,Germany,Bookcase,Storage,1,89.0,0,43.0
+ORD-00935,2025-04-17,Italy,Wall Spotlight,Lighting,1,24.0,5,10.2
+ORD-00936,2025-04-18,Germany,Desk Lamp,Lighting,2,29.0,10,12.5
+ORD-00937,2025-04-18,France,Wall Shelf,Storage,10,25.0,25,10.4
+ORD-00938,2025-04-18,France,Wall Spotlight,Lighting,,24.0,0,10.2
+ORD-00939,2025-04-18,Germany,Cookware Set,Kitchen,1,119.0,25,58.0
+ORD-00940,2025-04-18,Germany,Blackout Curtains,Textiles,9,49.0,10,20.5
+ORD-00941,2025-04-18,Spain,Cutting Board,Kitchen,8,12.0,15,4.4
+ORD-00942,2025-04-18,Spain,Oak Dining Table,Furniture,2,349.0,20,182.0
+ORD-00943,2025-04-20,Germany,Blackout Curtains,Textiles,4,49.0,10,20.5
+ORD-00944,2025-04-20,Netherlands,Bookcase,Storage,4,89.0,0,43.0
+ORD-00945,2025-04-20,Germany,Cutting Board,Kitchen,7,12.0,15,4.4
+ORD-00946,2025-04-20,Germany,Cutting Board,Kitchen,5,12.0,5,4.4
+ORD-00947,2025-04-21,France,Shoe Cabinet,Storage,6,69.0,0,32.0
+ORD-00948,2025-04-21,Italy,Shoe Cabinet,Storage,3,69.0,20,32.0
+ORD-00949,2025-04-21,Spain,Cookware Set,Kitchen,3,119.0,10,58.0
+ORD-00950,2025-04-22,Germany,Oak Dining Table,Furniture,2,349.0,25,182.0
+ORD-00951,2025-04-22,France,Desk Lamp,Lighting,4,29.0,15,12.5
+ORD-00952,2025-04-22,France,Storage Box Set,Storage,4,19.0,0,7.2
+ORD-00953,2025-04-23,Italy,Floor Lamp,Lighting,6,79.0,5,34.0
+ORD-00954,2025-04-23,Belgium,Chef Knife,Kitchen,4,34.0,10,13.0
+ORD-00955,2025-04-24,Spain,Bookcase,Storage,3,89.0,10,43.0
+ORD-00956,2025-04-24,Germany,Fabric Armchair,Furniture,3,229.0,0,118.0
+ORD-00957,2025-04-25,France,Desk Lamp,Lighting,4,29.0,0,12.5
+ORD-00958,2025-04-26,Belgium,Wall Shelf,Storage,8,25.0,10,10.4
+ORD-00959,2025-04-27,Netherlands,Floor Rug 160x230,Textiles,6,129.0,25,61.0
+ORD-00960,2025-04-28,Belgium,Cotton Duvet Cover,Textiles,3,39.0,10,16.5
+ORD-00961,2025-04-28,Germany,Floor Lamp,Lighting,5,79.0,5,34.0
+ORD-00962,2025-04-29,Spain,Glass Storage Jars (3),Kitchen,2,14.0,0,5.1
+ORD-00963,2025-04-29,Germany,Fabric Armchair,Furniture,3,229.0,15,118.0
+ORD-00964,2025-04-29,Italy,Wall Spotlight,Lighting,1,24.0,25,10.2
+ORD-00965,2025-04-29,Netherlands,Cookware Set,Kitchen,1,119.0,10,58.0
+ORD-00966,2025-04-30,Italy,Pendant Light,Lighting,12,49.0,10,21.0
+ORD-00967,2025-05-01,Belgium,Oak Dining Table,Furniture,3,349.0,5,182.0
+ORD-00968,2025-05-01,Italy,Cotton Duvet Cover,Textiles,7,39.0,0,16.5
+ORD-00969,2025-05-02,Belgium,Blackout Curtains,Textiles,10,49.0,10,20.5
+ORD-00970,2025-05-03,France,Pendant Light,Lighting,3,49.0,5,21.0
+ORD-00971,2025-05-04,France,Floor Lamp,Lighting,4,79.0,15,34.0
+ORD-00972,2025-05-05,Spain,Wool Throw,Textiles,2,45.0,10,19.0
+ORD-00973,2025-05-06,Netherlands,Oak Dining Table,Furniture,3,349.0,20,182.0
+ORD-00974,2025-05-06,Germany,Oak Dining Table,Furniture,1,349.0,10,182.0
+ORD-00975,2025-05-06,Netherlands,Shoe Cabinet,Storage,4,69.0,10,32.0
+ORD-00976,2025-05-06,Spain,Oak Dining Table,Furniture,3,349.0,25,182.0
+ORD-00977,2025-05-06,Germany,Shoe Cabinet,Storage,1,69.0,0,32.0
+ORD-00978,2025-05-06,Netherlands,Cutting Board,Kitchen,5,12.0,10,4.4
+ORD-00979,2025-05-06,Netherlands,Floor Lamp,Lighting,5,79.0,0,34.0
+ORD-00979,2025-05-06,Netherlands,Floor Lamp,Lighting,5,79.0,0,34.0
+ORD-00980,2025-05-07,Germany,Bedside Table,Furniture,1,59.0,10,27.0
+ORD-00981,2025-05-08,Germany,Office Chair,Furniture,1,149.0,10,79.0
+ORD-00982,2025-05-09,Italy,Fabric Armchair,Furniture,1,229.0,0,118.0
+ORD-00983,2025-05-09,Netherlands,Chef Knife,Kitchen,9,34.0,0,13.0
+ORD-00984,2025-05-11,Netherlands,Chef Knife,Kitchen,9,34.0,10,13.0
+ORD-00985,2025-05-11,Italy,Storage Box Set,Storage,5,19.0,25,7.2
+ORD-00986,2025-05-12,Italy,Pendant Light,Lighting,7,49.0,20,21.0
+ORD-00987,2025-05-13,Germany,Bookcase,Storage,1,89.0,0,43.0
+ORD-00988,2025-05-13,Germany,Storage Box Set,Storage,1,19.0,0,7.2
+ORD-00989,2025-05-13,Belgium,Bedside Table,Furniture,5,59.0,5,27.0
+ORD-00990,2025-05-14,France,Chef Knife,Kitchen,9,34.0,0,13.0
+ORD-00991,2025-05-14,Italy,Wool Throw,Textiles,2,45.0,0,19.0
+ORD-00992,2025-05-14,Italy,Wall Spotlight,Lighting,1,24.0,0,10.2
+ORD-00993,2025-05-15,Italy,Bedside Table,Furniture,1,59.0,25,27.0
+ORD-00994,2025-05-15,Spain,Oak Dining Table,Furniture,2,349.0,10,182.0
+ORD-00995,2025-05-16,France,Ceramic Dinner Plate,Kitchen,9,4.5,15,1.6
+ORD-00996,2025-05-17,,Floor Rug 160x230,Textiles,4,129.0,10,61.0
+ORD-00997,2025-05-17,Spain,Wall Shelf,Storage,10,25.0,0,10.4
+ORD-00998,2025-05-19,Italy,Bedside Table,Furniture,5,59.0,10,27.0
+ORD-00999,2025-05-19,Spain,Wall Spotlight,Lighting,8,24.0,25,10.2
+ORD-01000,2025-05-20,Italy,Chef Knife,Kitchen,3,34.0,0,13.0
+ORD-01001,2025-05-20,France,Bedside Table,Furniture,5,59.0,0,27.0
+ORD-01002,2025-05-20,France,Office Chair,Furniture,1,149.0,5,-79.0
+ORD-01003,2025-05-20,Italy,Bookcase,Storage,3,89.0,10,43.0
+ORD-01004,2025-05-21,Spain,Blackout Curtains,Textiles,10,49.0,0,20.5
+ORD-01005,2025-05-21,France,Cotton Duvet Cover,Textiles,6,39.0,25,16.5
+ORD-01006,2025-05-21,Germany,Wool Throw,Textiles,3,45.0,25,19.0
+ORD-01007,2025-05-21,Spain,Bath Towel,Textiles,6,9.0,0,3.3
+ORD-01008,2025-05-21,Germany,Two-Seat Sofa,Furniture,2,499.0,20,265.0
+ORD-01008,2025-05-21,Germany,Two-Seat Sofa,Furniture,2,499.0,20,265.0
+ORD-01009,2025-05-23,France,Wall Shelf,Storage,10,25.0,15,10.4
+ORD-01010,2025-05-24,Netherlands,Bath Towel,Textiles,4,9.0,0,3.3
+ORD-01011,2025-05-25,Germany,Bedside Table,Furniture,5,59.0,10,27.0
+ORD-01012,2025-05-25,Germany,Blackout Curtains,Textiles,10,49.0,0,20.5
+ORD-01013,2025-05-25,France,Office Chair,Furniture,3,149.0,0,79.0
+ORD-01014,2025-05-27,France,Glass Storage Jars (3),Kitchen,1,14.0,20,5.1
+ORD-01015,2025-05-28,Germany,Cotton Duvet Cover,Textiles,1,39.0,0,16.5
+ORD-01016,2025-05-28,Italy,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-01017,2025-05-28,France,Cutting Board,Kitchen,10,12.0,10,4.4
+ORD-01018,2025-05-29,Belgium,Cutting Board,Kitchen,7,12.0,0,4.4
+ORD-01019,2025-05-30,Belgium,Cookware Set,Kitchen,3,119.0,10,58.0
+ORD-01020,2025-05-30,France,Wool Throw,Textiles,4,45.0,20,19.0
+ORD-01021,2025-05-30,Spain,Shoe Cabinet,Storage,1,69.0,0,32.0
+ORD-01022,2025-05-30,Italy,Chef Knife,Kitchen,6,34.0,25,13.0
+ORD-01023,2025-05-30,Italy,Floor Lamp,Lighting,6,79.0,10,34.0
+ORD-01024,2025-06-01,Spain,Floor Lamp,Lighting,1,79.0,0,34.0
+ORD-01025,2025-06-02,Germany,Wool Throw,Textiles,1,45.0,25,19.0
+ORD-01026,2025-06-02,France,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-01027,2025-06-03,France,Blackout Curtains,Textiles,4,49.0,25,20.5
+ORD-01028,2025-06-03,Germany,Wardrobe,Storage,3,299.0,0,158.0
+ORD-01029,2025-06-03,Netherlands,Wool Throw,Textiles,7,45.0,15,19.0
+ORD-01030,2025-06-03,Italy,Ceramic Dinner Plate,Kitchen,10,4.5,0,1.6
+ORD-01031,2025-06-03,Italy,Cutting Board,Kitchen,3,12.0,5,4.4
+ORD-01032,2025-06-03,Spain,Desk Lamp,Lighting,10,29.0,5,12.5
+ORD-01033,2025-06-06,Germany,Wool Throw,Textiles,12,45.0,15,19.0
+ORD-01034,2025-06-07,Spain,Storage Box Set,Storage,7,19.0,15,7.2
+ORD-01035,2024-13-45,Germany,Bedside Table,Furniture,1,59.0,20,27.0
+ORD-01036,2025-06-08,Spain,Bath Towel,Textiles,4,9.0,0,3.3
+ORD-01037,2025-06-09,Netherlands,Two-Seat Sofa,Furniture,1,499.0,20,265.0
+ORD-01038,2025-06-09,Netherlands,Wardrobe,Storage,3,299.0,20,158.0
+ORD-01039,2025-06-09,France,Cotton Duvet Cover,Textiles,5,39.0,5,16.5
+ORD-01040,2025-06-10,France,Storage Box Set,Storage,10,19.0,0,7.2
+ORD-01041,2025-06-10,Italy,Cotton Duvet Cover,Textiles,8,39.0,0,16.5
+ORD-01042,2025-06-11,Italy,Cutting Board,Kitchen,12,12.0,10,4.4
+ORD-01043,2025-06-11,Spain,Office Chair,Furniture,1,149.0,20,79.0
+ORD-01044,2025-06-11,Netherlands,Pendant Light,Lighting,8,49.0,20,21.0
+ORD-01045,2025-06-12,France,Glass Storage Jars (3),Kitchen,4,14.0,15,5.1
+ORD-01046,2025-06-12,Netherlands,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-01047,2025-06-14,Italy,Cotton Duvet Cover,Textiles,10,39.0,10,16.5
+ORD-01048,2025-06-14,France,Wall Spotlight,Lighting,9,24.0,5,10.2
+ORD-01049,2025-06-15,Belgium,Wool Throw,Textiles,1,45.0,0,19.0
+ORD-01050,2025-06-16,Spain,Storage Box Set,Storage,4,19.0,0,7.2
+ORD-01051,2025-06-17,France,Floor Rug 160x230,Textiles,2,129.0,0,61.0
+ORD-01052,2025-06-17,Netherlands,Cutting Board,Kitchen,2,12.0,20,4.4
+ORD-01053,2025-06-18,France,LED Strip 2m,Lighting,3,19.0,10,7.8
+ORD-01054,2025-06-18,Germany,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-01055,2025-06-18,Germany,Wool Throw,Textiles,10,45.0,15,19.0
+ORD-01056,2025-06-18,Germany,Cutting Board,Kitchen,3,12.0,0,4.4
+ORD-01057,2025-06-18,Spain,Wall Shelf,Storage,10,25.0,0,10.4
+ORD-01058,2025-06-19,France,LED Strip 2m,Lighting,12,19.0,10,7.8
+ORD-01059,2025-06-19,Belgium,Chef Knife,Kitchen,9,34.0,10,13.0
+ORD-01060,2025-06-19,Germany,Storage Box Set,Storage,6,19.0,10,7.2
+ORD-01061,2025-06-20,Italy,Fabric Armchair,Furniture,1,229.0,0,118.0
+ORD-01062,2025-06-21,Germany,Wool Throw,Textiles,2,45.0,0,19.0
+ORD-01063,2025-06-21,France,Shoe Cabinet,Storage,3,69.0,10,32.0
+ORD-01064,2025-06-21,Germany,Floor Rug 160x230,Textiles,5,129.0,20,61.0
+ORD-01065,2025-06-21,Spain,Bath Towel,Textiles,12,9.0,0,3.3
+ORD-01066,2025-06-22,France,Pendant Light,Lighting,10,49.0,0,21.0
+ORD-01067,2025-06-22,Germany,Oak Dining Table,Furniture,1,349.0,15,182.0
+ORD-01068,2025-06-23,Belgium,Pendant Light,Lighting,10,49.0,15,21.0
+ORD-01069,2025-06-23,France,Bookcase,Storage,3,89.0,10,43.0
+ORD-01070,2025-06-24,Germany,Office Chair,Furniture,4,149.0,20,79.0
+ORD-01071,2025-06-24,Germany,Wall Shelf,Storage,1,25.0,25,10.4
+ORD-01071,2025-06-24,Germany,Wall Shelf,Storage,1,25.0,25,10.4
+ORD-01072,2025-06-25,Germany,Cutting Board,Kitchen,12,12.0,25,4.4
+ORD-01073,2025-06-25,Netherlands,Pendant Light,Lighting,10,49.0,0,21.0
+ORD-01074,2025-06-25,Italy,Storage Box Set,Storage,4,19.0,0,7.2
+ORD-01075,2025-06-25,Spain,Cookware Set,Kitchen,1,119.0,10,58.0
+ORD-01076,2025-06-25,Netherlands,Cutting Board,Kitchen,8,12.0,10,4.4
+ORD-01077,2025-06-25,Germany,Chef Knife,Kitchen,1,34.0,10,13.0
+ORD-01078,2025-06-27,Italy,Cutting Board,Kitchen,,12.0,20,4.4
+ORD-01079,2025-06-28,France,Wall Spotlight,Lighting,1,24.0,10,10.2
+ORD-01080,2025-06-29,Germany,Pendant Light,Lighting,7,49.0,20,21.0
+ORD-01081,2025-06-30,Belgium,Two-Seat Sofa,Furniture,1,499.0,25,265.0
+ORD-01082,2025-06-30,Germany,Wall Spotlight,Lighting,3,24.0,0,10.2
+ORD-01083,2025-07-01,Spain,LED Strip 2m,Lighting,10,19.0,0,7.8
+ORD-01084,2025-07-01,Spain,Office Chair,Furniture,6,149.0,5,79.0
+ORD-01085,2025-07-01,Belgium,Office Chair,Furniture,1,149.0,0,79.0
+ORD-01086,2025-07-02,France,Oak Dining Table,Furniture,1,349.0,10,182.0
+ORD-01087,2025-07-02,Germany,Glass Storage Jars (3),Kitchen,5,14.0,20,5.1
+ORD-01088,2025-07-03,Germany,Desk Lamp,Lighting,3,29.0,25,12.5
+ORD-01089,2025-07-05,Belgium,Shoe Cabinet,Storage,1,69.0,0,32.0
+ORD-01089,2025-07-05,Belgium,Shoe Cabinet,Storage,1,69.0,0,32.0
+ORD-01090,2025-07-05,Germany,Bath Towel,Textiles,5,9.0,0,3.3
+ORD-01091,not a date,France,Storage Box Set,Storage,10,19.0,0,7.2
+ORD-01092,2025-07-06,Spain,Ceramic Dinner Plate,Kitchen,2,4.5,20,1.6
+ORD-01093,2025-07-06,Italy,Cookware Set,Kitchen,2,119.0,0,58.0
+ORD-01094,2025-07-06,France,Bookcase,Storage,6,89.0,10,43.0
+ORD-01095,2025-07-07,Netherlands,Desk Lamp,Lighting,3,29.0,0,12.5
+ORD-01096,2025-07-07,Italy,Cotton Duvet Cover,Textiles,6,39.0,10,16.5
+ORD-01097,2025-07-07,Germany,Oak Dining Table,Furniture,2,349.0,10,182.0
+ORD-01098,2025-07-07,Germany,Bookcase,Storage,4,89.0,0,43.0
+ORD-01099,2025-07-08,Belgium,Wall Spotlight,Lighting,5,24.0,0,10.2
+ORD-01100,2025-07-08,France,Floor Rug 160x230,Textiles,5,129.0,20,61.0
+ORD-01101,2025-07-09,Germany,Bookcase,Storage,6,89.0,0,43.0
+ORD-01102,2025-07-09,Italy,Wool Throw,Textiles,4,45.0,0,19.0
+ORD-01103,2025-07-09,France,Wall Shelf,Storage,1,25.0,25,10.4
+ORD-01104,2025-07-09,Germany,Storage Box Set,Storage,7,19.0,10,7.2
+ORD-01105,2025-07-10,Germany,Chef Knife,Kitchen,3,34.0,10,13.0
+ORD-01106,2025-07-10,Germany,Blackout Curtains,Textiles,4,49.0,10,20.5
+ORD-01107,2025-07-11,,Chef Knife,Kitchen,12,34.0,20,13.0
+ORD-01108,2025-07-11,France,Ceramic Dinner Plate,Kitchen,9,4.5,10,1.6
+ORD-01109,2025-07-11,Netherlands,Wall Shelf,Storage,11,25.0,0,10.4
+ORD-01110,2025-07-12,Belgium,Bedside Table,Furniture,6,59.0,25,27.0
+ORD-01111,2025-07-12,France,Wool Throw,Textiles,12,45.0,15,19.0
+ORD-01112,2025-07-13,Germany,Bath Towel,Textiles,5,9.0,10,3.3
+ORD-01113,2025-07-14,Belgium,Oak Dining Table,Furniture,3,349.0,20,182.0
+ORD-01114,2025-07-14,Netherlands,Oak Dining Table,Furniture,1,349.0,0,182.0
+ORD-01115,2025-07-14,Spain,Pendant Light,Lighting,10,49.0,10,21.0
+ORD-01116,2025-07-15,France,Two-Seat Sofa,Furniture,2,499.0,15,265.0
+ORD-01117,2025-07-16,Netherlands,Floor Rug 160x230,Textiles,4,129.0,10,61.0
+ORD-01118,2025-07-16,Italy,Wall Spotlight,Lighting,1,24.0,10,10.2
+ORD-01119,2025-07-16,Spain,Chef Knife,Kitchen,4,34.0,0,13.0
+ORD-01120,2025-07-17,Germany,Cookware Set,Kitchen,5,119.0,5,58.0
+ORD-01121,2025-07-17,Germany,Glass Storage Jars (3),Kitchen,7,14.0,25,5.1
+ORD-01122,2025-07-17,Belgium,Two-Seat Sofa,Furniture,2,499.0,0,265.0
+ORD-01123,2025-07-18,Belgium,Two-Seat Sofa,Furniture,1,499.0,10,265.0
+ORD-01124,2025-07-19,Netherlands,Bath Towel,Textiles,3,9.0,0,3.3
+ORD-01125,2025-07-19,Germany,Bedside Table,Furniture,4,59.0,15,27.0
+ORD-01126,2025-07-19,Netherlands,Ceramic Dinner Plate,Kitchen,9,4.5,20,1.6
+ORD-01127,2025-07-19,Belgium,Floor Rug 160x230,Textiles,5,129.0,0,61.0
+ORD-01128,2025-07-19,Italy,Pendant Light,Lighting,2,49.0,15,21.0
+ORD-01129,2025-07-20,France,Wall Shelf,Storage,8,25.0,15,10.4
+ORD-01130,2025-07-20,Netherlands,Cutting Board,Kitchen,3,12.0,15,4.4
+ORD-01131,2025-07-21,Italy,Bath Towel,Textiles,9,9.0,15,3.3
+ORD-01132,2025-07-21,Germany,Two-Seat Sofa,Furniture,2,499.0,15,265.0
+ORD-01133,2025-07-22,Germany,Office Chair,Furniture,1,149.0,20,79.0
+ORD-01134,2025-07-22,Italy,Glass Storage Jars (3),Kitchen,4,14.0,25,5.1
+ORD-01135,2025-07-22,Germany,Blackout Curtains,Textiles,4,49.0,15,20.5
+ORD-01136,2025-07-22,Italy,Wall Spotlight,Lighting,6,24.0,15,10.2
+ORD-01137,2025-07-22,Germany,Oak Dining Table,Furniture,1,349.0,15,182.0
+ORD-01138,2025-07-23,Germany,Bedside Table,Furniture,4,59.0,5,27.0
+ORD-01139,2025-07-23,Italy,Wall Shelf,Storage,8,25.0,15,10.4
+ORD-01140,2025-07-23,Germany,Glass Storage Jars (3),Kitchen,4,14.0,5,5.1
+ORD-01141,2025-07-25,Germany,Oak Dining Table,Furniture,1,349.0,15,182.0
+ORD-01142,2025-07-25,Germany,Office Chair,Furniture,6,149.0,25,79.0
+ORD-01143,2025-07-25,Spain,Bath Towel,Textiles,8,9.0,15,3.3
+ORD-01144,2025-07-26,Italy,Chef Knife,Kitchen,2,34.0,0,13.0
+ORD-01145,2025-07-27,Spain,Wall Spotlight,Lighting,9,24.0,0,10.2
+ORD-01146,2025-07-27,Germany,Floor Lamp,Lighting,2,79.0,25,34.0
+ORD-01147,2025-07-28,Germany,Bedside Table,Furniture,3,59.0,0,27.0
+ORD-01148,2025-07-28,France,Wall Shelf,Storage,4,25.0,0,10.4
+ORD-01149,2025-07-29,Belgium,Ceramic Dinner Plate,Kitchen,1,4.5,0,1.6
+ORD-01150,2025-07-29,France,Wall Spotlight,Lighting,1,24.0,20,10.2
+ORD-01151,2025-07-29,Netherlands,Two-Seat Sofa,Furniture,3,499.0,0,265.0
+ORD-01152,2025-07-30,Italy,Office Chair,Furniture,3,149.0,15,79.0
+ORD-01153,2025-08-01,Belgium,Wool Throw,Textiles,9,45.0,0,19.0
+ORD-01154,2025-08-02,France,Floor Rug 160x230,Textiles,2,129.0,0,61.0
+ORD-01155,2025-08-02,Germany,Desk Lamp,Lighting,1,29.0,25,12.5
+ORD-01156,2025-08-02,Germany,Floor Lamp,Lighting,6,79.0,25,34.0
+ORD-01157,2025-08-02,Spain,Wall Spotlight,Lighting,7,24.0,20,10.2
+ORD-01158,2025-08-03,Italy,Shoe Cabinet,Storage,3,69.0,10,32.0
+ORD-01159,2025-08-03,Netherlands,Chef Knife,Kitchen,6,34.0,0,13.0
+ORD-01160,2025-08-03,France,Bookcase,Storage,6,89.0,15,43.0
+ORD-01161,2025-08-03,Germany,Shoe Cabinet,Storage,1,69.0,0,32.0
+ORD-01162,2025-08-04,Italy,Ceramic Dinner Plate,Kitchen,4,4.5,0,1.6
+ORD-01163,2025-08-05,Spain,Wool Throw,Textiles,12,45.0,25,19.0
+ORD-01164,2025-08-05,Italy,Bookcase,Storage,2,89.0,20,43.0
+ORD-01165,2025-08-06,Italy,Two-Seat Sofa,Furniture,1,499.0,15,265.0
+ORD-01166,2025-08-07,Spain,Fabric Armchair,Furniture,3,229.0,10,118.0
+ORD-01167,2025-08-07,Germany,Pendant Light,Lighting,5,49.0,15,21.0
+ORD-01168,2025-08-09,Netherlands,LED Strip 2m,Lighting,6,19.0,0,7.8
+ORD-01169,2025-08-10,Italy,Bookcase,Storage,1,89.0,0,43.0
+ORD-01170,2025-08-10,Italy,Cotton Duvet Cover,Textiles,8,39.0,20,16.5
+ORD-01171,2025-08-10,Germany,Bookcase,Storage,2,89.0,0,43.0
+ORD-01172,2025-08-10,France,Ceramic Dinner Plate,Kitchen,6,4.5,25,1.6
+ORD-01173,2025-08-10,Germany,Chef Knife,Kitchen,5,34.0,5,13.0
+ORD-01174,2025-08-11,France,Ceramic Dinner Plate,Kitchen,3,4.5,10,1.6
+ORD-01175,2025-08-11,Belgium,Pendant Light,Lighting,2,49.0,20,21.0
+ORD-01176,2025-08-12,Germany,Wool Throw,Textiles,12,45.0,25,19.0
+ORD-01177,2025-08-12,France,Office Chair,Furniture,3,149.0,0,79.0
+ORD-01178,2025-08-12,France,Blackout Curtains,Textiles,7,49.0,0,20.5
+ORD-01179,2025-08-12,Germany,LED Strip 2m,Lighting,3,19.0,10,7.8
+ORD-01180,2025-08-12,France,Wardrobe,Storage,3,299.0,0,158.0
+ORD-01181,2025-08-13,Spain,Chef Knife,Kitchen,9,34.0,0,13.0
+ORD-01182,2025-08-14,Germany,Floor Rug 160x230,Textiles,1,129.0,0,61.0
+ORD-01183,2025-08-14,Italy,Cutting Board,Kitchen,11,12.0,15,4.4
+ORD-01184,2025-08-15,Belgium,Bookcase,Storage,5,89.0,0,43.0
+ORD-01185,2025-08-15,Spain,Wardrobe,Storage,3,299.0,0,158.0
+ORD-01186,2025-08-15,Spain,Office Chair,Furniture,1,149.0,5,79.0
+ORD-01187,2025-08-15,France,Bookcase,Storage,2,89.0,10,43.0
+ORD-01188,2025-08-16,Belgium,Blackout Curtains,Textiles,11,49.0,0,20.5
+ORD-01189,2025-08-16,Belgium,Desk Lamp,Lighting,8,29.0,10,12.5
+ORD-01190,2025-08-16,Spain,Ceramic Dinner Plate,Kitchen,9,4.5,0,1.6
+ORD-01191,2025-08-16,Italy,Storage Box Set,Storage,11,19.0,0,7.2
+ORD-01192,2025-08-17,Spain,Bath Towel,Textiles,12,9.0,10,3.3
+ORD-01193,2025-08-17,Italy,Chef Knife,Kitchen,12,34.0,25,13.0
+ORD-01194,2025-08-17,Spain,Fabric Armchair,Furniture,3,229.0,15,118.0
+ORD-01195,2025-08-18,Italy,Shoe Cabinet,Storage,1,69.0,10,32.0
+ORD-01196,2025-08-19,Italy,Glass Storage Jars (3),Kitchen,12,14.0,25,5.1
+ORD-01197,2025-08-19,Italy,LED Strip 2m,Lighting,3,19.0,15,7.8
+ORD-01198,2025-08-19,Belgium,Blackout Curtains,Textiles,10,49.0,0,20.5
+ORD-01199,2025-08-19,Spain,Bath Towel,Textiles,5,9.0,10,3.3
+ORD-01200,2025-08-20,Germany,Oak Dining Table,Furniture,2,349.0,0,182.0
+ORD-01201,2025-08-21,Germany,Cutting Board,Kitchen,4,12.0,25,4.4
+ORD-01202,2025-08-21,Spain,LED Strip 2m,Lighting,5,19.0,10,7.8
+ORD-01203,2025-08-21,Belgium,Floor Lamp,Lighting,5,79.0,25,34.0
+ORD-01204,2025-08-21,Italy,Oak Dining Table,Furniture,3,349.0,10,182.0
+ORD-01205,2025-08-22,Belgium,Wool Throw,Textiles,6,45.0,0,19.0
+ORD-01206,2025-08-22,Germany,Bath Towel,Textiles,11,9.0,0,3.3
+ORD-01207,2025-08-22,Germany,Cotton Duvet Cover,Textiles,2,39.0,5,16.5
+ORD-01208,2025-08-24,France,Bath Towel,Textiles,7,9.0,0,3.3
+ORD-01209,2025-08-25,France,Floor Lamp,Lighting,2,79.0,15,34.0
+ORD-01210,2025-08-25,Italy,Chef Knife,Kitchen,9,34.0,0,13.0
+ORD-01211,2025-08-25,Germany,Bookcase,Storage,3,89.0,15,43.0
+ORD-01212,2025-08-28,France,Office Chair,Furniture,3,149.0,25,79.0
+ORD-01213,2025-08-28,France,Fabric Armchair,Furniture,1,229.0,0,118.0
+ORD-01214,2025-08-28,Germany,Pendant Light,Lighting,4,49.0,5,21.0
+ORD-01215,2025-08-28,Netherlands,Floor Lamp,Lighting,5,79.0,15,34.0
+ORD-01216,2025-08-29,Italy,Office Chair,Furniture,3,149.0,15,79.0
+ORD-01217,2025-08-29,Germany,Bath Towel,Textiles,4,9.0,10,3.3
+ORD-01218,2025-08-30,Germany,Wool Throw,Textiles,10,45.0,0,19.0
+ORD-01219,2025-08-30,Germany,Glass Storage Jars (3),Kitchen,11,14.0,0,5.1
+ORD-01220,2025-08-31,France,Glass Storage Jars (3),Kitchen,9,14.0,5,5.1
+ORD-01221,2025-08-31,Germany,Oak Dining Table,Furniture,3,349.0,0,182.0
+ORD-01222,2025-09-04,Spain,Storage Box Set,Storage,10,19.0,0,7.2
+ORD-01223,2025-09-04,Germany,Pendant Light,Lighting,7,49.0,10,21.0
+ORD-01224,2025-09-04,Netherlands,Wall Shelf,Storage,9,25.0,0,10.4
+ORD-01225,2025-09-04,Germany,Chef Knife,Kitchen,8,34.0,10,13.0
+ORD-01225,2025-09-04,Germany,Chef Knife,Kitchen,8,34.0,10,13.0
+ORD-01226,2025-09-05,Germany,Cotton Duvet Cover,Textiles,3,39.0,0,16.5
+ORD-01227,2025-09-06,Italy,LED Strip 2m,Lighting,10,19.0,10,7.8
+ORD-01228,2025-09-06,Belgium,Wall Shelf,Storage,11,25.0,15,10.4
+ORD-01229,2025-09-08,Spain,Blackout Curtains,Textiles,3,49.0,0,20.5
+ORD-01230,2025-09-08,France,Wall Shelf,Storage,6,25.0,10,10.4
+ORD-01231,2025-09-09,Netherlands,Shoe Cabinet,Storage,3,69.0,0,32.0
+ORD-01232,2025-09-10,Germany,Wall Spotlight,Lighting,2,24.0,0,10.2
+ORD-01233,2025-09-11,Italy,Wall Shelf,Storage,2,25.0,0,10.4
+ORD-01234,2025-09-11,Germany,Oak Dining Table,Furniture,1,349.0,20,182.0
+ORD-01235,2025-09-11,Italy,Glass Storage Jars (3),Kitchen,2,14.0,0,5.1
+ORD-01236,2025-09-11,Italy,Wardrobe,Storage,2,299.0,20,158.0
+ORD-01237,2025-09-11,Italy,Fabric Armchair,Furniture,3,229.0,0,118.0
+ORD-01238,2025-09-13,France,Bookcase,Storage,5,89.0,10,43.0
+ORD-01239,2025-09-13,Germany,Wardrobe,Storage,2,299.0,10,158.0
+ORD-01240,2025-09-14,Belgium,Oak Dining Table,Furniture,2,349.0,10,182.0
+ORD-01241,2025-09-14,Netherlands,Cutting Board,Kitchen,10,12.0,5,4.4
+ORD-01242,2025-09-14,Germany,Two-Seat Sofa,Furniture,1,499.0,20,265.0
+ORD-01243,2025-09-14,Spain,Desk Lamp,Lighting,3,29.0,0,12.5
+ORD-01244,2025-09-14,Netherlands,Office Chair,Furniture,5,149.0,25,79.0
+ORD-01245,2025-09-14,France,Glass Storage Jars (3),Kitchen,2,14.0,20,5.1
+ORD-01246,2025-09-15,Italy,Desk Lamp,Lighting,9,29.0,10,12.5
+ORD-01247,2025-09-15,Netherlands,Oak Dining Table,Furniture,1,349.0,0,182.0
+ORD-01248,2025-09-15,Belgium,Fabric Armchair,Furniture,3,229.0,0,118.0
+ORD-01249,2025-09-16,Germany,Wardrobe,Storage,2,299.0,5,158.0
+ORD-01250,2025-09-17,Italy,Bookcase,Storage,3,89.0,0,43.0
+ORD-01251,2025-09-17,Germany,Blackout Curtains,Textiles,6,49.0,0,20.5
+ORD-01252,2025-09-18,Germany,Office Chair,Furniture,6,149.0,20,79.0
+ORD-01253,2025-09-18,Netherlands,Storage Box Set,Storage,6,19.0,10,7.2
+ORD-01254,2025-09-18,Belgium,Oak Dining Table,Furniture,1,349.0,25,182.0
+ORD-01255,2025-09-19,Spain,Floor Lamp,Lighting,5,79.0,0,34.0
+ORD-01256,2025-09-19,Germany,Glass Storage Jars (3),Kitchen,2,14.0,5,5.1
+ORD-01257,2025-09-19,Spain,Bath Towel,Textiles,10,9.0,10,3.3
+ORD-01258,2025-09-20,Germany,Pendant Light,Lighting,1,49.0,0,21.0
+ORD-01259,2025-09-20,Germany,Wardrobe,Storage,1,299.0,25,158.0
+ORD-01260,2025-09-20,Germany,Bedside Table,Furniture,4,59.0,20,27.0
+ORD-01261,2025-09-21,Belgium,Blackout Curtains,Textiles,6,49.0,20,20.5
+ORD-01262,2025-09-21,Spain,Blackout Curtains,Textiles,3,49.0,10,20.5
+ORD-01263,2025-09-22,Italy,LED Strip 2m,Lighting,4,19.0,10,7.8
+ORD-01264,2025-09-23,Germany,Floor Lamp,Lighting,6,79.0,25,34.0
+ORD-01265,2025-09-24,Netherlands,Chef Knife,Kitchen,3,34.0,10,13.0
+ORD-01266,2025-09-24,Netherlands,Wardrobe,Storage,1,299.0,10,158.0
+ORD-01267,2025-09-24,Italy,Bookcase,Storage,3,89.0,0,43.0
+ORD-01268,2025-09-26,Italy,Two-Seat Sofa,Furniture,1,499.0,25,265.0
+ORD-01269,2025-09-26,Belgium,Cutting Board,Kitchen,3,12.0,0,4.4
+ORD-01270,2025-09-26,France,Two-Seat Sofa,Furniture,2,499.0,0,265.0
+ORD-01271,2025-09-27,Spain,Floor Lamp,Lighting,6,79.0,0,34.0
+ORD-01272,2025-09-27,Italy,Ceramic Dinner Plate,Kitchen,12,4.5,20,1.6
+ORD-01273,2025-09-27,Spain,Wardrobe,Storage,2,299.0,25,158.0
+ORD-01274,2025-09-27,Germany,Storage Box Set,Storage,11,19.0,0,7.2
+ORD-01275,2025-09-28,Italy,Two-Seat Sofa,Furniture,1,499.0,5,265.0
+ORD-01276,2025-09-29,Germany,Fabric Armchair,Furniture,3,229.0,25,118.0
+ORD-01277,2025-09-29,Spain,Floor Lamp,Lighting,6,79.0,0,34.0
+ORD-01278,2025-09-30,Netherlands,Bath Towel,Textiles,2,9.0,15,3.3
+ORD-01279,2025-10-01,Belgium,Fabric Armchair,Furniture,3,229.0,15,118.0
+ORD-01280,2025-10-02,Germany,Wall Spotlight,Lighting,2,24.0,10,10.2
+ORD-01281,2025-10-02,Spain,Wool Throw,Textiles,1,45.0,25,19.0
+ORD-01282,2025-10-02,Spain,Floor Lamp,Lighting,5,79.0,0,34.0
+ORD-01283,2025-10-03,Germany,Pendant Light,Lighting,10,49.0,0,21.0
+ORD-01284,2025-10-03,Italy,Cotton Duvet Cover,Textiles,10,39.0,0,16.5
+ORD-01285,2025-10-03,Netherlands,Bath Towel,Textiles,2,9.0,25,3.3
+ORD-01286,2025-10-03,Germany,Storage Box Set,Storage,5,19.0,0,7.2
+ORD-01287,2025-10-04,Germany,Wall Spotlight,Lighting,12,24.0,0,10.2
+ORD-01288,2025-10-04,Germany,Ceramic Dinner Plate,Kitchen,11,4.5,0,1.6
+ORD-01288,2025-10-04,Germany,Ceramic Dinner Plate,Kitchen,11,4.5,0,1.6
+ORD-01289,2025-10-04,France,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-01290,2025-10-04,Netherlands,Bookcase,Storage,5,89.0,0,43.0
+ORD-01291,2025-10-05,Germany,Two-Seat Sofa,Furniture,2,499.0,20,265.0
+ORD-01292,2025-10-05,France,Wall Shelf,Storage,1,25.0,0,10.4
+ORD-01292,2025-10-05,France,Wall Shelf,Storage,1,25.0,0,10.4
+ORD-01293,2025-10-06,France,Glass Storage Jars (3),Kitchen,1,14.0,20,5.1
+ORD-01294,2025-10-06,France,Pendant Light,Lighting,12,49.0,0,21.0
+ORD-01295,2025-10-08,Spain,Wall Spotlight,Lighting,1,24.0,5,10.2
+ORD-01296,2025-10-08,Germany,Storage Box Set,Storage,1,19.0,15,7.2
+ORD-01297,2025-10-08,Italy,Fabric Armchair,Furniture,2,229.0,0,118.0
+ORD-01298,2025-10-09,Netherlands,Shoe Cabinet,Storage,3,69.0,20,32.0
+ORD-01299,2025-10-09,Belgium,Bedside Table,Furniture,1,59.0,25,27.0
+ORD-01300,2025-10-09,France,Bedside Table,Furniture,5,59.0,0,27.0
+ORD-01301,2025-10-09,Belgium,Bedside Table,Furniture,6,59.0,25,27.0
+ORD-01302,2025-10-10,Italy,Wall Shelf,Storage,1,25.0,5,10.4
+ORD-01303,2025-10-10,France,Bookcase,Storage,5,89.0,0,43.0
+ORD-01304,2025-10-10,France,Bath Towel,Textiles,1,9.0,10,3.3
+ORD-01305,2025-10-10,Spain,Bookcase,Storage,2,89.0,10,43.0
+ORD-01306,2025-10-10,Italy,Two-Seat Sofa,Furniture,1,499.0,0,265.0
+ORD-01307,2025-10-11,Germany,Glass Storage Jars (3),Kitchen,8,14.0,20,5.1
+ORD-01308,2025-10-11,Germany,Office Chair,Furniture,1,149.0,0,79.0
+ORD-01309,2025-10-12,Germany,Blackout Curtains,Textiles,3,49.0,20,20.5
+ORD-01310,2025-10-12,Belgium,Pendant Light,Lighting,4,49.0,10,21.0
+ORD-01310,2025-10-12,Belgium,Pendant Light,Lighting,4,49.0,10,21.0
+ORD-01311,2025-10-13,Germany,Office Chair,Furniture,2,149.0,10,79.0
+ORD-01312,2025-10-14,Spain,Fabric Armchair,Furniture,3,229.0,15,118.0
+ORD-01313,2025-10-14,Italy,Glass Storage Jars (3),Kitchen,2,14.0,20,5.1
+ORD-01314,2025-10-14,Netherlands,Cotton Duvet Cover,Textiles,2,39.0,0,16.5
+ORD-01315,2025-10-14,Italy,Floor Rug 160x230,Textiles,4,129.0,0,61.0
+ORD-01316,2025-10-14,Italy,Wall Spotlight,Lighting,8,24.0,10,10.2
+ORD-01317,2025-10-14,Italy,Cotton Duvet Cover,Textiles,12,39.0,10,16.5
+ORD-01318,2025-10-15,Belgium,Bedside Table,Furniture,6,59.0,10,27.0
+ORD-01319,2025-10-15,Germany,Bookcase,Storage,1,89.0,0,43.0
+ORD-01320,2025-10-16,France,Bedside Table,Furniture,2,59.0,0,27.0
+ORD-01321,2025-10-16,Italy,Shoe Cabinet,Storage,1,69.0,0,32.0
+ORD-01322,2025-10-18,France,Oak Dining Table,Furniture,1,349.0,0,182.0
+ORD-01323,2025-10-19,Netherlands,Bath Towel,Textiles,1,9.0,20,3.3
+ORD-01324,2025-10-19,Netherlands,Bookcase,Storage,1,89.0,0,43.0
+ORD-01325,2025-10-19,Germany,Blackout Curtains,Textiles,12,49.0,0,20.5
+ORD-01326,2025-10-20,France,Chef Knife,Kitchen,3,34.0,0,13.0
+ORD-01327,2025-10-20,France,Chef Knife,Kitchen,9,34.0,5,13.0
+ORD-01328,2025-10-21,Belgium,Fabric Armchair,Furniture,2,229.0,0,118.0
+ORD-01329,2025-10-21,Germany,Floor Rug 160x230,Textiles,1,129.0,5,61.0
+ORD-01330,2025-10-21,Italy,Wall Shelf,Storage,12,25.0,25,10.4
+ORD-01331,2025-10-22,Netherlands,Bookcase,Storage,5,89.0,0,43.0
+ORD-01332,2025-10-22,Germany,Chef Knife,Kitchen,8,34.0,25,13.0
+ORD-01333,2025-10-23,Spain,Wall Spotlight,Lighting,7,24.0,0,10.2
+ORD-01334,2025-10-23,France,Wall Shelf,Storage,2,25.0,0,10.4
+ORD-01335,2025-10-24,Italy,Cotton Duvet Cover,Textiles,4,39.0,10,16.5
+ORD-01336,2025-10-25,France,Pendant Light,Lighting,10,49.0,0,21.0
+ORD-01337,2025-10-25,France,Wardrobe,Storage,1,299.0,5,158.0
+ORD-01338,2025-10-25,Italy,Two-Seat Sofa,Furniture,1,499.0,15,265.0
+ORD-01339,2025-10-26,France,Cotton Duvet Cover,Textiles,8,39.0,15,16.5
+ORD-01340,2025-10-26,Germany,Floor Rug 160x230,Textiles,3,129.0,15,61.0
+ORD-01341,2025-10-26,France,Floor Rug 160x230,Textiles,3,129.0,5,61.0
+ORD-01342,2025-10-27,Belgium,Chef Knife,Kitchen,2,34.0,0,13.0
+ORD-01343,2025-10-27,Germany,Ceramic Dinner Plate,Kitchen,11,4.5,0,1.6
+ORD-01344,2025-10-27,Germany,Oak Dining Table,Furniture,2,349.0,101,182.0
+ORD-01345,2025-10-27,France,Desk Lamp,Lighting,5,29.0,15,12.5
+ORD-01346,2025-10-28,Germany,Wardrobe,Storage,3,299.0,15,158.0
+ORD-01347,2025-10-28,Germany,Cookware Set,Kitchen,1,119.0,25,58.0
+ORD-01348,2025-10-28,Belgium,Wall Spotlight,Lighting,7,24.0,20,10.2
+ORD-01349,2025-10-28,Germany,Pendant Light,Lighting,4,49.0,25,21.0
+ORD-01350,2025-10-28,France,LED Strip 2m,Lighting,12,19.0,20,7.8
+ORD-01351,2025-10-29,Italy,Ceramic Dinner Plate,Kitchen,8,4.5,0,1.6
+ORD-01352,2025-10-30,Spain,LED Strip 2m,Lighting,3,19.0,5,7.8
+ORD-01353,2025-10-30,Germany,Ceramic Dinner Plate,Kitchen,3,4.5,20,-1.6
+ORD-01354,2025-10-31,Spain,Two-Seat Sofa,Furniture,3,499.0,0,265.0
+ORD-01355,2025-10-31,Germany,Bookcase,Storage,3,89.0,10,43.0
+ORD-01356,31/02/2025,Spain,Pendant Light,Lighting,9,49.0,20,21.0
+ORD-01357,2025-11-01,Spain,Cutting Board,Kitchen,5,12.0,0,4.4
+ORD-01358,2025-11-02,Netherlands,Bedside Table,Furniture,5,59.0,0,27.0
+ORD-01359,2025-11-03,Spain,Bedside Table,Furniture,1,59.0,10,27.0
+ORD-01360,2025-11-04,Germany,Cutting Board,Kitchen,11,12.0,0,4.4
+ORD-01361,2025-11-04,Netherlands,Cotton Duvet Cover,Textiles,2,39.0,10,16.5
+ORD-01362,2025-11-04,Spain,Ceramic Dinner Plate,Kitchen,4,4.5,0,1.6
+ORD-01363,2025-11-04,Germany,Floor Lamp,Lighting,2,79.0,5,34.0
+ORD-01364,2025-11-04,Netherlands,Cookware Set,Kitchen,2,119.0,0,58.0
+ORD-01365,2025-11-05,Belgium,Wardrobe,Storage,1,299.0,20,158.0
+ORD-01366,2025-11-05,France,Pendant Light,Lighting,10,49.0,0,21.0
+ORD-01367,2025-11-05,Netherlands,Wall Shelf,Storage,5,25.0,0,10.4
+ORD-01368,2025-11-05,France,Office Chair,Furniture,2,149.0,5,79.0
+ORD-01369,2025-11-06,Spain,Glass Storage Jars (3),Kitchen,11,14.0,10,5.1
+ORD-01370,2025-11-06,Germany,Floor Rug 160x230,Textiles,4,129.0,0,61.0
+ORD-01371,2025-11-07,Germany,Desk Lamp,Lighting,12,29.0,0,12.5
+ORD-01372,2025-11-08,Belgium,Floor Lamp,Lighting,5,79.0,25,34.0
+ORD-01373,2025-11-08,Belgium,Oak Dining Table,Furniture,1,349.0,10,182.0
+ORD-01374,2025-11-08,Netherlands,Two-Seat Sofa,Furniture,2,499.0,10,265.0
+ORD-01375,2025-11-08,France,Floor Rug 160x230,Textiles,1,129.0,25,61.0
+ORD-01376,2025-11-09,Spain,Two-Seat Sofa,Furniture,1,499.0,20,265.0
+ORD-01377,2025-11-09,Belgium,Pendant Light,Lighting,9,49.0,10,21.0
+ORD-01378,2025-11-09,Spain,Bath Towel,Textiles,8,9.0,0,3.3
+ORD-01379,2025-11-09,Italy,Bath Towel,Textiles,6,9.0,0,3.3
+ORD-01380,2025-11-09,Germany,Wall Shelf,Storage,4,25.0,25,10.4
+ORD-01381,2025-11-09,France,Cutting Board,Kitchen,12,12.0,0,4.4
+ORD-01382,2025-11-10,France,Wool Throw,Textiles,11,45.0,20,19.0
+ORD-01383,2025-11-10,France,Wall Spotlight,Lighting,3,24.0,0,10.2
+ORD-01384,2025-11-11,France,Pendant Light,Lighting,7,49.0,0,21.0
+ORD-01385,2025-11-11,France,Cookware Set,Kitchen,5,119.0,10,58.0
+ORD-01386,2025-11-11,France,Cookware Set,Kitchen,6,119.0,15,58.0
+ORD-01387,2025-11-12,Germany,Ceramic Dinner Plate,Kitchen,12,4.5,0,1.6
+ORD-01388,2025-11-12,Italy,Bath Towel,Textiles,3,9.0,0,3.3
+ORD-01389,2025-11-12,France,Oak Dining Table,Furniture,3,349.0,25,182.0
+ORD-01390,2025-11-12,France,Shoe Cabinet,Storage,2,69.0,25,32.0
+ORD-01391,2025-11-14,France,Blackout Curtains,Textiles,8,49.0,15,20.5
+ORD-01392,2025-11-15,France,Storage Box Set,Storage,11,19.0,25,7.2
+ORD-01393,2025-11-16,Italy,Bedside Table,Furniture,6,59.0,10,27.0
+ORD-01394,2025-11-16,Germany,Wall Spotlight,Lighting,5,24.0,0,10.2
+ORD-01395,2025-11-17,Spain,Floor Lamp,Lighting,1,79.0,0,34.0
+ORD-01396,2025-11-18,France,Cutting Board,Kitchen,3,12.0,15,4.4
+ORD-01397,2025-11-18,Belgium,Wall Shelf,Storage,7,25.0,0,10.4
+ORD-01398,2025-11-18,Germany,Floor Lamp,Lighting,2,79.0,5,34.0
+ORD-01399,2025-11-19,Belgium,Floor Rug 160x230,Textiles,6,129.0,0,61.0
+ORD-01400,2025-11-19,Spain,,Storage,1,89.0,20,43.0
+ORD-01401,2025-11-19,France,Bookcase,Storage,3,89.0,10,43.0
+ORD-01402,2025-11-19,Belgium,Bedside Table,Furniture,1,59.0,15,27.0
+ORD-01403,2025-11-21,France,Floor Rug 160x230,Textiles,2,129.0,10,61.0
+ORD-01404,2025-11-21,France,Cotton Duvet Cover,Textiles,7,39.0,10,16.5
+ORD-01405,2025-11-22,Germany,Storage Box Set,Storage,3,19.0,10,7.2
+ORD-01406,2025-11-23,France,Desk Lamp,Lighting,6,29.0,15,12.5
+ORD-01407,2025-11-23,France,Floor Rug 160x230,Textiles,5,129.0,25,61.0
+ORD-01408,2025-11-23,France,Bedside Table,Furniture,4,59.0,10,27.0
+ORD-01409,2025-11-23,Netherlands,Wall Spotlight,Lighting,5,24.0,10,10.2
+ORD-01410,2025-11-24,Germany,Shoe Cabinet,Storage,3,69.0,10,32.0
+ORD-01411,2025-11-24,Spain,Blackout Curtains,Textiles,10,49.0,0,20.5
+ORD-01412,2025-11-24,Spain,LED Strip 2m,Lighting,3 pcs,19.0,0,7.8
+ORD-01413,2025-11-25,Belgium,Wool Throw,Textiles,7,45.0,20,19.0
+ORD-01414,2025-11-25,France,Pendant Light,Lighting,5,49.0,10,21.0
+ORD-01415,2025-11-26,Germany,Two-Seat Sofa,Furniture,2,499.0,25,265.0
+ORD-01416,2025-11-27,France,Floor Lamp,Lighting,5,79.0,0,34.0
+ORD-01417,2025-11-27,France,Oak Dining Table,Furniture,1,349.0,20,182.0
+ORD-01418,2025-11-28,France,Floor Rug 160x230,Textiles,3,129.0,5,61.0
+ORD-01419,2025-11-28,Germany,Wall Spotlight,Lighting,6,24.0,25,10.2
+ORD-01420,2025-11-28,Italy,Storage Box Set,Storage,8,19.0,15,7.2
+ORD-01421,2025-11-28,Belgium,Cutting Board,Kitchen,9,12.0,0,4.4
+ORD-01422,2025-11-29,Belgium,Two-Seat Sofa,Furniture,3,499.0,0,265.0
+ORD-01423,2025-11-29,Germany,Chef Knife,Kitchen,11,34.0,10,13.0
+ORD-01424,2025-11-29,Belgium,Floor Lamp,Lighting,4,79.0,0,34.0
+ORD-01425,2025-11-30,Italy,Floor Lamp,Lighting,4,79.0,20,34.0
+ORD-01426,2025-11-30,Germany,Bedside Table,Furniture,6,59.0,5,27.0
+ORD-01427,2025-11-30,Italy,Cotton Duvet Cover,Textiles,7,39.0,5,16.5
+ORD-01428,2025-11-30,Germany,Shoe Cabinet,Storage,5,69.0,0,32.0
+ORD-01429,2025-12-01,Germany,Wool Throw,Textiles,6,45.0,20,19.0
+ORD-01430,2025-12-01,Netherlands,Wool Throw,Textiles,6,45.0,0,19.0
+ORD-01431,2025-12-01,Netherlands,Bookcase,Storage,4,89.0,20,43.0
+ORD-01432,2025-12-02,Netherlands,Shoe Cabinet,Storage,6,69.0,0,32.0
+ORD-01433,2025-12-03,Germany,LED Strip 2m,Lighting,6,19.0,20,7.8
+ORD-01434,2025-12-03,Italy,Blackout Curtains,Textiles,7,49.0,5,20.5
+ORD-01435,2025-12-04,France,Oak Dining Table,Furniture,2,349.0,15,182.0
+ORD-01436,2025-12-04,Germany,Floor Lamp,Lighting,1,79.0,0,34.0
+ORD-01437,2025-12-04,Spain,Cookware Set,Kitchen,3,119.0,20,58.0
+ORD-01438,2025-12-04,Belgium,Bookcase,Storage,5,89.0,0,43.0
+ORD-01439,2025-12-04,Germany,Bookcase,Storage,5,89.0,0,43.0
+ORD-01440,2025-12-05,France,Wall Shelf,Storage,8,25.0,15,10.4
+ORD-01441,2025-12-05,Belgium,Bookcase,Storage,6,89.0,0,43.0
+ORD-01442,2025-12-06,Spain,Shoe Cabinet,Storage,1,69.0,25,32.0
+ORD-01443,2025-12-07,France,LED Strip 2m,Lighting,2,19.0,0,7.8
+ORD-01444,2025-12-07,Germany,Floor Rug 160x230,Textiles,5,129.0,0,61.0
+ORD-01445,2025-12-07,France,Fabric Armchair,Furniture,1,229.0,0,118.0
+ORD-01446,2025-12-08,Germany,Wall Spotlight,Lighting,2,24.0,15,10.2
+ORD-01447,2025-12-08,Germany,Storage Box Set,Storage,10,19.0,25,7.2
+ORD-01448,2025-12-09,Germany,Bookcase,Storage,6,89.0,0,43.0
+ORD-01449,2025-12-10,Spain,Office Chair,Furniture,5,149.0,0,79.0
+ORD-01450,2025-12-10,Netherlands,Glass Storage Jars (3),Kitchen,10,14.0,20,5.1
+ORD-01451,2025-12-11,Germany,Bookcase,Storage,2,89.0,0,43.0
+ORD-01452,2025-12-11,France,LED Strip 2m,Lighting,7,19.0,0,7.8
+ORD-01453,2025-12-11,France,Wall Spotlight,Lighting,8,24.0,0,10.2
+ORD-01454,2025-12-12,Belgium,Storage Box Set,Storage,1,19.0,0,7.2
+ORD-01455,2025-12-12,Spain,Bath Towel,Textiles,4,9.0,5,3.3
+ORD-01456,2025-12-13,Spain,Bath Towel,Textiles,1,9.0,10,3.3
+ORD-01457,2025-12-13,Spain,Desk Lamp,Lighting,8,29.0,20,12.5
+ORD-01458,2025-12-13,France,Two-Seat Sofa,Furniture,1,499.0,10,265.0
+ORD-01459,2025-12-14,Germany,Storage Box Set,Storage,7,19.0,10,7.2
+ORD-01460,2025-12-14,Italy,Oak Dining Table,Furniture,3,349.0,0,182.0
+ORD-01461,2025-12-15,Germany,Desk Lamp,Lighting,2,29.0,0,12.5
+ORD-01462,2025-12-15,Germany,Desk Lamp,Lighting,6,29.0,5,12.5
+ORD-01463,2025-12-15,France,Oak Dining Table,Furniture,3,349.0,0,182.0
+ORD-01464,2025-12-16,Italy,Blackout Curtains,Textiles,1,49.0,10,20.5
+ORD-01465,2025-12-16,France,Wardrobe,Storage,3,299.0,0,158.0
+ORD-01466,2025-12-17,Belgium,Blackout Curtains,Textiles,2,49.0,0,20.5
+ORD-01467,2025-12-17,Germany,Office Chair,Furniture,1,149.0,0,79.0
+ORD-01468,2025-12-17,Netherlands,Bath Towel,Textiles,12,9.0,20,3.3
+ORD-01469,2025-12-18,Netherlands,Glass Storage Jars (3),Kitchen,12,14.0,20,5.1
+ORD-01470,2025-12-18,Belgium,Ceramic Dinner Plate,Kitchen,6,4.5,10,1.6
+ORD-01471,2025-12-19,Netherlands,Chef Knife,Kitchen,10,34.0,5,13.0
+ORD-01472,2025-12-20,France,Bath Towel,Textiles,2,9.0,10,3.3
+ORD-01473,2025-12-20,France,Office Chair,Furniture,3,149.0,0,79.0
+ORD-01474,2025-12-21,Spain,Two-Seat Sofa,Furniture,3,499.0,0,265.0
+ORD-01475,yesterday,Spain,Chef Knife,Kitchen,5,34.0,0,13.0
+ORD-01476,2025-12-21,France,Bookcase,Storage,6,89.0,10,43.0
+ORD-01477,2025-12-21,France,Bedside Table,Furniture,3,59.0,0,27.0
+ORD-01478,2025-12-22,Spain,Wardrobe,Storage,2,299.0,0,158.0
+ORD-01479,2025-12-22,Germany,Shoe Cabinet,Storage,5,69.0,0,32.0
+ORD-01480,2025-12-22,Netherlands,Two-Seat Sofa,Furniture,2,499.0,10,265.0
+ORD-01481,2025-12-23,Germany,Office Chair,Furniture,5,149.0,10,79.0
+ORD-01482,2025-12-24,Spain,Chef Knife,Kitchen,8,34.0,0,13.0
+ORD-01483,2025-12-25,Netherlands,Desk Lamp,Lighting,1,29.0,20,12.5
+ORD-01484,2025-12-25,Netherlands,Pendant Light,Lighting,6,49.0,0,21.0
+ORD-01485,2025-12-26,Italy,Bath Towel,Textiles,8,9.0,20,3.3
+ORD-01486,2025-12-27,Germany,Storage Box Set,Storage,4,19.0,20,7.2
+ORD-01487,2025-12-28,Italy,Chef Knife,Kitchen,6,34.0,-5,13.0
+ORD-01488,2025-12-28,Belgium,Floor Rug 160x230,Textiles,2,129.0,20,61.0
+ORD-01489,2025-12-28,Netherlands,Wool Throw,Textiles,9,45.0,25,19.0
+ORD-01490,2025-12-28,Belgium,Glass Storage Jars (3),Kitchen,4,14.0,0,5.1
+ORD-01491,2025-12-28,Italy,Wardrobe,Storage,3,299.0,0,158.0
+ORD-01492,2025-12-28,Italy,Office Chair,Furniture,3,149.0,0,79.0
+ORD-01493,2025-12-29,Italy,Office Chair,Furniture,6,149.0,20,79.0
+ORD-01494,2025-12-29,France,Storage Box Set,Storage,5,19.0,0,7.2
+ORD-01495,2025-12-29,Spain,Oak Dining Table,Furniture,3,349.0,0,182.0
+ORD-01496,2025-12-30,Italy,Pendant Light,Lighting,6,49.0,10,21.0
+ORD-01497,2025-12-30,France,Cookware Set,Kitchen,1,119.0,0,58.0
+ORD-01497,2025-12-30,France,Cookware Set,Kitchen,1,119.0,0,58.0
+ORD-01498,2025-12-30,Germany,Cotton Duvet Cover,Textiles,7,39.0,5,16.5
+ORD-01499,2025-12-31,Belgium,Bookcase,Storage,6,89.0,15,43.0
+ORD-01500,2025-12-31,Netherlands,Floor Lamp,Lighting,3,79.0,0,34.0
