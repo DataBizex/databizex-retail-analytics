@@ -191,6 +191,18 @@ with `sample_data/` and `powerbi/` bundled. The result is
 `dist\DataBizex\DataBizex.exe`. Copy the whole `dist\DataBizex` folder to
 share the app.
 
+Optional single-file build:
+
+```bat
+build_windows.bat --onefile
+```
+
+This also writes `dist\DataBizex.exe` (about 97 MB, one file, sample data and
+Power BI docs embedded). It works the same, but every launch first unpacks
+itself to `%TEMP%`. On the development machine the window appeared after
+about 3.4 s, against about 1.4 s for the folder build. The folder build stays
+the default for that reason.
+
 To check a build without clicking through the app:
 
 ```bat
@@ -232,7 +244,8 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 - The whole file is loaded into memory; very large files (millions of rows) will be slow.
 - Only exact duplicates are removed; near-duplicates (e.g. same order_id, different values) are not detected.
 - No free-form SQL editor; only the predefined queries run.
-- The packaged app is about 225 MB as a folder; no installer and no `--onefile` build yet.
+- The packaged app is about 225 MB as a folder (or a 97 MB single exe with slower start). No installer yet.
+- Executables are not code-signed, so Windows SmartScreen may warn on first launch from a download.
 - The UI uses Qt's light colour scheme even when Windows is in dark mode.
 
 ## Future improvements
