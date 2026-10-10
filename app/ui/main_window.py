@@ -251,7 +251,7 @@ class MainWindow(QMainWindow):
         profile_box = QGroupBox("Column profile")
         QVBoxLayout(profile_box).addWidget(table := DataTable())
         self.profile_table = table
-        stats_box = QGroupBox("Numeric statistics (columns read as numbers)")
+        stats_box = QGroupBox("Numeric statistics (columns with at least 80% numbers)")
         QVBoxLayout(stats_box).addWidget(table := DataTable())
         self.stats_table = table
         lower.addWidget(profile_box)
@@ -851,7 +851,9 @@ class MainWindow(QMainWindow):
         )
         self.preview_table.show_frame(self.original_df.head(PREVIEW_ROWS))
         self.profile_table.show_frame(profile_columns(self.original_df), float_decimals=2)
-        self.stats_table.show_frame(numeric_summary(self.original_df), float_decimals=2)
+        # Uses the import-converted values (e.g. "43,92" -> 43.92), before mapping or cleaning.
+        imported = self.conversion.df if self.conversion is not None else self.original_df
+        self.stats_table.show_frame(numeric_summary(imported), float_decimals=2)
         summary, row_flags = validate(df, self.rules)
         self.quality_table.show_frame(summary)
         self._show_score(quality_score(self.rules, summary, row_flags))
