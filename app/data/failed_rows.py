@@ -12,6 +12,7 @@ import pandas as pd
 
 from app.data.cleaner import STATUS_ISSUE
 from app.data.loader import SOURCE_ROW
+from app.data.rules import ALL_COLUMNS, Rule, expand_rules
 
 ALL_FAILED = "All failed rows"  # rows failing at least one error-severity rule
 FAILED_RULES = "failed_rules"
@@ -50,11 +51,22 @@ def failed_rule_choices(summary: pd.DataFrame, row_flags: pd.DataFrame) -> list[
     return choices
 
 
+def _missing_value_checks(rules: list[Rule], df: pd.DataFrame) -> tuple[set[str], set[str]]:
+    """(aggregate checks, column-specific checks) among the not_null rules, as validate names them."""
+    not_null = [r for r in expand_rules(rules, df) if r.type == "not_null"]
+    return ({r.name for r in not_null if r.column == ALL_COLUMNS},
+            {r.name for r in not_null if r.column != ALL_COLUMNS})
+
+
 def failed_rows(df: pd.DataFrame, summary: pd.DataFrame, row_flags: pd.DataFrame, selection: str,
-                limit: int | None = None) -> tuple[pd.DataFrame, int]:
+                limit: int | None = None, rules: list[Rule] | None = None) -> tuple[pd.DataFrame, int]:
     """(table, total matching rows). Table columns: source_row, the data columns, failed_rules.
 
     failed_rules lists every check the row failed (any severity), separated by "; ".
+    With rules (the set summary and row_flags came from), the aggregate missing-values
+    check ("Missing values (all columns)") is left out of a row's failed_rules when a
+    column-specific one ("Missing values: <column>") already lists that row; it stays
+    when it is the only missing-values check for the row. Which rows match is not affected.
     limit caps the rows returned (for display); the total is always the full count.
     """
     mask = failed_row_mask(summary, row_flags, selection)
@@ -64,10 +76,16 @@ def failed_rows(df: pd.DataFrame, summary: pd.DataFrame, row_flags: pd.DataFrame
         index = index[:limit]
     flagged = row_flags.loc[index, [c for c in failed_checks(summary) if c in row_flags.columns]]
     names = flagged.columns.to_numpy()
+    listed = flagged.to_numpy().copy()
+    if rules is not None:
+        aggregate, specific = _missing_value_checks(rules, df)
+        is_aggregate = flagged.columns.isin(list(aggregate))
+        has_specific = listed[:, flagged.columns.isin(list(specific))].any(axis=1)
+        listed[has_specific[:, None] & is_aggregate[None, :]] = False
     table = df.loc[index].copy()
     # A re-imported failed-rows export already has these columns; keep them and add ours beside.
     row_col = SOURCE_ROW if SOURCE_ROW not in table.columns else f"{SOURCE_ROW} (this file)"
     rules_col = FAILED_RULES if FAILED_RULES not in table.columns else f"{FAILED_RULES} (this file)"
     table.insert(0, row_col, index.to_numpy())
-    table[rules_col] = [FAILED_RULES_SEPARATOR.join(names[row]) for row in flagged.to_numpy()]
+    table[rules_col] = [FAILED_RULES_SEPARATOR.join(names[row]) for row in listed]
     return table.reset_index(drop=True), total

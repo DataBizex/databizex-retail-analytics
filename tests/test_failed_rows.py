@@ -5,7 +5,7 @@ from app.data.cleaner import remove_exact_duplicates
 from app.data.failed_rows import ALL_FAILED, FAILED_RULES, failed_rule_choices, failed_rows
 from app.data.formats import ImportOptions, apply_import_options
 from app.data.loader import SOURCE_ROW, load_file, with_source_rows
-from app.data.rules import default_rules, validate
+from app.data.rules import Rule, default_rules, validate
 from app.database.duckdb_manager import DuckDBManager
 from app.exports.exporter import POWERBI_COLUMNS, export_csv, generate_powerbi_package
 from app.paths import sample_data_path
@@ -153,3 +153,49 @@ def test_demo_net_revenue_unchanged_with_source_rows():
     net = manager.headline()["net_revenue"]
     manager.close()
     assert round(net, 2) == 405163.05
+
+
+# ---------------------------------------------------------------------- aggregate vs specific missing values
+AGGREGATE = "Missing values (all columns)"
+
+
+def _missing_frame() -> pd.DataFrame:
+    """Line 3: unit_price empty. Line 4: country empty. Line 2: complete."""
+    return pd.DataFrame({
+        "order_id": ["D1", "D2", "D3"], "order_date": ["2024-01-01"] * 3,
+        "country": ["Germany", "France", None], "product": ["Chair"] * 3, "category": ["Furniture"] * 3,
+        "quantity": [1, 2, 3], "unit_price": [10.0, None, 30.0], "discount_pct": [0, 0, 0],
+        "unit_cost": [5.0, 5.0, 5.0],
+    }, index=pd.Index([2, 3, 4], name=SOURCE_ROW))
+
+
+def test_specific_missing_values_rule_replaces_the_aggregate_in_failed_rules():
+    df = _missing_frame()
+    rules = default_rules()
+    summary, flags = validate(df, rules)
+    table, _ = failed_rows(df, summary, flags, AGGREGATE, rules=rules)
+    by_row = dict(zip(table[SOURCE_ROW], table[FAILED_RULES]))
+    assert by_row[3] == "Missing values: unit_price"
+    assert by_row[4] == "Missing values: country"
+    # the summary, the dropdown and the matching rows are unchanged
+    assert summary.set_index("check").loc[AGGREGATE, "count"] == 2
+    assert dict(failed_rule_choices(summary, flags))[AGGREGATE] == f"{AGGREGATE} (2)"
+    assert failed_rows(df, summary, flags, AGGREGATE)[0][FAILED_RULES].tolist() == [
+        f"{AGGREGATE}; Missing values: unit_price", f"{AGGREGATE}; Missing values: country"]  # without rules
+
+
+def test_aggregate_kept_when_no_specific_rule_covers_the_empty_cell(tmp_path):
+    df = _missing_frame()
+    rules = [Rule(AGGREGATE, "*", "not_null", severity="warning"),  # no each_column: no per-column rows
+             Rule("Missing values: unit_price", "unit_price", "not_null")]
+    summary, flags = validate(df, rules)
+    table, total = failed_rows(df, summary, flags, AGGREGATE, rules=rules)
+    assert total == 2
+    by_row = dict(zip(table[SOURCE_ROW], table[FAILED_RULES]))
+    assert by_row[3] == "Missing values: unit_price"
+    assert by_row[4] == AGGREGATE  # country has no specific rule: the aggregate is the only reason
+
+    export_csv(table, tmp_path / "missing.csv")
+    exported = pd.read_csv(tmp_path / "missing.csv", encoding="utf-8")
+    assert dict(zip(exported[SOURCE_ROW], exported[FAILED_RULES])) == {
+        3: "Missing values: unit_price", 4: AGGREGATE}

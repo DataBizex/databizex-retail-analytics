@@ -731,7 +731,7 @@ class MainWindow(QMainWindow):
             self.failed_count_label.setText("")
             return
         table, total = failed_rows(self.working_df, self.quality_summary, self.row_flags, key,
-                                   limit=FAILED_ROWS_SHOWN)
+                                   limit=FAILED_ROWS_SHOWN, rules=self.rules)
         self.failed_table.show_frame(table, float_decimals=2)
         if total > len(table):
             self.failed_count_label.setText(f"Showing {len(table):,} of {total:,} rows")
@@ -752,7 +752,8 @@ class MainWindow(QMainWindow):
         if self.source_path and path.resolve() == self.source_path.resolve():
             self._error("Export blocked", "Choose a different file: the source file is never overwritten.")
             return
-        table, total = failed_rows(self.working_df, self.quality_summary, self.row_flags, key)
+        table, total = failed_rows(self.working_df, self.quality_summary, self.row_flags, key,
+                                   rules=self.rules)
         if self._run_export("Exporting failed rows", export_csv, table, path):
             self._log_export(f"Failed rows exported: {path} ({total:,} rows, rule: {self.failed_combo.currentText()})")
             QMessageBox.information(self, "Export complete", f"Saved {total:,} rows:\n{path}")

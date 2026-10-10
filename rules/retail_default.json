@@ -211,6 +211,17 @@
       "severity": "warning",
       "description": "Outside Q1 - 3 x IQR .. Q3 + 3 x IQR; flagged only, never removed",
       "comment": "Retail prices are right-skewed, so the standard 1.5x IQR fence flags a large share of legitimate premium products; 3.0x marks only extreme values. IQR is preferred over z-score because z-score assumes an approximately normal distribution, which price data rarely is. z-score stays available (method: zscore) for custom rule files."
+    },
+    {
+      "name": "Text variants",
+      "column": "*",
+      "type": "text_variants",
+      "params": {
+        "each_column": "Text variants: {column}"
+      },
+      "severity": "warning",
+      "description": "Same value written with different case or spacing",
+      "comment": "Reported only and not part of the quality score. Values are grouped after trimming, collapsing internal whitespace and ignoring case; there is no fuzzy matching, so 'Deutschland' and 'Germany' stay separate. Normalize text... merges the groups."
     }
   ]
 }

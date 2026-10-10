@@ -26,6 +26,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   working rows with `source_row` first and a `failed_rules` column. Shows up to 500 rows
   and states the full count. It refreshes after duplicate removal, reset and loading a
   rule set.
+- In `failed_rules`, "Missing values (all columns)" is left out when a column-specific
+  "Missing values: <column>" check already lists the row, and kept when it is the row's
+  only missing-values check.
 - **Export failed rows to CSV...** on the Data Quality and Export & Reporting tabs. It
   writes every matching row (not only the 500 shown) and records the export in the
   export log.

@@ -237,7 +237,7 @@ def detect_outliers(df: pd.DataFrame, columns: list[str] | None = None, method: 
 
 
 # ---------------------------------------------------------------------- validation
-def _expand(rules: list[Rule], df: pd.DataFrame) -> list[Rule]:
+def expand_rules(rules: list[Rule], df: pd.DataFrame) -> list[Rule]:
     """Resolve '*' rules with each_column into one rule per column.
 
     not_null: one rule per data column. An explicit not_null rule for a column present
@@ -340,7 +340,7 @@ def validate(df: pd.DataFrame, rules: list[Rule]) -> tuple[pd.DataFrame, pd.Data
     """
     rows = []
     flags: dict[str, pd.Series] = {}
-    for rule in _expand(rules, df):
+    for rule in expand_rules(rules, df):
         count, rule_flags = _check(df, rule)
         if count is None:
             status, details = STATUS_UNAVAILABLE, UNAVAILABLE_DETAILS
