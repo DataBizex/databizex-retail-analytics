@@ -1006,7 +1006,8 @@ class MainWindow(QMainWindow):
         self._show_score(quality_score(self.rules, summary, row_flags))
         self._refresh_failed_rows()
         self.change_table.show_frame(change_summary(self.original_df, df, self.rules,
-                                                    self._normalized_source_columns()))
+                                                    self._normalized_source_columns(),
+                                                    self.column_mapping))
         self.reset_btn.setEnabled(self.duplicates_removed > 0 or bool(self.normalized_columns))
 
     def show_about(self) -> None:

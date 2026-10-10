@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 
 from app.analytics.kpis import headline_kpis, prepare_sales_frame, validity_summary
-from app.data.cleaner import remove_exact_duplicates
+from app.data.cleaner import change_summary, remove_exact_duplicates, run_quality_checks
 from app.data.column_mapping import apply_column_mapping
 from app.data.formats import (
     ImportOptions,
@@ -178,3 +178,35 @@ def test_same_decimal_and_thousands_separator_is_rejected():
     assert options_problem(options)
     with pytest.raises(ValueError):
         apply_import_options(pd.DataFrame({"x": ["1,5"]}), options)
+
+
+# ---------------------------------------------------------------------- before / after with a mapping
+def test_change_summary_lines_up_mapped_columns(german_csv):
+    original = load_file(german_csv).df
+    working = apply_column_mapping(apply_import_options(original, GERMAN_OPTIONS).df, GERMAN_MAPPING).df
+    table = change_summary(original, working, distinct={"country": "Land"}, mapping=GERMAN_MAPPING)
+    assert not table[["original", "working", "change"]].isna().any().any()  # no blank cell
+    metrics = table.set_index("metric")
+    assert metrics.loc["Missing values: order_id (Bestellnummer)", "working"] == 0
+    # as read, every date and price is text; after conversion only 31.04. and "abc" remain
+    dates = metrics.loc["Invalid dates: order_date (Bestelldatum)", ["original", "working", "change"]]
+    assert tuple(dates) == (6, 1, -5)
+    assert tuple(metrics.loc["Invalid numeric: unit_price (Einzelpreis)", ["original", "working"]]) == (6, 1)
+    assert tuple(metrics.loc["Distinct values: country (Land)", ["original", "working"]]) == (3, 3)
+    assert not any(m.endswith(": Bestellnummer") or ": Land" in m for m in table["metric"])
+    pd.testing.assert_frame_equal(original, load_file(german_csv).df)  # original untouched
+
+
+def test_change_summary_without_mapping_is_unchanged(quality_df):
+    cleaned, _ = remove_exact_duplicates(quality_df)
+    plain = change_summary(quality_df, cleaned)
+    checks = run_quality_checks(quality_df)
+    expected = ["Rows", "Columns"] + checks.loc[checks["status"] != "Unavailable", "check"].tolist()
+    assert plain["metric"].tolist() == expected  # labels are the plain check names
+    identity = {c: c for c in quality_df.columns}
+    pd.testing.assert_frame_equal(change_summary(quality_df, cleaned, mapping=identity), plain)
+    pd.testing.assert_frame_equal(change_summary(quality_df, cleaned, distinct={"country": "country"},
+                                                 mapping=identity),
+                                  change_summary(quality_df, cleaned, distinct={"country": "country"}))
+    assert "Distinct values: country" in change_summary(quality_df, cleaned, distinct={"country": "country"})[
+        "metric"].tolist()

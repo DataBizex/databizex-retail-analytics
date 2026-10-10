@@ -76,6 +76,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The `note` column of the numeric statistics table was cut off; columns are now sized
   to their contents.
+- With a column mapping, the Before / after table listed each check twice (file headers on
+  the original side, app field names on the working side), leaving the working and change
+  cells blank. Each row now has one label built from the app field name, with the file
+  header in parentheses when it differs (e.g. "Missing values: order_id (Bestellnummer)"),
+  and the original value is computed through the mapping.
 
 ## [0.2.0] - 2026-10-10
 
