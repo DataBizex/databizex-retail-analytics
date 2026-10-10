@@ -42,6 +42,7 @@ from PySide6.QtWidgets import (
 from app import __version__
 from app.analytics.kpis import KpiInputError, format_margin, validity_summary
 from app.data.cleaner import change_summary, remove_exact_duplicates, run_quality_checks
+from app.data.column_mapping import ColumnMappingError, apply_column_mapping, guess_mapping, needs_mapping
 from app.data.loader import FILE_DIALOG_FILTER, DataLoadError, load_file
 from app.data.profiler import dataset_overview, numeric_summary, profile_columns
 from app.database.duckdb_manager import QUERIES, DuckDBManager
@@ -53,6 +54,7 @@ from app.exports.exporter import (
     generate_powerbi_package,
 )
 from app.paths import sample_data_path, user_data_dir
+from app.ui.column_mapping_dialog import ColumnMappingDialog
 from app.ui.data_table import DataTable
 
 logger = logging.getLogger(__name__)
@@ -68,7 +70,7 @@ KPI_TABLE_KEYS = ["by_country", "by_category", "by_month", "top_products"]
 
 
 def _money(value: float) -> str:
-    return f"€ {value:,.2f}"
+    return "n/a" if pd.isna(value) else f"€ {value:,.2f}"
 
 
 class KpiCard(QFrame):
@@ -114,6 +116,10 @@ class MainWindow(QMainWindow):
         self.source_path: Path | None = None
         self.original_df: pd.DataFrame | None = None
         self.working_df: pd.DataFrame | None = None
+        # Column mapping chosen for the current file (None = names used as they are).
+        self.column_mapping: dict[str, str | None] | None = None
+        self.unavailable_columns: list[str] = []
+        self.mapping_notes: list[str] = []
         self.duplicates_removed = 0
         self.kpi_results: dict[str, pd.DataFrame] = {}
         self.kpi_headline: dict[str, float] = {}
@@ -379,9 +385,10 @@ class MainWindow(QMainWindow):
     def data_state_text(self) -> str:
         if self.working_df is None:
             return "No data loaded"
+        mapped = " — columns mapped" if self.column_mapping else ""
         if self.duplicates_removed:
-            return f"Cleaned working data ({self.duplicates_removed:,} exact duplicates removed)"
-        return "Original imported data (no cleaning applied)"
+            return f"Cleaned working data ({self.duplicates_removed:,} exact duplicates removed){mapped}"
+        return f"Original imported data (no cleaning applied){mapped}"
 
     def _ask_save_path(self, caption: str, default_name: str, file_filter: str) -> Path | None:
         start = str(Path.home() / "Documents" / default_name)
@@ -423,7 +430,8 @@ class MainWindow(QMainWindow):
 
         self.source_path = path
         self.original_df = result.df
-        self.working_df = result.df.copy()
+        self.column_mapping = self._ask_column_mapping(result.df) if needs_mapping(result.df) else None
+        self._make_working_copy()
         self.duplicates_removed = 0
         self._clear_kpis()
         self._refresh_all()
@@ -433,6 +441,29 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(
             f"Loaded {path.name}: {len(result.df):,} rows × {result.df.shape[1]} columns", 10000)
         return True
+
+    def _ask_column_mapping(self, df: pd.DataFrame) -> dict[str, str | None] | None:
+        columns = list(df.columns)
+        dialog = ColumnMappingDialog(columns, guess_mapping(columns), self)
+        if not dialog.exec():
+            logger.info("Column mapping skipped; using the file's column names as they are")
+            return None
+        return dialog.mapping()
+
+    def _make_working_copy(self) -> None:
+        """Set working_df from original_df, applying the column mapping if one was chosen."""
+        self.unavailable_columns, self.mapping_notes = [], []
+        if self.column_mapping:
+            try:
+                mapped = apply_column_mapping(self.original_df, self.column_mapping)
+            except ColumnMappingError as exc:
+                self.column_mapping = None
+                self._error("Column mapping not applied", str(exc))
+            else:
+                self.working_df = mapped.df
+                self.unavailable_columns, self.mapping_notes = mapped.unavailable, mapped.notes
+                return
+        self.working_df = self.original_df.copy()
 
     # ------------------------------------------------------------------ quality
     def remove_duplicates(self) -> None:
@@ -457,7 +488,7 @@ class MainWindow(QMainWindow):
     def reset_working_copy(self) -> None:
         if not self._require_data():
             return
-        self.working_df = self.original_df.copy()
+        self._make_working_copy()
         self.duplicates_removed = 0
         self._clear_kpis()
         self._refresh_all()
@@ -469,7 +500,7 @@ class MainWindow(QMainWindow):
             return False
         try:
             with self._busy("Running SQL queries in DuckDB..."):
-                prepared = self.db.load_sales(self.working_df)
+                prepared = self.db.load_sales(self.working_df, self.unavailable_columns)
                 results = self.db.run_all()
                 headline = self.db.headline()
         except KpiInputError as exc:
@@ -491,11 +522,15 @@ class MainWindow(QMainWindow):
         self.cards["orders"].set_value(f"{headline['orders']:,}")
         self.kpi_basis_label.setText(
             f"<b>KPIs computed on:</b> {self.kpi_basis} — {summary.total_rows:,} rows loaded into table <i>sales</i>.")
-        self.exclusion_label.setText(
-            f"{summary.excluded_rows:,} rows excluded from all KPIs (missing, non-numeric or negative quantity/price/cost, "
-            f"or discount outside 0–100). {summary.kpi_rows_without_valid_date:,} included rows have an invalid or "
-            "missing order_date and are left out of the monthly trend only."
+        checked = "quantity/price" if "unit_cost" in self.unavailable_columns else "quantity/price/cost"
+        note = (
+            f"{summary.excluded_rows:,} rows excluded from all KPIs (missing, non-numeric or negative {checked}, "
+            f"or discount outside 0–100)."
         )
+        if "order_date" not in self.unavailable_columns:
+            note += (f" {summary.kpi_rows_without_valid_date:,} included rows have an invalid or "
+                     "missing order_date and are left out of the monthly trend only.")
+        self.exclusion_label.setText(" ".join([note, *self.mapping_notes]))
         self._show_selected_query()
         self._draw_charts()
         self._refresh_state_label()
@@ -555,6 +590,8 @@ class MainWindow(QMainWindow):
             ax.set_xticklabels([by_month["month"].iloc[i] for i in ticks], rotation=45, ha="right")
             ax.grid(alpha=0.3)
             self.month_chart.draw_idle()
+        elif "order_date" in self.unavailable_columns:
+            self.month_chart.clear("Monthly trend: n/a (order_date not available)")
         else:
             self.month_chart.clear("No rows with valid dates")
 
@@ -637,7 +674,8 @@ class MainWindow(QMainWindow):
             return
         source = self.source_path.name if self.source_path else ""
         written = self._run_export("Generating Power BI package", generate_powerbi_package,
-                                   self.working_df, folder, source, self.data_state_text())
+                                   self.working_df, folder, source, self.data_state_text(),
+                                   self.unavailable_columns)
         if written:
             self._log_export(f"Power BI package written to {folder}: " + ", ".join(p.name for p in written))
             QMessageBox.information(self, "Power BI package ready",

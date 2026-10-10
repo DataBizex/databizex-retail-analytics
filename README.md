@@ -35,6 +35,10 @@ wrong and nobody can tell why. Teams need to:
 - Row/column counts, inferred dtypes, missing and unique counts, numeric statistics.
 - Empty, header-only, unreadable and headerless files handled without crashing.
 - **Load sample data** button for the bundled demo file.
+- **Map Your Columns** dialog when `quantity`, `unit_price`, `discount_pct`,
+  `unit_cost` or `order_date` is not found by name: pick the file's column for each
+  expected field (best guess preselected) or "(not available)". Only the working copy
+  is renamed; extra columns are kept.
 
 **Data Quality**
 - Missing values (per column and total), exact duplicate rows,
@@ -151,6 +155,12 @@ The monthly trend additionally requires a valid `order_date` (`YYYY-MM-DD`).
 Rows with a missing country, product or category are kept and grouped as
 `(missing)`.
 
+**Column mapping.** Fields set to "(not available)" in the mapping dialog:
+`discount_pct` is filled with 0 (stated in the KPI note); without `unit_cost`,
+rows are valid without a cost and gross profit / margin are shown as n/a;
+without `order_date` the monthly trend is n/a; without `quantity` or
+`unit_price` KPIs stay unavailable.
+
 **Assumptions:** single currency (EUR in the sample), no returns or refunds,
 no taxes, no currency conversion. Gross profit uses unit cost only.
 
@@ -239,8 +249,8 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 - Legacy `.xls` files are not supported (save as `.xlsx` or `.csv`).
 - Only the first sheet of an Excel file is read.
 - Dates must be ISO `YYYY-MM-DD` (or real Excel dates); other formats are flagged invalid.
-- Column names must match the expected schema for checks and KPIs
-  (missing columns are marked Unavailable; there is no column mapping yet).
+- Column names must match the expected schema for checks and KPIs, or be mapped
+  in the column mapping dialog. The mapping is not saved between sessions.
 - The whole file is loaded into memory; very large files (millions of rows) will be slow.
 - Only exact duplicates are removed; near-duplicates (e.g. same order_id, different values) are not detected.
 - No free-form SQL editor; only the predefined queries run.
@@ -250,7 +260,7 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 
 ## Future improvements
 
-- Column mapping dialog for exports with different column names.
+- Remember column mappings per file layout.
 - Configurable date formats and duplicate rules (e.g. by `order_id`).
 - Read-only custom SQL editor with a SELECT-only guard.
 - Background thread for loading very large files.

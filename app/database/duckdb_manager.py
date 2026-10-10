@@ -7,6 +7,7 @@ EXTRACT, GROUP BY, ORDER BY, LIMIT) so they also run on MySQL and PostgreSQL.
 from __future__ import annotations
 
 import logging
+from collections.abc import Collection
 from dataclasses import dataclass
 
 import duckdb
@@ -106,9 +107,12 @@ class DuckDBManager:
         self._con = duckdb.connect(database=":memory:")
         self.row_count = 0
 
-    def load_sales(self, df: pd.DataFrame) -> pd.DataFrame:
-        """(Re)create table `sales` from the dataset. Returns the prepared frame."""
-        prepared = prepare_sales_frame(df)
+    def load_sales(self, df: pd.DataFrame, unavailable: Collection[str] = ()) -> pd.DataFrame:
+        """(Re)create table `sales` from the dataset. Returns the prepared frame.
+
+        unavailable: columns marked "not available" in the column mapping.
+        """
+        prepared = prepare_sales_frame(df, unavailable)
         table = prepared[TABLE_COLUMNS].copy()
         for col in ["order_id", "country", "product", "category"]:
             table[col] = table[col].astype(object).where(table[col].notna(), None)
@@ -147,10 +151,15 @@ class DuckDBManager:
 
     def headline(self) -> dict[str, float]:
         row = self.run("headline").iloc[0]
+        orders = int(row["orders"])
         net = float(row["net_revenue"]) if pd.notna(row["net_revenue"]) else 0.0
-        profit = float(row["gross_profit"]) if pd.notna(row["gross_profit"]) else 0.0
+        # A NULL profit with valid rows means unit_cost is unavailable: report n/a, not 0.
+        if pd.notna(row["gross_profit"]):
+            profit = float(row["gross_profit"])
+        else:
+            profit = float("nan") if orders else 0.0
         return {
-            "orders": int(row["orders"]),
+            "orders": orders,
             "units_sold": float(row["units_sold"]) if pd.notna(row["units_sold"]) else 0.0,
             "net_revenue": net,
             "gross_profit": profit,

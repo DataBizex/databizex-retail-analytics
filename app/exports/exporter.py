@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import shutil
+from collections.abc import Collection
 from datetime import datetime
 from pathlib import Path
 
@@ -74,9 +75,9 @@ def export_tables_csv(tables: dict[str, pd.DataFrame], folder: str | Path) -> li
     return [export_csv(df, folder / f"{name}.csv") for name, df in tables.items()]
 
 
-def powerbi_frame(working: pd.DataFrame) -> pd.DataFrame:
+def powerbi_frame(working: pd.DataFrame, unavailable: Collection[str] = ()) -> pd.DataFrame:
     """Rows valid for KPIs, typed, with net_revenue / gross_profit precomputed."""
-    prepared = prepare_sales_frame(working)
+    prepared = prepare_sales_frame(working, unavailable)
     valid = prepared[prepared["kpi_valid"] == 1].copy()
     valid["year"] = valid["order_date"].dt.year.astype("Int64")
     valid["month"] = valid["order_date"].dt.month.astype("Int64")
@@ -87,14 +88,18 @@ def powerbi_frame(working: pd.DataFrame) -> pd.DataFrame:
 
 
 def generate_powerbi_package(working: pd.DataFrame, folder: str | Path,
-                             source_name: str = "", data_state: str = "") -> list[Path]:
-    """Write sales_clean.csv, the guide, the data dictionary and package_info.txt."""
+                             source_name: str = "", data_state: str = "",
+                             unavailable: Collection[str] = ()) -> list[Path]:
+    """Write sales_clean.csv, the guide, the data dictionary and package_info.txt.
+
+    unavailable: columns marked "not available" in the column mapping.
+    """
     folder = Path(folder)
     if not folder.is_dir():
         raise ExportError(f"Folder does not exist: {folder}")
 
-    frame = powerbi_frame(working)
-    summary = validity_summary(prepare_sales_frame(working))
+    frame = powerbi_frame(working, unavailable)
+    summary = validity_summary(prepare_sales_frame(working, unavailable))
     written = [export_csv(frame, folder / POWERBI_CSV_NAME)]
 
     for doc in POWERBI_DOCS:

@@ -10,10 +10,16 @@ A row counts towards KPIs only if quantity, unit_price, discount_pct and
 unit_cost are all valid numbers, none is negative, and discount_pct is within
 0-100. Monthly figures additionally need a valid order_date. Rows that fail are
 excluded and reported, never repaired or filled with zero.
+
+When the user's column mapping marks unit_cost as unavailable, rows are valid
+without it and gross profit / margin are NaN ("n/a"). order_date and the
+dimension columns may also be unavailable; quantity, unit_price and
+discount_pct never are.
 """
 
 from __future__ import annotations
 
+from collections.abc import Collection
 from dataclasses import dataclass
 
 import numpy as np
@@ -23,6 +29,8 @@ from app.data.cleaner import DATE_COLUMN, NUMERIC_COLUMNS, parse_dates, parse_nu
 
 REQUIRED_COLUMNS = ["order_date", "country", "product", "category", *NUMERIC_COLUMNS]
 DIMENSION_COLUMNS = ["order_id", "country", "product", "category"]
+# Required columns that a column mapping may mark as unavailable.
+OPTIONAL_COLUMNS = ["order_date", "country", "product", "category", "unit_cost"]
 UNKNOWN_LABEL = "(missing)"
 
 
@@ -38,31 +46,39 @@ class ValiditySummary:
     kpi_rows_without_valid_date: int
 
 
-def missing_required_columns(df: pd.DataFrame) -> list[str]:
-    return [c for c in REQUIRED_COLUMNS if c not in df.columns]
+def missing_required_columns(df: pd.DataFrame, unavailable: Collection[str] = ()) -> list[str]:
+    optional = set(unavailable) & set(OPTIONAL_COLUMNS)
+    return [c for c in REQUIRED_COLUMNS if c not in df.columns and c not in optional]
 
 
-def prepare_sales_frame(df: pd.DataFrame) -> pd.DataFrame:
+def prepare_sales_frame(df: pd.DataFrame, unavailable: Collection[str] = ()) -> pd.DataFrame:
     """Typed copy of the data with validity flags (kpi_valid, date_valid as 0/1).
 
-    The input DataFrame is not modified.
+    unavailable: columns the user's column mapping marked as not available
+    (only OPTIONAL_COLUMNS are honoured). They are treated as empty even if a
+    column with that name exists. The input DataFrame is not modified.
     """
-    missing = missing_required_columns(df)
+    missing = missing_required_columns(df, unavailable)
     if missing:
         raise KpiInputError("KPIs need these columns, which were not found: " + ", ".join(missing))
+    skipped = set(unavailable) & set(OPTIONAL_COLUMNS)
 
     out = pd.DataFrame(index=df.index)
     for col in DIMENSION_COLUMNS:
-        if col in df.columns:
+        if col in df.columns and col not in skipped:
             out[col] = df[col].astype("string").str.strip()
         else:
             out[col] = pd.Series(pd.NA, index=df.index, dtype="string")
-    out[DATE_COLUMN] = parse_dates(df[DATE_COLUMN]).dt.normalize()
+    if DATE_COLUMN in skipped:
+        out[DATE_COLUMN] = pd.Series(pd.NaT, index=df.index, dtype="datetime64[ns]")
+    else:
+        out[DATE_COLUMN] = parse_dates(df[DATE_COLUMN]).dt.normalize()
     for col in NUMERIC_COLUMNS:
-        out[col] = parse_numeric(df[col])
+        out[col] = float("nan") if col in skipped else parse_numeric(df[col])
 
-    numbers_ok = out[NUMERIC_COLUMNS].notna().all(axis=1)
-    non_negative = (out[["quantity", "unit_price", "unit_cost"]] >= 0).all(axis=1)
+    checked = [c for c in NUMERIC_COLUMNS if c not in skipped]
+    numbers_ok = out[checked].notna().all(axis=1)
+    non_negative = (out[[c for c in ["quantity", "unit_price", "unit_cost"] if c in checked]] >= 0).all(axis=1)
     discount_ok = out["discount_pct"].between(0, 100)
     out["kpi_valid"] = (numbers_ok & non_negative & discount_ok).astype(int)
     out["date_valid"] = out[DATE_COLUMN].notna().astype(int)
@@ -92,7 +108,8 @@ def headline_kpis(prepared: pd.DataFrame) -> dict[str, float]:
     """Pandas reference implementation (used to cross-check the SQL results)."""
     valid = prepared[prepared["kpi_valid"] == 1]
     net = float(valid["net_revenue"].sum())
-    profit = float(valid["gross_profit"].sum())
+    # NaN (n/a) when valid rows exist but none has a cost, i.e. unit_cost unavailable.
+    profit = float(valid["gross_profit"].sum(min_count=1)) if len(valid) else 0.0
     return {
         "net_revenue": net,
         "units_sold": float(valid["quantity"].sum()),
