@@ -7,9 +7,12 @@ from app.analytics.kpis import KpiInputError, format_margin, headline_kpis, prep
 from app.data.cleaner import remove_exact_duplicates
 from app.data.column_mapping import (
     DISCOUNT_FILLED_NOTE,
+    EXPECTED_COLUMNS,
+    NOT_AVAILABLE_LABEL,
     ColumnMappingError,
     apply_column_mapping,
     guess_mapping,
+    header_key,
     needs_mapping,
 )
 from app.data.loader import load_file
@@ -99,3 +102,65 @@ def test_demo_file_needs_no_mapping_and_revenue_unchanged():
     net = manager.headline()["net_revenue"]
     manager.close()
     assert round(net, 2) == 405163.05
+
+
+# ---------------------------------------------------------------------- German, French, Dutch headers
+GERMAN = ["Bestellnummer", "Bestelldatum", "Land", "Artikel", "Warengruppe", "Menge", "Einzelpreis",
+          "Rabatt", "Einkaufspreis"]
+FRENCH = ["Numéro de commande", "Date de commande", "Pays", "Produit", "Catégorie", "Quantité",
+          "Prix unitaire", "Remise", "Coût unitaire"]
+DUTCH = ["Bestelnummer", "Besteldatum", "Land", "Product", "Categorie", "Aantal", "Prijs", "Korting",
+         "Kostprijs"]
+
+
+@pytest.mark.parametrize("headers", [GERMAN, FRENCH, DUTCH], ids=["german", "french", "dutch"])
+def test_foreign_headers_map_to_all_nine_fields(headers):
+    # each list is in EXPECTED_COLUMNS order, so header i belongs to field i
+    assert guess_mapping(headers) == dict(zip(EXPECTED_COLUMNS, headers))
+
+
+def test_accents_and_case_are_ignored():
+    assert header_key("Stückzahl") == header_key("stuckzahl") == "stuckzahl"
+    assert header_key("Coût UNITAIRE") == "cout unitaire"
+    assert guess_mapping(["Stückzahl"])["quantity"] == "Stückzahl"
+
+
+def test_purchase_price_is_never_taken_as_unit_price():
+    # without an Einzelpreis column, "preis" must not claim Einkaufspreis
+    guess = guess_mapping(["Einkaufspreis", "Verkaufspreis", "Menge"])
+    assert (guess["unit_cost"], guess["unit_price"]) == ("Einkaufspreis", "Verkaufspreis")
+    assert guess_mapping(["Einkaufspreis", "Menge"])["unit_price"] is None
+
+
+def test_english_guesses_unchanged():
+    assert guess_mapping(["Order ID", "Order Date", "Country", "Product Name", "Category", "Qty",
+                          "Unit Price", "Discount %", "Unit Cost"]) == {
+        "order_id": "Order ID", "order_date": "Order Date", "country": "Country",
+        "product": "Product Name", "category": "Category", "quantity": "Qty",
+        "unit_price": "Unit Price", "discount_pct": "Discount %", "unit_cost": "Unit Cost"}
+    assert guess_mapping(["SKU", "Sale Price", "Cost Price"])["unit_price"] == "Sale Price"
+
+
+def test_unrelated_column_is_not_matched():
+    guess = guess_mapping(GERMAN + ["Kommentar"])
+    assert "Kommentar" not in guess.values()
+    assert guess_mapping(["Kommentar"]) == dict.fromkeys(EXPECTED_COLUMNS)
+
+
+def test_dialog_opens_with_partial_guesses():
+    import os
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    from PySide6.QtWidgets import QApplication
+
+    from app.ui.column_mapping_dialog import ColumnMappingDialog
+
+    app = QApplication.instance() or QApplication([])
+    headers = ["Bestellnummer", "Menge", "Einzelpreis", "Kommentar", "Lieferant"]
+    dialog = ColumnMappingDialog(headers, guess_mapping(headers))
+    shown = {field: combo.currentText() for field, combo in dialog.combos.items()}
+    assert shown["order_id"] == "Bestellnummer" and shown["quantity"] == "Menge"
+    assert shown["unit_price"] == "Einzelpreis"
+    assert shown["country"] == NOT_AVAILABLE_LABEL  # left for the user to pick
+    assert dialog.combos["country"].findText("Kommentar") >= 0  # every file column is offered
+    dialog.deleteLater()
+    app.processEvents()

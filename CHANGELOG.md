@@ -7,60 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-11
+
 ### Added
 
-- Detection of regional number formats per column: decimal comma (`43,92`), dot or other
-  thousands separators (`1.234,56`) and US-style thousands commas (`1,234.56`).
-- Detection of date formats per column: `YYYY-MM-DD`, `DD.MM.YYYY`, `DD/MM/YYYY` and
-  `MM/DD/YYYY`. Ambiguous day/month order is read as DD/MM and flagged.
+- Detection of regional number and date formats per column: decimal comma (`43,92`),
+  thousands separators (`1.234,56`, and US-style `1,234.56`), and `YYYY-MM-DD`,
+  `DD.MM.YYYY`, `DD/MM/YYYY` and `MM/DD/YYYY` dates. Ambiguous day/month order is read
+  as DD/MM and flagged.
 - **Import Options** dialog after loading a file whose delimiter, encoding, number or date
   format is not the default. It states what was detected, and every setting can be
-  overridden. Changing the delimiter or encoding reads the file again.
-- Numbers and dates are converted in the working copy only (`app/data/formats.py`). Values
-  that do not fit the chosen format keep their original text, so quality checks still
-  report them.
-- Import settings and converted columns are shown in the source line and written to the
-  Power BI `package_info.txt`.
+  overridden; changing the delimiter or encoding reads the file again. Numbers and dates
+  are converted in the working copy only (`app/data/formats.py`), and values that do not
+  fit keep their text so the quality checks still report them. The settings and the
+  converted columns are shown in the source line and written to the Power BI
+  `package_info.txt`.
+- Source line numbers: every working row keeps its line in the source file (header =
+  line 1; for Excel, the sheet row) through import conversion, column mapping, duplicate
+  removal and normalization. The number never reaches KPI queries or the Power BI package.
 - **Failed rows** view on the Data Quality tab: a dropdown of every rule with failures
   (with counts) plus "All failed rows" (error rules only), and a table of the matching
-  working rows with `source_row` first and a `failed_rules` column. Shows up to 500 rows
-  and states the full count. It refreshes after duplicate removal, reset and loading a
-  rule set.
-- In `failed_rules`, "Missing values (all columns)" is left out when a column-specific
-  "Missing values: <column>" check already lists the row, and kept when it is the row's
-  only missing-values check.
+  working rows with `source_row` first and a `failed_rules` column listing every rule the
+  row failed. "Missing values (all columns)" is left out of `failed_rules` when a
+  column-specific "Missing values: <column>" check already lists the row. Shows up to 500
+  rows, states the full count, and refreshes after duplicate removal, normalization, reset
+  and loading a rule set.
 - **Export failed rows to CSV...** on the Data Quality and Export & Reporting tabs. It
   writes every matching row (not only the 500 shown) and records the export in the
   export log.
-- Each working row keeps its source file line number (header = line 1; for Excel, the
-  sheet row) through import conversion, column mapping and duplicate removal. The number
-  never reaches KPI queries or the Power BI package.
-
-- Text normalization (`app/data/normalize.py`). Values that differ only in case or
-  spacing are grouped per categorical-looking text column (at most 200 distinct values,
-  fewer than half the rows, not an identifier or `order_id`). The canonical form is
-  always trimmed with single internal spaces, in the letter case of the most frequent
-  variant (ties: alphabetical after trimming). A value with stray spaces is normalized
-  even when it is the only spelling ("Whitespace only" in the dialog); a lone value that
-  differs only in case is not. There is no fuzzy matching.
+- Text normalization with preview (`app/data/normalize.py`). Values that differ only in
+  case or spacing are grouped per categorical-looking text column (at most 200 distinct
+  values, fewer than half the rows, not an identifier or `order_id`, not mostly numbers).
+  The canonical form is trimmed with single internal spaces, in the letter case of the
+  most frequent variant (ties: alphabetical after trimming). Values with stray spaces are
+  cleaned even when they have no other spelling ("Whitespace only"). There is no fuzzy
+  matching: "Deutschland" and "Germany" are never merged.
+- **Normalize text...** button and dialog on the Data Quality tab, showing each column's
+  groups (variant, rows, result). Nothing is applied until Apply is clicked; KPIs on screen
+  are recalculated. **Reset working copy to original** undoes it, the before/after table
+  shows the distinct-value count per normalized column, and the data-state text (source
+  line, `package_info.txt`) lists the normalized columns.
 - Quality check "Text variants: <column>" (rule type `text_variants`, severity warning,
-  not part of the quality score), included in the default rule set. It appears in the
-  failed-rows dropdown and lists the rows that would change.
-- **Normalize text...** button and dialog on the Data Quality tab. Nothing is applied until
-  Apply is clicked; the KPI screen is recalculated if it was showing results. Reset undoes
-  it, the before/after table shows the distinct-value count per normalized column, and the
-  data-state text (source line, `package_info.txt`) lists the normalized columns.
+  not part of the quality score) in the default rule set. It appears in the failed-rows
+  dropdown and lists the rows normalization would change.
+- Header guessing in the column mapping dialog for German, French and Dutch headers
+  (e.g. Bestellnummer, Menge, Einzelpreis; Numéro de commande, Quantité, Prix unitaire;
+  Bestelnummer, Aantal, Prijs), next to the English keywords. Accents and case are
+  ignored ("Stückzahl" matches "stuckzahl"), each file column is still used once, and
+  unit_cost is now guessed before unit_price so "Einkaufspreis" is never taken as the
+  selling price. Unmatched fields stay open in the dialog for the user to pick.
+- Synthetic German webshop export `sample_data/messy webshop export de.csv` (made-up
+  data, no real business or personal information).
 
 ### Changed
 
 - Numeric statistics on the Import & Preview tab include columns where at least 80% of the
-  non-empty values are numbers (parsed like the quality checks), computed on the values that
-  parse and on import-converted values. New `non_numeric` and `note` columns show how many
-  values were ignored; the data itself is not changed.
-- `load_file()` accepts optional `delimiter` and `encoding` overrides and records which
-  ones were used, plus the source line number of every row (`LoadResult.source_rows`).
-- `remove_exact_duplicates()` keeps the row index instead of renumbering, so rows keep
-  their source line numbers.
+  non-empty values are numbers (same parser as the quality checks). They are computed on
+  the values that parse, using import-converted values; new `non_numeric` and `note`
+  columns show how many values were ignored. The data itself is not changed.
+- `remove_exact_duplicates()` now keeps the original index instead of renumbering the rows,
+  so rows keep their source line numbers.
+- `load_file()` accepts optional `delimiter` and `encoding` overrides and records the ones
+  used, plus the source line number of every row (`LoadResult.source_rows`).
+- `change_summary()` can compare distinct-value counts for chosen columns.
+- The default rule set has 25 rules (the `text_variants` rule was added).
 
 ### Fixed
 

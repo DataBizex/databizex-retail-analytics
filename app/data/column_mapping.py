@@ -7,6 +7,7 @@ original DataFrame is never modified; apply_column_mapping returns a new one.
 from __future__ import annotations
 
 import logging
+import unicodedata
 from dataclasses import dataclass, field
 
 import pandas as pd
@@ -21,19 +22,22 @@ EXPECTED_COLUMNS = [
 MAPPING_TRIGGER_COLUMNS = ["quantity", "unit_price", "discount_pct", "unit_cost", "order_date"]
 NOT_AVAILABLE_LABEL = "(not available)"
 
-# Case-insensitive substrings tried in order for each expected column. Fields are
-# guessed in this dict's order and a source column is used at most once, so the
-# more specific fields (price, cost, ...) claim their columns before order_id / product.
+# Substrings tried in order for each expected column, matched against headers with
+# accents and case removed (see header_key). English keywords come first, then German,
+# French and Dutch. Fields are guessed in this dict's order and a source column is used
+# at most once, so the more specific fields claim their columns before order_id /
+# product. unit_cost comes before unit_price so "Einkaufspreis" is never taken by "preis".
 GUESS_KEYWORDS: dict[str, list[str]] = {
-    "unit_price": ["price"],
-    "unit_cost": ["cost"],
-    "discount_pct": ["discount"],
-    "quantity": ["qty", "quantity", "frequency"],
-    "order_date": ["date"],
-    "category": ["category"],
-    "country": ["country"],
-    "order_id": ["id"],
-    "product": ["brand", "product"],
+    "unit_cost": ["cost", "einkaufspreis", "einkauf", "kosten", "kostprijs", "cout"],
+    "unit_price": ["price", "einzelpreis", "verkaufspreis", "preis", "prix", "prijs"],
+    "discount_pct": ["discount", "rabatt", "remise", "korting"],
+    "quantity": ["qty", "quantity", "frequency", "menge", "anzahl", "stuckzahl", "quantite", "aantal"],
+    "order_date": ["date", "bestelldatum", "datum", "datum_bestelling"],
+    "category": ["category", "warengruppe", "kategorie", "categorie"],
+    "country": ["country", "land", "pays", "paese", "pais"],
+    "order_id": ["id", "bestellnummer", "bestell-nr", "bestelnummer", "auftrag", "commande", "numero",
+                 "bestelling"],
+    "product": ["brand", "product", "artikel", "produkt", "produit", "naam"],
 }
 
 DISCOUNT_FILLED_NOTE = "discount_pct was not available in the file and was set to 0 for every row."
@@ -57,13 +61,21 @@ def needs_mapping(df: pd.DataFrame) -> bool:
     return any(c not in df.columns for c in MAPPING_TRIGGER_COLUMNS)
 
 
+def header_key(name: str) -> str:
+    """Header for matching: accents removed and case folded ("Stückzahl" -> "stuckzahl")."""
+    decomposed = unicodedata.normalize("NFKD", str(name))
+    return "".join(ch for ch in decomposed if not unicodedata.combining(ch)).casefold()
+
+
 def guess_mapping(columns: list[str]) -> dict[str, str | None]:
     """Best guess {expected column: source column or None}.
 
     An exact (case-insensitive) name match wins; otherwise the first unused
-    source column containing one of the field's keywords.
+    source column whose header_key contains one of the field's keywords.
+    Fields that match nothing stay None, for the user to choose.
     """
     columns = [str(c) for c in columns]
+    keys = {c: header_key(c) for c in columns}
     by_lower = {c.lower(): c for c in columns}
     guess: dict[str, str | None] = {}
     used: set[str] = set()
@@ -77,7 +89,7 @@ def guess_mapping(columns: list[str]) -> dict[str, str | None]:
             continue
         guess[target] = None
         for keyword in keywords:
-            match = next((c for c in columns if c not in used and keyword in c.lower()), None)
+            match = next((c for c in columns if c not in used and keyword in keys[c]), None)
             if match is not None:
                 guess[target] = match
                 used.add(match)

@@ -48,40 +48,42 @@ wrong and nobody can tell why. Teams need to:
 - **Load sample data** button for the bundled demo file.
 - **Map Your Columns** dialog when `quantity`, `unit_price`, `discount_pct`,
   `unit_cost` or `order_date` is not found by name: pick the file's column for each
-  expected field (best guess preselected) or "(not available)". Only the working copy
-  is renamed; extra columns are kept.
+  expected field (best guess preselected from English, German, French and Dutch header
+  keywords, ignoring accents and case) or "(not available)". Only the working copy is renamed; extra columns are kept.
 
 **Data Quality**
 - Rule-based checks read from a JSON rule set. The shipped default
-  (`rules/retail_default.json`) checks missing values (per column and total), exact
+  (`rules/retail_default.json`, 25 rules) checks missing values (per column and total), exact
   duplicate rows, repeated `order_id` (catches the same ID with different values, e.g.
-  from a broken export or bad join), invalid `order_date`, non-numeric values, `discount_pct` outside
-  0–100, negative quantity / unit_price / unit_cost, unit_price below unit_cost, and
-  outliers (IQR with a 3.0x multiplier on quantity and unit_price).
+  from a broken export or bad join), invalid `order_date`, non-numeric values,
+  `discount_pct` outside 0–100, negative quantity / unit_price / unit_cost, unit_price
+  below unit_cost, outliers (IQR with a 3.0x multiplier on quantity and unit_price) and
+  text variants.
 - **Load rule set...** validates any other tabular data (HR, finance, ...) with its own rules.
   Rule types: not_null, dtype, range, allowed_values, regex, unique (on key columns),
-  cross_column, outlier, text_variants. See the docstring of `app/data/rules.py` for the file format.
+  cross_column, outlier, text_variants. See the docstring of `app/data/rules.py` for the
+  file format.
 - Summary table: check, count, status (OK / Issue / Unavailable), severity (error / warning).
 - Quality score: completeness, validity, uniqueness and consistency (% of rows that pass
   all rules of that kind) and their average as an overall score out of 100.
 - Outliers are flagged as warnings only; they are never removed or excluded from KPIs.
-- **Failed rows**: pick a rule (or "All failed rows", which covers error rules) to see the
-  rows that failed it, with `source_row` (the line in the source file, header = line 1) and
-  `failed_rules` (every rule the row failed). Up to 500 rows are shown; **Export failed rows
-  to CSV...** writes all of them.
   The default uses IQR with a 3.0x multiplier (`factor`) rather than the usual 1.5x:
   retail prices are right-skewed, so the 1.5x fence flags a large share of legitimate
   premium products, while 3.0x marks only extreme values. IQR is preferred over z-score
   because z-score assumes an approximately normal distribution, which price data rarely
   is. `method: zscore` (with `threshold`) remains available in custom rule files.
+- **Failed rows**: pick a rule (or "All failed rows", which covers error rules) to see the
+  rows that failed it, with `source_row` (the line in the source file, header = line 1) and
+  `failed_rules` (every rule the row failed). Up to 500 rows are shown; **Export failed rows
+  to CSV...** writes all of them.
 - **Remove exact duplicates** on the in-memory working copy only.
 - **Text variants** (warning, not scored): values in a categorical-looking text column that
   are the same apart from case or spacing (" germany", "GERMANY", "Germany "), and values
   with stray spaces even if they have no other spelling ("Spain " becomes "Spain"). **Normalize
   text...** shows the groups per column and, after you tick columns and click Apply, writes
   each group in the working copy in the letter case of its most frequent variant, trimmed
-  and with single spaces. No fuzzy matching: "Deutschland" and
-  "Germany" are never merged. **Reset working copy to original** undoes it; the source line
+  and with single spaces. No fuzzy matching: "Deutschland" and "Germany" are never
+  merged. **Reset working copy to original** undoes it; the source line
   and `package_info.txt` record which columns were normalized.
 - Before/after table: original import vs working data.
 - Rows with missing values are never deleted or filled with zero.
@@ -137,8 +139,9 @@ databizex-retail-analytics/
 ├── app/
 │   ├── main.py               entry point, logging, --smoke-test mode
 │   ├── paths.py              resource paths (source + PyInstaller bundle)
-│   ├── ui/                   main_window.py, data_table.py  (PySide6 only)
-│   ├── data/                 loader.py, profiler.py, cleaner.py, rules.py, column_mapping.py
+│   ├── ui/                   main_window.py, data_table.py, dialogs  (PySide6 only)
+│   ├── data/                 loader.py, formats.py, column_mapping.py, profiler.py,
+│   │                         cleaner.py, rules.py, normalize.py, failed_rows.py
 │   ├── analytics/            kpis.py  (KPI definitions, row validity)
 │   ├── database/             duckdb_manager.py  (table `sales`, SQL queries)
 │   └── exports/              exporter.py  (CSV, Excel, Power BI package)
@@ -153,9 +156,11 @@ databizex-retail-analytics/
 ```
 
 ```
-file (.csv/.xlsx) ──read-only──> original DataFrame ──copy──> working DataFrame
+file (.csv/.xlsx) ──read-only──> original DataFrame ──copy──> working DataFrame (indexed by source line)
                                        │                        │
-                                 profile + checks        remove exact duplicates
+                                 profile + checks        import conversion (numbers, dates)
+                                                         column mapping
+                                                         remove exact duplicates / normalize text
                                                                 │
                                          prepare: typed columns + kpi_valid / date_valid flags
                                                                 │
@@ -164,7 +169,7 @@ file (.csv/.xlsx) ──read-only──> original DataFrame ──copy──> wo
                                                 CSV / Excel / Power BI package (user-chosen paths)
 ```
 
-All data logic lives outside `app/ui`, so the tests run headless.
+All data logic lives outside `app/ui`, so almost all tests run without a window.
 
 ### Portable SQL
 
@@ -189,7 +194,8 @@ not negative, and `discount_pct` is between 0 and 100. Other rows are
 excluded and their number is shown next to the KPIs. They are never
 repaired or set to zero.
 
-The monthly trend additionally requires a valid `order_date` (`YYYY-MM-DD`).
+The monthly trend additionally requires a valid `order_date` (ISO `YYYY-MM-DD`, or one of
+the supported regional formats converted on import).
 Rows with a missing country, product or category are kept and grouped as
 `(missing)`.
 
@@ -220,13 +226,15 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The tests use small fixtures with hand-checked results. They cover
-loading valid, empty, header-only, headerless, unsupported and corrupt
-files, plus missing-value profiling and duplicate detection and removal
-(the source file stays unchanged). Every validation rule type, the quality
-score formula and the default rule set's counts on the demo file are tested. KPI values and DuckDB aggregations are
-checked on a 5-row dataset, and the CSV, Excel and Power BI exports are
-tested too.
+The suite has 129 tests, using small fixtures with hand-checked results. They
+cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
+regional number and date detection and conversion; English, German, French and Dutch
+header guessing; source line numbers; profiling,
+duplicate detection and removal (the source file stays unchanged); every validation
+rule type, the quality score formula and the default rule set's counts on the demo
+file; failed rows and their export; text normalization; KPI values and DuckDB
+aggregations; and the CSV, Excel and Power BI exports. Three tests use Qt's offscreen
+platform (two drive the main window, one the mapping dialog), so no screen is needed.
 
 ## Build the executable
 
@@ -236,7 +244,7 @@ build_windows.bat
 
 The script creates or reuses `.venv`, installs the requirements, runs the
 tests (and stops if any fail), then runs PyInstaller (`--onedir --windowed`)
-with `sample_data/` and `powerbi/` bundled. The result is
+with `sample_data/`, `powerbi/` and `rules/` bundled. The result is
 `dist\DataBizex\DataBizex.exe`. Copy the whole `dist\DataBizex` folder to
 share the app.
 
@@ -264,13 +272,26 @@ writes the results as JSON.
 
 ## Sample dataset
 
-`sample_data/` contains **synthetic** data only, generated with a fixed seed
+All files in `sample_data/` are **synthetic**: made-up data with no real businesses,
+customers or personal information.
+
+`retail_sales_clean.csv` and `retail_sales_demo.csv` are generated with a fixed seed
 by `scripts/generate_sample_data.py`: about 1,500 orders across six European
-countries, 25 generic products and 2024–2025 dates. No real businesses,
-customers or personal data are included. `retail_sales_demo.csv` adds a
-documented set of problems (25 duplicates, 18 missing values, 8 invalid
-dates, 6 non-numeric values, 5 out-of-range discounts, 6 negative values).
-See [sample_data/README.md](sample_data/README.md).
+countries, 25 generic products and 2024–2025 dates.
+`retail_sales_demo.csv` adds a documented set of problems (25 duplicates, 18
+missing values, 8 invalid dates, 6 non-numeric values, 5 out-of-range discounts,
+6 negative values). See [sample_data/README.md](sample_data/README.md).
+
+`messy webshop export de.csv` is a synthetic German webshop export (1,235 rows) in
+the format German tools write: semicolon delimiter, Windows-1252 encoding, decimal
+commas (`43,92`), `DD.MM.YYYY` dates and German headers (Bestellnummer, Bestelldatum,
+Land, Artikel, Warengruppe, Menge, Einzelpreis, Rabatt, Einkaufspreis). It
+demonstrates the Import Options dialog and the column mapping, which guesses all nine
+German headers: read as plain text, no row is valid for KPIs; after conversion and
+mapping, 1,183 of 1,235 rows are. It also contains problems the checks report: 35 exact
+duplicates, 57 empty cells, 14 invalid dates (e.g. `kein Datum`, `30.02.2025`),
+6 unreadable prices (e.g. `k.A.`, `1.299,00 EUR`), 10 discounts outside 0–100 and
+9 negative quantities.
 
 ## Connect to Power BI
 
@@ -285,8 +306,15 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 
 ## Known limitations
 
-- Legacy `.xls` files are not supported (save as `.xlsx` or `.csv`).
-- Only the first sheet of an Excel file is read.
+- One table at a time, held in memory: the whole file is loaded, so very large files
+  (millions of rows) are slow.
+- No joins: data from several files or tables cannot be combined.
+- No free-form SQL editor; only the predefined queries run.
+- Executables are not code-signed, so Windows SmartScreen may warn on first launch from a
+  download.
+- No CI: the tests run locally and in `build_windows.bat`, not automatically on each push.
+- Legacy `.xls` files are not supported (save as `.xlsx` or `.csv`), and only the first
+  sheet of an Excel file is read.
 - Dates must be `YYYY-MM-DD`, `DD.MM.YYYY`, `DD/MM/YYYY` or `MM/DD/YYYY` (or real Excel
   dates), without a time part. One date format and one pair of separators apply to the
   whole file.
@@ -294,23 +322,19 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
   decimal number before the import options apply.
 - The Import & Preview preview and column profile show the file as read; only the numeric
   statistics use the import-converted values.
-- Column names must match the expected schema for checks and KPIs, or be mapped
-  in the column mapping dialog. The mapping is not saved between sessions.
-- The whole file is loaded into memory; very large files (millions of rows) will be slow.
-- Only exact duplicates are removed. A `unique` rule on key columns (e.g. `order_id`) reports
-  near-duplicates, but they are not removed.
-- Rule sets are JSON only and are not remembered between sessions; row-level rule flags are
-  computed but not yet shown or exported in the app.
-- No free-form SQL editor; only the predefined queries run.
-- The packaged app is about 225 MB as a folder (or a 97 MB single exe with slower start). No installer yet.
-- Executables are not code-signed, so Windows SmartScreen may warn on first launch from a download.
+- Mappings, import options and rule sets are not remembered between sessions.
+- Only exact duplicates are removed. A `unique` rule on key columns (e.g. `order_id`)
+  reports near-duplicates, but they are not removed.
+- Text normalization only merges case and spacing differences; there is no fuzzy matching.
+- The packaged app is about 225 MB as a folder (or a 97 MB single exe with slower start).
+  No installer yet.
 - The UI uses Qt's light colour scheme even when Windows is in dark mode.
 
 ## Future improvements
 
-- Remember column mappings per file layout.
-- Configurable date formats; removing duplicates by key columns (detection already works via `unique` rules).
-- Show and export the row-level rule flags (which rows failed which rule).
+- Remember column mappings and import options per file layout.
+- Removing duplicates by key columns (detection already works via `unique` rules).
+- Continuous integration running the test suite on each push.
 - Read-only custom SQL editor with a SELECT-only guard.
 - Background thread for loading very large files.
 - Windows installer with Inno Setup once the build is stable.
