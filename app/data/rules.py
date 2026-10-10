@@ -23,6 +23,10 @@ Rule types and their params:
                                             rows where "column operator other" is false
     outlier         method: iqr (factor, default 1.5) | zscore (threshold, default 3)
                                             always severity "warning"; outliers are never removed
+    text_variants   column "*" = every categorical-looking text column; params.each_column
+                                            (e.g. "Text variants: {column}") names each row.
+                                            Rows whose value differs from another only in case
+                                            or spacing (app.data.normalize); always "warning"
 """
 
 from __future__ import annotations
@@ -37,16 +41,19 @@ from pathlib import Path
 import pandas as pd
 
 from app.data.cleaner import STATUS_ISSUE, STATUS_OK, STATUS_UNAVAILABLE, parse_dates, parse_numeric
+from app.data.normalize import categorical_columns, variant_mapping
 from app.paths import resource_path
 
 logger = logging.getLogger(__name__)
 
-RULE_TYPES = ("not_null", "dtype", "range", "allowed_values", "regex", "unique", "cross_column", "outlier")
+RULE_TYPES = ("not_null", "dtype", "range", "allowed_values", "regex", "unique", "cross_column", "outlier",
+              "text_variants")
+WARNING_ONLY_TYPES = ("outlier", "text_variants")  # reported, never errors, not scored
 SEVERITIES = ("error", "warning")
 ALL_COLUMNS = "*"
 OPERATORS = {"<": operator.lt, "<=": operator.le, ">": operator.gt, ">=": operator.ge,
              "==": operator.eq, "!=": operator.ne}
-# Quality-score dimension of each rule type; outliers are not scored.
+# Quality-score dimension of each rule type; outliers and text variants are not scored.
 DIMENSIONS = {
     "not_null": "completeness",
     "dtype": "validity", "range": "validity", "allowed_values": "validity", "regex": "validity",
@@ -125,16 +132,16 @@ def _parse_rule(item: object, position: int) -> Rule:
     column = item.get("column", ALL_COLUMNS if rule_type == "unique" else None)
     if not isinstance(column, str) or not column:
         raise RulesError(f"{label}: 'column' is required.")
-    if column == ALL_COLUMNS and rule_type not in ("not_null", "unique"):
-        raise RulesError(f"{label}: column '*' is only allowed for not_null and unique rules.")
+    if column == ALL_COLUMNS and rule_type not in ("not_null", "unique", "text_variants"):
+        raise RulesError(f"{label}: column '*' is only allowed for not_null, unique and text_variants rules.")
     params = item.get("params", {})
     if not isinstance(params, dict):
         raise RulesError(f"{label}: 'params' must be an object.")
-    severity = item.get("severity", "warning" if rule_type == "outlier" else "error")
+    severity = item.get("severity", "warning" if rule_type in WARNING_ONLY_TYPES else "error")
     if severity not in SEVERITIES:
         raise RulesError(f"{label}: 'severity' must be 'error' or 'warning'.")
-    if rule_type == "outlier" and severity != "warning":
-        raise RulesError(f"{label}: outlier rules are always severity 'warning'.")
+    if rule_type in WARNING_ONLY_TYPES and severity != "warning":
+        raise RulesError(f"{label}: {rule_type} rules are always severity 'warning'.")
     description = item.get("description", "")
     if not isinstance(description, str):
         raise RulesError(f"{label}: 'description' must be text.")
@@ -152,7 +159,7 @@ def _is_number(value: object) -> bool:
 
 
 def _params_problem(rule_type: str, params: dict) -> str | None:
-    if rule_type == "not_null":
+    if rule_type in ("not_null", "text_variants"):
         template = params.get("each_column")
         if template is not None and (not isinstance(template, str) or "{column}" not in template):
             return "params.each_column must be text containing {column}."
@@ -230,12 +237,14 @@ def detect_outliers(df: pd.DataFrame, columns: list[str] | None = None, method: 
 
 
 # ---------------------------------------------------------------------- validation
-def _expand(rules: list[Rule], columns: list[str]) -> list[Rule]:
-    """Resolve a not_null '*' rule with each_column into one rule per data column.
+def _expand(rules: list[Rule], df: pd.DataFrame) -> list[Rule]:
+    """Resolve '*' rules with each_column into one rule per column.
 
-    An explicit not_null rule for a column present in the data takes that column's
-    place (its own name and severity) instead of being listed twice.
+    not_null: one rule per data column. An explicit not_null rule for a column present
+    in the data takes that column's place (its own name and severity) instead of being
+    listed twice. text_variants: one rule per categorical-looking text column.
     """
+    columns = list(df.columns)
     per_column = any(r.type == "not_null" and r.column == ALL_COLUMNS and r.params.get("each_column")
                      for r in rules)
     explicit = {r.column: r for r in rules if r.type == "not_null" and r.column != ALL_COLUMNS}
@@ -251,6 +260,11 @@ def _expand(rules: list[Rule], columns: list[str]) -> list[Rule]:
                                               type="not_null", severity=rule.severity)
                     for col in columns
                 )
+        elif rule.type == "text_variants" and rule.column == ALL_COLUMNS:
+            template = rule.params.get("each_column", "Text variants: {column}")
+            expanded.extend(Rule(name=template.format(column=col), column=col, type="text_variants",
+                                 severity=rule.severity, description=rule.description)
+                            for col in categorical_columns(df))
         elif not (rule.type == "not_null" and rule.column in absorbed):
             expanded.append(rule)
     return expanded
@@ -311,6 +325,8 @@ def _check(df: pd.DataFrame, rule: Rule) -> tuple[int | None, pd.Series]:
         flags = left.notna() & right.notna() & ~OPERATORS[p["operator"]](left, right)
     elif rule.type == "outlier":
         flags = outlier_mask(raw, p.get("method", "iqr"), p.get("factor", 1.5), p.get("threshold", 3.0))
+    elif rule.type == "text_variants":
+        flags = raw.isin(list(variant_mapping(raw)))  # rows normalization would change
     flags = flags.fillna(False).astype(bool)
     return int(flags.sum()), flags
 
@@ -324,7 +340,7 @@ def validate(df: pd.DataFrame, rules: list[Rule]) -> tuple[pd.DataFrame, pd.Data
     """
     rows = []
     flags: dict[str, pd.Series] = {}
-    for rule in _expand(rules, list(df.columns)):
+    for rule in _expand(rules, df):
         count, rule_flags = _check(df, rule)
         if count is None:
             status, details = STATUS_UNAVAILABLE, UNAVAILABLE_DETAILS
@@ -346,7 +362,8 @@ def quality_score(rules: list[Rule], summary: pd.DataFrame, row_flags: pd.DataFr
         dimension % = 100 * (1 - rows failing at least one rule of the dimension / total rows)
 
     completeness = not_null rules, validity = dtype / range / allowed_values / regex,
-    uniqueness = unique, consistency = cross_column. Outlier rules are not scored.
+    uniqueness = unique, consistency = cross_column. Outlier and text_variants rules are
+    not scored.
     Rules marked Unavailable are ignored; a dimension with no usable rule is None (n/a).
     overall = mean of the dimensions that are not None, 0-100 (None if all are None).
     """

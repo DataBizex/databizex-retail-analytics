@@ -11,6 +11,7 @@ Rules followed here:
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -65,14 +66,23 @@ def run_quality_checks(df: pd.DataFrame, rules: list[Rule] | None = None) -> pd.
 
 
 def change_summary(original: pd.DataFrame, working: pd.DataFrame,
-                   rules: list[Rule] | None = None) -> pd.DataFrame:
-    """Before/after comparison between imported data and the cleaned working copy."""
+                   rules: list[Rule] | None = None,
+                   distinct: Mapping[str, str] | None = None) -> pd.DataFrame:
+    """Before/after comparison between imported data and the cleaned working copy.
+
+    distinct: {working column: original column} for which to compare the number of
+    distinct values (e.g. normalized text columns; names differ after a column mapping).
+    """
     before = run_quality_checks(original, rules).set_index("check")["count"]
     after = run_quality_checks(working, rules).set_index("check")["count"]
     metrics = [
         ("Rows", len(original), len(working)),
         ("Columns", original.shape[1], working.shape[1]),
     ]
+    for work_col, orig_col in (distinct or {}).items():
+        if work_col in working.columns and orig_col in original.columns:
+            metrics.append((f"Distinct values: {work_col}",
+                            original[orig_col].nunique(), working[work_col].nunique()))
     for check in before.index:
         b = before[check]
         a = after.get(check, pd.NA)

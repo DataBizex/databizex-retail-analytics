@@ -33,6 +33,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   sheet row) through import conversion, column mapping and duplicate removal. The number
   never reaches KPI queries or the Power BI package.
 
+- Text normalization (`app/data/normalize.py`). Values that differ only in case or
+  spacing are grouped per categorical-looking text column (at most 200 distinct values,
+  fewer than half the rows, not an identifier or `order_id`). The canonical form is
+  always trimmed with single internal spaces, in the letter case of the most frequent
+  variant (ties: alphabetical after trimming). A value with stray spaces is normalized
+  even when it is the only spelling ("Whitespace only" in the dialog); a lone value that
+  differs only in case is not. There is no fuzzy matching.
+- Quality check "Text variants: <column>" (rule type `text_variants`, severity warning,
+  not part of the quality score), included in the default rule set. It appears in the
+  failed-rows dropdown and lists the rows that would change.
+- **Normalize text...** button and dialog on the Data Quality tab. Nothing is applied until
+  Apply is clicked; the KPI screen is recalculated if it was showing results. Reset undoes
+  it, the before/after table shows the distinct-value count per normalized column, and the
+  data-state text (source line, `package_info.txt`) lists the normalized columns.
+
 ### Changed
 
 - Numeric statistics on the Import & Preview tab include columns where at least 80% of the

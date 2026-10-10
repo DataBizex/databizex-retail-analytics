@@ -60,7 +60,7 @@ wrong and nobody can tell why. Teams need to:
   outliers (IQR with a 3.0x multiplier on quantity and unit_price).
 - **Load rule set...** validates any other tabular data (HR, finance, ...) with its own rules.
   Rule types: not_null, dtype, range, allowed_values, regex, unique (on key columns),
-  cross_column, outlier. See the docstring of `app/data/rules.py` for the file format.
+  cross_column, outlier, text_variants. See the docstring of `app/data/rules.py` for the file format.
 - Summary table: check, count, status (OK / Issue / Unavailable), severity (error / warning).
 - Quality score: completeness, validity, uniqueness and consistency (% of rows that pass
   all rules of that kind) and their average as an overall score out of 100.
@@ -75,6 +75,14 @@ wrong and nobody can tell why. Teams need to:
   because z-score assumes an approximately normal distribution, which price data rarely
   is. `method: zscore` (with `threshold`) remains available in custom rule files.
 - **Remove exact duplicates** on the in-memory working copy only.
+- **Text variants** (warning, not scored): values in a categorical-looking text column that
+  are the same apart from case or spacing (" germany", "GERMANY", "Germany "), and values
+  with stray spaces even if they have no other spelling ("Spain " becomes "Spain"). **Normalize
+  text...** shows the groups per column and, after you tick columns and click Apply, writes
+  each group in the working copy in the letter case of its most frequent variant, trimmed
+  and with single spaces. No fuzzy matching: "Deutschland" and
+  "Germany" are never merged. **Reset working copy to original** undoes it; the source line
+  and `package_info.txt` record which columns were normalized.
 - Before/after table: original import vs working data.
 - Rows with missing values are never deleted or filled with zero.
   The source file is never modified.

@@ -53,6 +53,7 @@ from app.data.formats import (
 )
 from app.data.failed_rows import ALL_FAILED, failed_rule_choices, failed_rows
 from app.data.loader import FILE_DIALOG_FILTER, DataLoadError, load_file, with_source_rows
+from app.data.normalize import apply_normalization, find_text_variants
 from app.data.profiler import dataset_overview, numeric_summary, profile_columns
 from app.data.rules import (
     RULES_FILE_FILTER,
@@ -75,6 +76,7 @@ from app.exports.exporter import (
 from app.paths import sample_data_path, user_data_dir
 from app.ui.column_mapping_dialog import ColumnMappingDialog
 from app.ui.import_options_dialog import ImportOptionsDialog
+from app.ui.normalize_dialog import NormalizeDialog
 from app.ui.data_table import DataTable
 
 logger = logging.getLogger(__name__)
@@ -163,6 +165,7 @@ class MainWindow(QMainWindow):
         self.unavailable_columns: list[str] = []
         self.mapping_notes: list[str] = []
         self.duplicates_removed = 0
+        self.normalized_columns: list[str] = []  # working-copy columns with text variants merged
         self.kpi_results: dict[str, pd.DataFrame] = {}
         self.kpi_headline: dict[str, float] = {}
         self.kpi_basis = ""
@@ -274,6 +277,8 @@ class MainWindow(QMainWindow):
         buttons = QHBoxLayout()
         self.dedupe_btn = QPushButton("Remove exact duplicates")
         self.dedupe_btn.clicked.connect(self.remove_duplicates)
+        self.normalize_btn = QPushButton("Normalize text...")
+        self.normalize_btn.clicked.connect(self.normalize_text)
         self.reset_btn = QPushButton("Reset working copy to original")
         self.reset_btn.clicked.connect(self.reset_working_copy)
         self.load_rules_btn = QPushButton("Load rule set...")
@@ -282,6 +287,7 @@ class MainWindow(QMainWindow):
         self.rules_label.setStyleSheet("color: #555;")
         self._update_rules_label()
         buttons.addWidget(self.dedupe_btn)
+        buttons.addWidget(self.normalize_btn)
         buttons.addWidget(self.reset_btn)
         buttons.addWidget(self.load_rules_btn)
         buttons.addWidget(self.rules_label)
@@ -290,7 +296,8 @@ class MainWindow(QMainWindow):
 
         note = QLabel(
             "Checks only report problems. Rows with missing values are never deleted or filled. "
-            "Removing duplicates changes the in-memory working copy only — the source file is never modified."
+            "Removing duplicates and normalizing text change the in-memory working copy only — "
+            "the source file is never modified."
         )
         note.setWordWrap(True)
         note.setStyleSheet("color: #555;")
@@ -482,8 +489,13 @@ class MainWindow(QMainWindow):
         if self.working_df is None:
             return "No data loaded"
         mapped = " — columns mapped" if self.column_mapping else ""
+        cleaning = []
         if self.duplicates_removed:
-            return f"Cleaned working data ({self.duplicates_removed:,} exact duplicates removed){mapped}"
+            cleaning.append(f"{self.duplicates_removed:,} exact duplicates removed")
+        if self.normalized_columns:
+            cleaning.append("text normalized in " + ", ".join(self.normalized_columns))
+        if cleaning:
+            return f"Cleaned working data ({'; '.join(cleaning)}){mapped}"
         return f"Original imported data (no cleaning applied){mapped}"
 
     def _ask_save_path(self, caption: str, default_name: str, file_filter: str) -> Path | None:
@@ -547,6 +559,7 @@ class MainWindow(QMainWindow):
         self.column_mapping = self._ask_column_mapping(result.df) if needs_mapping(result.df) else None
         self._make_working_copy()
         self.duplicates_removed = 0
+        self.normalized_columns = []
         self._clear_kpis()
         self._refresh_all()
         self.tabs.setCurrentIndex(0)
@@ -614,11 +627,51 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(
             f"Removed {removed:,} exact duplicate rows from the working copy (source file unchanged).", 10000)
 
+    def normalize_text(self) -> None:
+        if not self._require_data():
+            return
+        try:
+            with self._busy("Looking for text variants..."):
+                variants = find_text_variants(self.working_df)
+        except Exception as exc:  # noqa: BLE001
+            self._unexpected("text variant search", exc)
+            return
+        if not variants:
+            QMessageBox.information(self, "Nothing to normalize",
+                                    "No column has the same value written with different case or spacing.")
+            return
+        dialog = NormalizeDialog(variants, self)
+        if not dialog.exec():
+            return
+        selected = dialog.selected()
+        if not selected:
+            self.statusBar().showMessage("No columns selected; nothing normalized.", 10000)
+            return
+        try:
+            with self._busy("Normalizing text..."):
+                normalized = apply_normalization(self.working_df, selected)
+        except Exception as exc:  # noqa: BLE001
+            self._unexpected("text normalization", exc)
+            return
+        changed = sum(g.changes for col in selected for g in variants[col])
+        self.working_df = normalized
+        self.normalized_columns += [c for c in selected if c not in self.normalized_columns]
+        had_kpis = bool(self.kpi_results)
+        self._clear_kpis()
+        self._refresh_all()
+        # KPIs that were on screen are recalculated so charts show the merged values.
+        if had_kpis:
+            self.run_kpis()
+        self.statusBar().showMessage(
+            f"Normalized {changed:,} values in {', '.join(selected)} (working copy only; source file unchanged).",
+            10000)
+
     def reset_working_copy(self) -> None:
         if not self._require_data():
             return
-        self._make_working_copy()
+        self._make_working_copy()  # rebuilt from the original: undoes duplicate removal and normalization
         self.duplicates_removed = 0
+        self.normalized_columns = []
         self._clear_kpis()
         self._refresh_all()
         self.statusBar().showMessage("Working copy reset to the original imported data.", 10000)
@@ -892,6 +945,11 @@ class MainWindow(QMainWindow):
                                     f"Files saved in:\n{folder}\n\nOpen POWER_BI_GUIDE.md for the next steps.")
 
     # ------------------------------------------------------------------ refresh
+    def _normalized_source_columns(self) -> dict[str, str]:
+        """{working column: original column} for normalized columns (names differ after a mapping)."""
+        mapping = self.column_mapping or {}
+        return {col: mapping.get(col) or col for col in self.normalized_columns}
+
     def import_settings_text(self) -> str:
         return import_summary(self.import_options, self.conversion)
 
@@ -916,7 +974,8 @@ class MainWindow(QMainWindow):
 
     def _refresh_all(self) -> None:
         has_data = self.working_df is not None
-        for widget in [self.dedupe_btn, self.reset_btn, self.run_kpi_btn, *self.export_buttons]:
+        for widget in [self.dedupe_btn, self.normalize_btn, self.reset_btn, self.run_kpi_btn,
+                       *self.export_buttons]:
             widget.setEnabled(has_data)
         self._refresh_state_label()
         self.export_failed_btn.setEnabled(has_data)
@@ -945,8 +1004,9 @@ class MainWindow(QMainWindow):
         self.quality_table.show_frame(summary)
         self._show_score(quality_score(self.rules, summary, row_flags))
         self._refresh_failed_rows()
-        self.change_table.show_frame(change_summary(self.original_df, df, self.rules))
-        self.reset_btn.setEnabled(self.duplicates_removed > 0)
+        self.change_table.show_frame(change_summary(self.original_df, df, self.rules,
+                                                    self._normalized_source_columns()))
+        self.reset_btn.setEnabled(self.duplicates_removed > 0 or bool(self.normalized_columns))
 
     def show_about(self) -> None:
         QMessageBox.about(self, "About DataBizex", ABOUT_TEXT)
