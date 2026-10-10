@@ -43,6 +43,14 @@ from app import __version__
 from app.analytics.kpis import KpiInputError, format_margin, validity_summary
 from app.data.cleaner import change_summary, remove_exact_duplicates, run_quality_checks
 from app.data.column_mapping import ColumnMappingError, apply_column_mapping, guess_mapping, needs_mapping
+from app.data.formats import (
+    ConversionResult,
+    FormatDetection,
+    ImportOptions,
+    apply_import_options,
+    detect_formats,
+    import_summary,
+)
 from app.data.loader import FILE_DIALOG_FILTER, DataLoadError, load_file
 from app.data.profiler import dataset_overview, numeric_summary, profile_columns
 from app.data.rules import (
@@ -65,6 +73,7 @@ from app.exports.exporter import (
 )
 from app.paths import sample_data_path, user_data_dir
 from app.ui.column_mapping_dialog import ColumnMappingDialog
+from app.ui.import_options_dialog import ImportOptionsDialog
 from app.ui.data_table import DataTable
 
 logger = logging.getLogger(__name__)
@@ -139,6 +148,9 @@ class MainWindow(QMainWindow):
         self.source_path: Path | None = None
         self.original_df: pd.DataFrame | None = None
         self.working_df: pd.DataFrame | None = None
+        # Import options (delimiter, encoding, number and date formats) for the current file.
+        self.import_options = ImportOptions()
+        self.conversion: ConversionResult | None = None
         # Column mapping chosen for the current file (None = names used as they are).
         self.column_mapping: dict[str, str | None] | None = None
         self.unavailable_columns: list[str] = []
@@ -478,8 +490,25 @@ class MainWindow(QMainWindow):
             self._unexpected(f"loading {path.name}", exc)
             return False
 
+        detection = detect_formats(result.df, result.delimiter, result.encoding)
+        options = detection.options
+        if not detection.is_default():
+            options = self._ask_import_options(path, detection)
+            if (options.delimiter, options.encoding) != (result.delimiter, result.encoding):
+                try:
+                    with self._busy(f"Reading {path.name} with the chosen delimiter and encoding..."):
+                        result = load_file(path, delimiter=options.delimiter, encoding=options.encoding)
+                except DataLoadError as exc:
+                    self._error("Could not load file", f"{path.name}\n\n{exc}")
+                    return False
+                except Exception as exc:  # noqa: BLE001
+                    self._unexpected(f"loading {path.name}", exc)
+                    return False
+        logger.info("Import options for %s: %s", path.name, options.describe())
+
         self.source_path = path
         self.original_df = result.df
+        self.import_options = options
         self.column_mapping = self._ask_column_mapping(result.df) if needs_mapping(result.df) else None
         self._make_working_copy()
         self.duplicates_removed = 0
@@ -495,6 +524,14 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(message, 10000)
         return True
 
+    def _ask_import_options(self, path: Path, detection: FormatDetection) -> ImportOptions:
+        dialog = ImportOptionsDialog(path.name, detection, self)
+        if not dialog.exec():
+            logger.info("Import options declined; using the file as read, without conversion")
+            read = detection.options
+            return ImportOptions(delimiter=read.delimiter, encoding=read.encoding)
+        return dialog.options()
+
     def _ask_column_mapping(self, df: pd.DataFrame) -> dict[str, str | None] | None:
         columns = list(df.columns)
         dialog = ColumnMappingDialog(columns, guess_mapping(columns), self)
@@ -504,11 +541,13 @@ class MainWindow(QMainWindow):
         return dialog.mapping()
 
     def _make_working_copy(self) -> None:
-        """Set working_df from original_df, applying the column mapping if one was chosen."""
+        """Set working_df from original_df: number/date conversion, then the column mapping if chosen."""
         self.unavailable_columns, self.mapping_notes = [], []
+        self.conversion = apply_import_options(self.original_df, self.import_options)
+        converted = self.conversion.df
         if self.column_mapping:
             try:
-                mapped = apply_column_mapping(self.original_df, self.column_mapping)
+                mapped = apply_column_mapping(converted, self.column_mapping)
             except ColumnMappingError as exc:
                 self.column_mapping = None
                 self._error("Column mapping not applied", str(exc))
@@ -516,7 +555,7 @@ class MainWindow(QMainWindow):
                 self.working_df = mapped.df
                 self.unavailable_columns, self.mapping_notes = mapped.unavailable, mapped.notes
                 return
-        self.working_df = self.original_df.copy()
+        self.working_df = converted
 
     # ------------------------------------------------------------------ quality
     def remove_duplicates(self) -> None:
@@ -763,13 +802,16 @@ class MainWindow(QMainWindow):
         source = self.source_path.name if self.source_path else ""
         written = self._run_export("Generating Power BI package", generate_powerbi_package,
                                    self.working_df, folder, source, self.data_state_text(),
-                                   self.unavailable_columns)
+                                   self.unavailable_columns, self.import_settings_text())
         if written:
             self._log_export(f"Power BI package written to {folder}: " + ", ".join(p.name for p in written))
             QMessageBox.information(self, "Power BI package ready",
                                     f"Files saved in:\n{folder}\n\nOpen POWER_BI_GUIDE.md for the next steps.")
 
     # ------------------------------------------------------------------ refresh
+    def import_settings_text(self) -> str:
+        return import_summary(self.import_options, self.conversion)
+
     def _refresh_state_label(self) -> None:
         if self.working_df is None:
             self.state_label.setText("No data loaded. Use <b>Open file...</b> or <b>Load sample data</b>.")
@@ -782,8 +824,10 @@ class MainWindow(QMainWindow):
             kpi = " | KPIs: same as working data"
         else:
             kpi = f" | KPIs: {self.kpi_basis}"
+        # Like the column mapping, import settings are only spelled out when they differ from the default.
+        settings = "" if self.import_options.is_default() else f" | <b>Import:</b> {self.import_settings_text()}"
         self.state_label.setText(
-            f"<b>Source:</b> {self.source_path.name} (read-only) | <b>Original:</b> {original_rows:,} rows | "
+            f"<b>Source:</b> {self.source_path.name} (read-only){settings} | <b>Original:</b> {original_rows:,} rows | "
             f"<b>Working:</b> {working_rows:,} rows — {self.data_state_text()}{kpi}"
         )
 

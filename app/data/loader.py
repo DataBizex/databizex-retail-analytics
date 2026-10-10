@@ -15,6 +15,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 SUPPORTED_EXTENSIONS = {".csv", ".xlsx"}
+AUTO_ENCODINGS = ("utf-8-sig", "cp1252")  # UTF-8 (with or without BOM), then the common Windows code page
 FILE_DIALOG_FILTER = "Sales data (*.csv *.xlsx *.xls);;CSV (*.csv);;Excel (*.xlsx *.xls)"
 
 
@@ -27,9 +28,13 @@ class LoadResult:
     df: pd.DataFrame
     path: Path
     warnings: list[str] = field(default_factory=list)
+    # How a CSV was read (None for Excel), so the import settings can be shown and changed.
+    delimiter: str | None = None
+    encoding: str | None = None
 
 
-def load_file(path: str | Path) -> LoadResult:
+def load_file(path: str | Path, delimiter: str | None = None, encoding: str | None = None) -> LoadResult:
+    """Read the first sheet / the CSV. delimiter and encoding are detected unless given."""
     path = Path(path)
     ext = path.suffix.lower()
 
@@ -46,7 +51,10 @@ def load_file(path: str | Path) -> LoadResult:
         raise DataLoadError("The file is empty (0 bytes).")
 
     try:
-        df = _read_csv(path) if ext == ".csv" else _read_excel(path)
+        if ext == ".csv":
+            df, encoding, delimiter = _read_csv(path, encoding=encoding, delimiter=delimiter)
+        else:
+            df, encoding, delimiter = _read_excel(path), None, None
     except DataLoadError:
         raise
     except (pd.errors.EmptyDataError, pd.errors.ParserError, UnicodeDecodeError, ValueError, OSError) as exc:
@@ -59,7 +67,10 @@ def load_file(path: str | Path) -> LoadResult:
             "The first row looks like data, not column names. "
             "The file was loaded without a header and columns were named column_1, column_2, ..."
         )
-        df = _read_csv(path, header=None) if ext == ".csv" else _read_excel(path, header=None)
+        if ext == ".csv":
+            df = _read_csv(path, header=None, encoding=encoding, delimiter=delimiter)[0]
+        else:
+            df = _read_excel(path, header=None)
         df.columns = [f"column_{i + 1}" for i in range(df.shape[1])]
 
     df = df.dropna(axis=0, how="all")  # fully blank lines are formatting, not data
@@ -70,8 +81,9 @@ def load_file(path: str | Path) -> LoadResult:
 
     df.columns = [str(c).strip() for c in df.columns]
     df = df.reset_index(drop=True)
-    logger.info("Loaded %s: %d rows x %d columns", path, *df.shape)
-    return LoadResult(df=df, path=path, warnings=warnings)
+    logger.info("Loaded %s: %d rows x %d columns (delimiter %r, encoding %s)",
+                path, *df.shape, delimiter, encoding)
+    return LoadResult(df=df, path=path, warnings=warnings, delimiter=delimiter, encoding=encoding)
 
 
 def _sniff_delimiter(path: Path, encoding: str) -> str:
@@ -85,15 +97,19 @@ def _sniff_delimiter(path: Path, encoding: str) -> str:
         return ","
 
 
-def _read_csv(path: Path, header: int | None = 0) -> pd.DataFrame:
-    # UTF-8 first (with or without BOM), then the common Windows code page.
+def _read_csv(path: Path, header: int | None = 0, encoding: str | None = None,
+              delimiter: str | None = None) -> tuple[pd.DataFrame, str, str]:
+    """(DataFrame, encoding used, delimiter used). Without an encoding, AUTO_ENCODINGS are tried in order."""
     last_error: Exception | None = None
-    for encoding in ("utf-8-sig", "cp1252"):
+    for enc in (encoding,) if encoding else AUTO_ENCODINGS:
         try:
-            sep = _sniff_delimiter(path, encoding)
-            return pd.read_csv(path, sep=sep, encoding=encoding, header=header, skipinitialspace=True)
+            sep = delimiter or _sniff_delimiter(path, enc)
+            df = pd.read_csv(path, sep=sep, encoding=enc, header=header, skipinitialspace=True)
+            return df, enc, sep
         except UnicodeDecodeError as exc:
             last_error = exc
+    if encoding:
+        raise DataLoadError(f"Could not decode the file as {encoding} text: {last_error}")
     raise DataLoadError(f"Could not decode the file as UTF-8 or Windows-1252 text: {last_error}")
 
 
