@@ -45,6 +45,16 @@ from app.data.cleaner import change_summary, remove_exact_duplicates, run_qualit
 from app.data.column_mapping import ColumnMappingError, apply_column_mapping, guess_mapping, needs_mapping
 from app.data.loader import FILE_DIALOG_FILTER, DataLoadError, load_file
 from app.data.profiler import dataset_overview, numeric_summary, profile_columns
+from app.data.rules import (
+    RULES_FILE_FILTER,
+    QualityScore,
+    RulesError,
+    default_rules,
+    default_rules_path,
+    load_rules,
+    quality_score,
+    validate,
+)
 from app.database.duckdb_manager import QUERIES, DuckDBManager
 from app.exports.exporter import (
     ExportError,
@@ -67,6 +77,19 @@ ABOUT_TEXT = (
     "preparing data for Power BI. DataBizex.com"
 )
 KPI_TABLE_KEYS = ["by_country", "by_category", "by_month", "top_products"]
+SCORE_TITLES = {
+    "overall": "Quality score",
+    "completeness": "Completeness",
+    "validity": "Validity",
+    "uniqueness": "Uniqueness",
+    "consistency": "Consistency",
+}
+SCORE_TOOLTIP = (
+    "Each dimension = % of rows that fail none of its rules "
+    "(completeness: not-null; validity: type, range, allowed values, pattern; "
+    "uniqueness: duplicates; consistency: cross-column). "
+    "Overall = average of the available dimensions. Outliers are not scored."
+)
 
 
 def _money(value: float) -> str:
@@ -125,6 +148,14 @@ class MainWindow(QMainWindow):
         self.kpi_headline: dict[str, float] = {}
         self.kpi_basis = ""
         self.db = DuckDBManager()
+        # Validation rule set: the shipped retail default until the user loads another.
+        self.rules = []
+        self.rules_source = "no rule set"
+        try:
+            self.rules = default_rules()
+            self.rules_source = default_rules_path().name
+        except RulesError:
+            logger.exception("Default rule set could not be loaded")
 
         self._build_menu()
         self._build_ui()
@@ -226,8 +257,15 @@ class MainWindow(QMainWindow):
         self.dedupe_btn.clicked.connect(self.remove_duplicates)
         self.reset_btn = QPushButton("Reset working copy to original")
         self.reset_btn.clicked.connect(self.reset_working_copy)
+        self.load_rules_btn = QPushButton("Load rule set...")
+        self.load_rules_btn.clicked.connect(self.load_rule_set)
+        self.rules_label = QLabel()
+        self.rules_label.setStyleSheet("color: #555;")
+        self._update_rules_label()
         buttons.addWidget(self.dedupe_btn)
         buttons.addWidget(self.reset_btn)
+        buttons.addWidget(self.load_rules_btn)
+        buttons.addWidget(self.rules_label)
         buttons.addStretch(1)
         layout.addLayout(buttons)
 
@@ -238,6 +276,18 @@ class MainWindow(QMainWindow):
         note.setWordWrap(True)
         note.setStyleSheet("color: #555;")
         layout.addWidget(note)
+
+        scores = QHBoxLayout()
+        self.score_labels: dict[str, QLabel] = {}
+        for key in SCORE_TITLES:
+            label = QLabel()
+            label.setStyleSheet("padding: 4px 10px; background: #eef3f8; border-radius: 4px;")
+            label.setToolTip(SCORE_TOOLTIP)
+            self.score_labels[key] = label
+            scores.addWidget(label)
+        scores.addStretch(1)
+        layout.addLayout(scores)
+        self._show_score(None)
 
         splitter = QSplitter(Qt.Horizontal)
         quality_box = QGroupBox("Quality summary (working data)")
@@ -438,8 +488,11 @@ class MainWindow(QMainWindow):
         self.tabs.setCurrentIndex(0)
         if result.warnings:
             QMessageBox.information(self, "Loaded with warnings", "\n\n".join(result.warnings))
-        self.statusBar().showMessage(
-            f"Loaded {path.name}: {len(result.df):,} rows × {result.df.shape[1]} columns", 10000)
+        message = f"Loaded {path.name}: {len(result.df):,} rows × {result.df.shape[1]} columns"
+        # After a mapping the user has already confirmed the fields, so compute KPIs straight away.
+        if self.column_mapping and self.run_kpis():
+            message += " — KPIs calculated with your column mapping"
+        self.statusBar().showMessage(message, 10000)
         return True
 
     def _ask_column_mapping(self, df: pd.DataFrame) -> dict[str, str | None] | None:
@@ -493,6 +546,41 @@ class MainWindow(QMainWindow):
         self._clear_kpis()
         self._refresh_all()
         self.statusBar().showMessage("Working copy reset to the original imported data.", 10000)
+
+    def load_rule_set(self) -> None:
+        start = default_rules_path().parent
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Load rule set", str(start if start.is_dir() else Path.home()), RULES_FILE_FILTER)
+        if not path:
+            return
+        path = Path(path)
+        try:
+            rules = load_rules(path)
+        except RulesError as exc:
+            # The current rule set stays active.
+            self._error("Could not load rule set", f"{path.name}\n\n{exc}")
+            return
+        except Exception as exc:  # noqa: BLE001
+            self._unexpected(f"loading rule set {path.name}", exc)
+            return
+        self.rules, self.rules_source = rules, path.name
+        self._update_rules_label()
+        try:
+            with self._busy("Validating with the new rule set..."):
+                self._refresh_all()
+        except Exception as exc:  # noqa: BLE001
+            self._unexpected("validation", exc)
+            return
+        self.statusBar().showMessage(f"Rule set {path.name} loaded: {len(rules)} rules.", 10000)
+
+    def _update_rules_label(self) -> None:
+        self.rules_label.setText(f"Rule set: {self.rules_source} ({len(self.rules)} rules)")
+
+    def _show_score(self, score: QualityScore | None) -> None:
+        for key, title in SCORE_TITLES.items():
+            value = getattr(score, key) if score is not None else None
+            text = "n/a" if value is None else f"{value:.1f}" + (" / 100" if key == "overall" else "%")
+            self.score_labels[key].setText(f"{title}: <b>{text}</b>")
 
     # ------------------------------------------------------------------ KPIs
     def run_kpis(self) -> bool:
@@ -641,7 +729,7 @@ class MainWindow(QMainWindow):
             return
         path = self._ask_save_path("Export quality report (CSV)", "quality_report.csv", "CSV (*.csv)")
         if path:
-            report = run_quality_checks(self.working_df)
+            report = run_quality_checks(self.working_df, self.rules)
             if self._run_export("Exporting quality report", export_csv, report, path):
                 self._log_export(f"Quality report exported: {path}")
                 QMessageBox.information(self, "Export complete", f"Saved:\n{path}")
@@ -688,7 +776,12 @@ class MainWindow(QMainWindow):
             return
         original_rows = len(self.original_df)
         working_rows = len(self.working_df)
-        kpi = f" | KPIs: {self.kpi_basis}" if self.kpi_results else " | KPIs: not calculated"
+        if not self.kpi_results:
+            kpi = " | KPIs: not calculated"
+        elif self.kpi_basis == self.data_state_text():
+            kpi = " | KPIs: same as working data"
+        else:
+            kpi = f" | KPIs: {self.kpi_basis}"
         self.state_label.setText(
             f"<b>Source:</b> {self.source_path.name} (read-only) | <b>Original:</b> {original_rows:,} rows | "
             f"<b>Working:</b> {working_rows:,} rows — {self.data_state_text()}{kpi}"
@@ -701,6 +794,7 @@ class MainWindow(QMainWindow):
         self._refresh_state_label()
         if not has_data:
             self.import_info.setText("No file loaded.")
+            self._show_score(None)
             self._clear_kpis()
             return
 
@@ -714,8 +808,10 @@ class MainWindow(QMainWindow):
         self.preview_table.show_frame(self.original_df.head(PREVIEW_ROWS))
         self.profile_table.show_frame(profile_columns(self.original_df), float_decimals=2)
         self.stats_table.show_frame(numeric_summary(self.original_df), float_decimals=2)
-        self.quality_table.show_frame(run_quality_checks(df))
-        self.change_table.show_frame(change_summary(self.original_df, df))
+        summary, row_flags = validate(df, self.rules)
+        self.quality_table.show_frame(summary)
+        self._show_score(quality_score(self.rules, summary, row_flags))
+        self.change_table.show_frame(change_summary(self.original_df, df, self.rules))
         self.reset_btn.setEnabled(self.duplicates_removed > 0)
 
     def show_about(self) -> None:
