@@ -7,6 +7,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-15
+
+### Added
+
+- **Guided fixes.** Select a failed rule on the Data Quality tab and choose **Fix...** (or
+  right-click the rule). The dialog explains the problem and offers the actions that fit the
+  rule: exclude rows, set missing, map values, fill a constant, trim and standardize case, or
+  remove duplicates keeping the first occurrence. A preview shows up to 20 rows before and
+  after, the number of rows and cells that will change and the quality score before and after,
+  all computed on a copy; nothing changes until **Apply**. Outlier rules stay warnings only.
+- **Change log with undo.** Every fix, as well as **Remove exact duplicates** and **Normalize
+  text...**, is recorded with its rule, action, parameters, counts, affected source rows and
+  sample rows, and the quality score and KPI-valid rows before and after. **Edit > Undo last
+  fix** (Ctrl+Z) restores the working copy exactly for the last 10 fixes. **Reset working copy
+  to original** asks before discarding logged fixes. The log can be exported as a Markdown
+  audit report or CSV, and is added to the Excel export (a "Change log" sheet) and the Power BI
+  package (`change_log.csv`, `change_log.md`). It lives in memory for the session.
+- **Month-over-month and year-over-year growth** in the monthly revenue query (`MoM %`,
+  `YoY %`). Year-over-year compares each month with the same calendar month a year earlier,
+  so missing months are never compared with the wrong month.
+- **Pareto analysis of products:** a "Top products (Pareto)" query with each product's share
+  and cumulative share of net revenue, the smallest set of top products reaching 80%, the line
+  "N of M products make 80% of net revenue." and a Pareto chart with an 80% guide.
+- **Read-only custom SQL editor** on the SQL & KPIs tab: one `SELECT` or `WITH` query on table
+  `sales`, run with **Run** or Ctrl+Enter. A guard rejects anything that could change data
+  (more than one statement, `INSERT`, `DELETE`, `DROP`, `ATTACH`, `COPY`, `SET` and similar) with
+  a plain-language reason. Up to 1,000 rows are shown with the full row count, and **Export
+  result to CSV...** writes every row.
+- **Light and dark themes** under **View > Theme** (Light, Dark, or System, the default, which
+  follows Windows), applied live including the charts and remembered between sessions.
+  Themed quality score bars, KPI cards and tables, readable in both modes.
+- **Application icon** for the window, the taskbar and the executable.
+- **Layout memory:** the confirmed import settings and column mapping are remembered per file
+  layout (the exact column names) and pre-fill the dialogs the next time a file with the same
+  columns is opened.
+- **File > Open Recent** with the last 10 files; a file that no longer exists is removed from
+  the list when clicked.
+- **Failed-cell highlighting:** in the failed rows table, the cells that caused each failure
+  have a light red background.
+- **Messy multi-table sample data** in `sample_data/messy/`: five related synthetic tables
+  (stores, customers, products, sales as `.xlsx` and `.csv`, returns) with planted problems and
+  an answer key (`manifest.json`, `README.md`). Open them with **File > Open sample dataset**,
+  or click **Try messy sample data** on the empty Import & Preview tab. They load through the
+  normal import pipeline.
+- `scripts/make_sample_data.py`: the seeded generator for this sample, with options for table
+  sizes, file names, xlsx or CSV, and a large sales CSV for performance tests (git-ignored).
+- **Fix button hints:** when **Fix...** is disabled, its tooltip says why, and a short tip under
+  the rule list explains how to start.
+- Continuous integration: the test suite runs on every push (GitHub Actions).
+
+### Changed
+
+- **SQL & KPIs tab layout:** separate Predefined queries and Custom SQL views, so each result
+  table gets the full height, charts in a scrolling column, and Pareto labels for the top 10
+  products only. The window has a minimum size of 1100 x 700.
+- **Whole numbers** in float columns (e.g. quantities with empty cells) are shown as `6`
+  instead of `6.0` in the preview, failed rows and before/after tables. The data is unchanged.
+- **File loading errors** are explained in plain language, with the technical detail on a
+  separate line: a row with a different number of columns than the header names the line, a
+  file that cannot be read as text suggests re-saving it from Excel, and an Excel file that
+  cannot be opened may be corrupted, password-protected or not a real `.xlsx` file.
+- **Clearer sample data labels:** the header button and File menu item are now **Load demo
+  data** (the single-table `retail_sales_demo.csv`); tooltips explain the difference from the
+  messy sample tables.
+- Bundled sample files are not added to the recent files list.
+
+### Fixed
+
+- **Status bar messages clear themselves.** "Working" messages such as "Looking for text
+  variants..." or "Running your SQL query in DuckDB..." stayed on screen after the operation
+  ended, even while other dialogs were open. They are now always removed, whether the
+  operation succeeded, failed, was cancelled or found nothing to do. Results clear after 9 s
+  and errors after 15 s, as one line without technical tracebacks.
+
 ## [0.3.0] - 2026-10-11
 
 ### Added

@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/54df7143-94ee-4f4d-8513-8fd6c83d0869
 
 ## Download
 
-Get `DataBizex.exe` from the [latest release](https://github.com/DataBizex/databizex-retail-analytics/releases/latest). No installation: download and run.
+Get `DataBizex.exe` (version 0.4.0, one file, Windows 10 or 11) from the [latest release](https://github.com/DataBizex/databizex-retail-analytics/releases/latest). No installation: download and run. What changed is listed in [CHANGELOG.md](CHANGELOG.md).
 
 On first launch, Windows SmartScreen may show "Windows protected your PC". This appears because the executable is not code-signed (a paid certificate), not because anything is wrong. Click **More info**, then **Run anyway**. You can also build the app yourself from this repository and compare.
 
@@ -194,6 +194,17 @@ Captured from the running app with `scripts/capture_screenshots.py`.
 |---|---|
 | ![SQL & KPIs](screenshots/03_sql_kpis.png) | ![Export & Reporting](screenshots/04_export_reporting.png) |
 
+| Fix dialog: removing duplicates raises the score from 96.2 to 96.6 | Change log after three fixes: 96.2 -> 96.6 -> 96.9 -> 97.2 |
+|---|---|
+| ![Fix dialog](screenshots/05_fix_dialog.png) | ![Change log](screenshots/06_change_log.png) |
+
+The first four use the demo data; the last two use the messy sales sample
+(**File > Open sample dataset**). The Fix dialog previews removing the 30 exact duplicate
+rows, each with the row that is kept, and the quality score before and after (96.2 -> 96.6).
+The change log then shows three fixes, each raising the score: duplicates removed
+(96.2 -> 96.6), missing `discount_pct` filled with 0 (96.6 -> 96.9) and the 30 rows with a
+discount outside 0-100 excluded (96.9 -> 97.2), with the last entry's before/after rows.
+
 ## Technology stack
 
 | Purpose | Tool |
@@ -308,7 +319,7 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The suite has 382 tests, using small fixtures with hand-checked results. They
+The suite has 387 tests, using small fixtures with hand-checked results. They
 cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
 regional number and date detection and conversion; English, German, French and Dutch
 header guessing; remembered file layouts; source line numbers; profiling,
@@ -322,10 +333,10 @@ bundled sample file and the default rules against its answer key; text normaliza
 KPI values, DuckDB aggregations, month-over-month, year-over-year and Pareto results;
 the custom SQL guard and editor; status bar messages (working messages always cleared)
 and the Fix button hints; the SQL & KPIs layout; the recent files list; the light and
-dark themes (complete palettes, text contrast, settings and the app icon); and the CSV,
-Excel and Power BI exports. Thirty-two tests use Qt's offscreen platform (thirty drive
-the main window or the Fix dialog, one the mapping dialog, one the table model), so no
-screen is needed.
+dark themes (complete palettes, text contrast, settings and the app icon); the version
+(one source, matching the changelog); and the CSV, Excel and Power BI exports.
+Thirty-five tests use Qt's offscreen platform (thirty-three drive the main window or the
+Fix dialog, one the mapping dialog, one the table model), so no screen is needed.
 
 ## Build the executable
 
@@ -335,7 +346,8 @@ build_windows.bat
 
 The script creates or reuses `.venv`, installs the requirements, runs the
 tests (and stops if any fail), then runs PyInstaller (`--onedir --windowed`)
-with `sample_data/`, `powerbi/` and `rules/` bundled. The result is
+with the app icon, `assets/`, the sample data (the demo files and `sample_data/messy/`),
+`powerbi/` and `rules/` bundled. The result is
 `dist\DataBizex\DataBizex.exe`. Copy the whole `dist\DataBizex` folder to
 share the app.
 
@@ -357,8 +369,9 @@ To check a build without clicking through the app:
 dist\DataBizex\DataBizex.exe --smoke-test %TEMP%\databizex_smoke.json
 ```
 
-This opens the window, loads the sample, removes duplicates, runs the KPIs,
-writes a Power BI package and an Excel file to a temporary folder, and
+This opens the window, loads the demo data, removes duplicates, runs the KPIs,
+writes a Power BI package and an Excel file to a temporary folder, checks that
+**File > Open sample dataset** finds and reads every messy sample file, and
 writes the results as JSON.
 
 ## Sample data

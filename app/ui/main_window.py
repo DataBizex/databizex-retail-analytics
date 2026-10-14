@@ -937,8 +937,9 @@ class MainWindow(QMainWindow):
         if self.normalized_columns:
             cleaning.append("text normalized in " + ", ".join(self.normalized_columns))
         fixed = ""
-        if len(self.change_log):
-            count = len(self.change_log)
+        # Duplicate removal and normalization are logged too, but already named under "cleaning".
+        count = sum(1 for entry in self.change_log.entries if entry.kind != KIND_NORMALIZATION)
+        if count:
             fixed = f" — Working copy: {count:,} fix{'es' if count != 1 else ''} applied"
         if cleaning:
             return f"Cleaned working data ({'; '.join(cleaning)}){mapped}{fixed}"
@@ -1854,7 +1855,8 @@ class MainWindow(QMainWindow):
         change = change_summary(self.original_df, df, self.rules, self._normalized_source_columns(),
                                 self.column_mapping)
         self.change_table.show_frame(change, whole_number_columns=whole_number_columns(change))
-        self.reset_btn.setEnabled(self.duplicates_removed > 0 or bool(self.normalized_columns))
+        self.reset_btn.setEnabled(self.duplicates_removed > 0 or bool(self.normalized_columns)
+                                  or len(self.change_log) > 0)
 
     def show_about(self) -> None:
         self._about_dialog().exec()

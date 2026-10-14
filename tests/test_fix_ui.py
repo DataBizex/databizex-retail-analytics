@@ -158,3 +158,24 @@ def test_status_bar_after_custom_sql(window):
     assert not win.run_custom_sql()
     assert win.statusBar().currentMessage().startswith("Query not run:")
     assert "Running" not in win.statusBar().currentMessage()
+
+
+def test_reset_button_is_enabled_after_a_fix(window, monkeypatch):
+    win, main_window, _app, _popups = window
+    assert win.load_sample()
+    assert not win.reset_btn.isEnabled()  # nothing to reset yet
+    _accept_with(main_window, monkeypatch)
+    assert win.open_fix_dialog("Negative values: quantity")
+    assert win.reset_btn.isEnabled()
+    assert win.undo_last_fix()
+    assert not win.reset_btn.isEnabled()
+
+
+def test_state_line_counts_fixes_not_cleaning_steps(window, monkeypatch):
+    win, main_window, _app, _popups = window
+    assert win.load_sample()
+    win.remove_duplicates()  # logged, but described as cleaning
+    assert "25 exact duplicates removed" in win.data_state_text() and "fix" not in win.data_state_text()
+    _accept_with(main_window, monkeypatch)
+    assert win.open_fix_dialog("Negative values: quantity")
+    assert win.data_state_text().endswith("Working copy: 1 fix applied")

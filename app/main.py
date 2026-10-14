@@ -1,8 +1,9 @@
 """DataBizex entry point.
 
     python -m app.main                      start the GUI
-    python -m app.main --smoke-test OUT     start, load the sample, run checks + KPIs,
-                                            write a JSON report to OUT and exit
+    python -m app.main --smoke-test OUT     start, load the demo data, run checks + KPIs,
+                                            check the messy sample files, write a JSON
+                                            report to OUT and exit
 """
 
 from __future__ import annotations
@@ -88,6 +89,16 @@ def run_smoke_test(window, output: Path) -> None:
         report["kpis"] = {k: (None if v != v else v) for k, v in window.kpi_headline.items()}
         report["kpi_basis"] = window.kpi_basis
         report["preview_rows_in_gui"] = window.preview_table.model_.rowCount()
+        # File > Open sample dataset: the bundled messy tables are found and readable.
+        from app.data.loader import load_file
+        from app.paths import messy_sample_dir
+        from app.ui.main_window import messy_samples
+
+        window._rebuild_sample_menu()
+        report["sample_menu_enabled"] = window.sample_menu.menuAction().isEnabled()
+        report["sample_menu_entries"] = [action.text() for action in window.sample_menu.actions()]
+        report["messy_sample_rows"] = {path.name: len(load_file(path).df)
+                                       for _label, path in messy_samples(messy_sample_dir())}
         with tempfile.TemporaryDirectory() as tmp:
             written = generate_powerbi_package(window.working_df, Path(tmp), "smoke-test", window.kpi_basis)
             report["powerbi_files"] = sorted(p.name for p in written)
