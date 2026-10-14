@@ -222,3 +222,7 @@ __marimo__/
 # DataBizex
 .venv/
 *.log
+
+# Large generated sample files (scripts/make_sample_data.py); never committed
+sample_data/large/
+*.large.*

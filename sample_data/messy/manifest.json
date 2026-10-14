@@ -1,0 +1,124 @@
+{
+  "generator": "scripts/make_sample_data.py",
+  "seed": 20261015,
+  "arguments": {
+    "customers": 1000,
+    "products": 120,
+    "sales_rows": 3000,
+    "returns": 300,
+    "large_rows": 0,
+    "prefix": "retail_messy",
+    "format": "xlsx",
+    "sales_csv": true
+  },
+  "synthetic": "All data is synthetic: generated names, ids and amounts, not real customers or sales.",
+  "counting_rules": [
+    "Problem counts are measured BEFORE duplicate rows are appended. Duplicates copy existing rows, which may carry problems, so a file can contain slightly more of a problem than counted.",
+    "Problems on the same column never share a row, so each count is exact for its column. Problems on different columns can overlap on the same row."
+  ],
+  "relations": {
+    "sales.store_id": "stores.store_id",
+    "sales.customer_id": "customers.customer_id",
+    "sales.product_id": "products.product_id",
+    "returns.order_id": "sales.order_id"
+  },
+  "orphan_values": {
+    "product_id": "P9999",
+    "customer_id": "C999999",
+    "store_id": "S99",
+    "order_id": "O99999999"
+  },
+  "tables": {
+    "stores": {
+      "files": [
+        "retail_messy_1_stores.xlsx"
+      ],
+      "rows": 29,
+      "rows_before_duplicates": 27,
+      "duplicate_rows": 2,
+      "problems": {
+        "city spelling variants": 2,
+        "missing region": 2,
+        "negative area_sqm": 1
+      }
+    },
+    "customers": {
+      "files": [
+        "retail_messy_2_customers.xlsx"
+      ],
+      "rows": 1020,
+      "rows_before_duplicates": 1000,
+      "duplicate_rows": 20,
+      "problems": {
+        "missing email": 60,
+        "email without @": 10,
+        "implausible birth_year (1850, 1900, 2030, 0)": 4,
+        "loyalty_tier case/space variants": 80,
+        "signup_date as DD/MM/YYYY text": 50,
+        "city variants": 32,
+        "upper-case names": 30,
+        "names padded with spaces": 20
+      }
+    },
+    "products": {
+      "files": [
+        "retail_messy_3_products.xlsx"
+      ],
+      "rows": 123,
+      "rows_before_duplicates": 120,
+      "duplicate_rows": 3,
+      "problems": {
+        "category spelling/case variants": 14,
+        "list_price below unit_cost": 3,
+        "list_price = 0": 1,
+        "missing unit_cost": 2,
+        "missing brand": 4,
+        "status case variants": 6
+      }
+    },
+    "sales": {
+      "files": [
+        "retail_messy_4_sales.xlsx",
+        "retail_messy_4_sales.csv"
+      ],
+      "rows": 3030,
+      "rows_before_duplicates": 3000,
+      "duplicate_rows": 30,
+      "problems": {
+        "negative quantity": 60,
+        "zero quantity": 30,
+        "missing quantity": 45,
+        "zero unit_price": 30,
+        "missing unit_price": 30,
+        "price outlier x100": 9,
+        "discount outside 0-100": 30,
+        "missing discount": 30,
+        "date as DD/MM/YYYY": 60,
+        "future date": 15,
+        "missing date": 30,
+        "product_id lower case (join breaks)": 30,
+        "orphan product_id": 30,
+        "customer_id leading space (join breaks)": 30,
+        "orphan customer_id": 30,
+        "orphan store_id": 15,
+        "payment_method variants": 60,
+        "missing channel": 30
+      }
+    },
+    "returns": {
+      "files": [
+        "retail_messy_5_returns.xlsx"
+      ],
+      "rows": 303,
+      "rows_before_duplicates": 300,
+      "duplicate_rows": 3,
+      "problems": {
+        "reason variants": 14,
+        "return_date before order date": 6,
+        "negative refund_amount": 6,
+        "missing refund_amount": 6,
+        "orphan order_id": 4
+      }
+    }
+  }
+}

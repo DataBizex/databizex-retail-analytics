@@ -64,7 +64,9 @@ wrong and nobody can tell why. Teams need to:
   A column gets statistics when at least 80% of its non-empty values are numbers (same
   parser as the quality checks); the rest are counted as `non_numeric` and left in the data.
 - Empty, header-only, unreadable and headerless files handled without crashing.
-- **Load sample data** button for the bundled demo file.
+- **Load sample data** button for the bundled demo file, and **File > Open sample dataset**
+  for five related, deliberately messy tables (stores, customers, products, sales, returns);
+  see [Sample data](#sample-data).
 - **Map Your Columns** dialog when `quantity`, `unit_price`, `discount_pct`,
   `unit_cost` or `order_date` is not found by name: pick the file's column for each
   expected field (best guess preselected from English, German, French and Dutch header
@@ -220,9 +222,10 @@ databizex-retail-analytics/
 │   ├── analytics/            kpis.py  (KPI definitions, row validity)
 │   ├── database/             duckdb_manager.py  (table `sales`, SQL queries)
 │   └── exports/              exporter.py  (CSV, Excel, Power BI package)
-├── sample_data/              synthetic CSV files + README
+├── sample_data/              synthetic CSV files + README; messy/ = five related messy tables
 ├── assets/                   icon.png, icon.ico (drawn by scripts/generate_icon.py)
-├── scripts/                  generate_sample_data.py, capture_screenshots.py, generate_icon.py
+├── scripts/                  generate_sample_data.py, make_sample_data.py, capture_screenshots.py,
+│                             generate_icon.py
 ├── tests/                    pytest suite
 ├── powerbi/                  POWER_BI_GUIDE.md, data_dictionary.md
 ├── rules/                    retail_default.json (default validation rule set)
@@ -304,7 +307,7 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The suite has 355 tests, using small fixtures with hand-checked results. They
+The suite has 372 tests, using small fixtures with hand-checked results. They
 cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
 regional number and date detection and conversion; English, German, French and Dutch
 header guessing; remembered file layouts; source line numbers; profiling,
@@ -312,13 +315,15 @@ duplicate detection and removal (the source file stays unchanged); every validat
 rule type, the quality score formula and the default rule set's counts on the demo
 file; failed rows, their highlighted cells and their export; every guided fix action
 (result, change log entry, idempotency, original and source file untouched), fix
-suggestions for all 25 default rules, undo and the change log exports; text
-normalization; KPI values, DuckDB aggregations, month-over-month, year-over-year and
-Pareto results; the custom SQL guard and editor; the SQL & KPIs layout; the recent files
-list; the light and dark themes (complete palettes, text contrast, settings and the app
-icon); and the CSV, Excel and Power BI exports. Eighteen tests use Qt's offscreen
-platform (sixteen drive the main window or the Fix dialog, one the mapping dialog, one
-the table model), so no screen is needed.
+suggestions for all 25 default rules, undo and the change log exports; the messy sample
+generator (byte-identical output, keys and planted problems against the manifest), every
+bundled sample file and the default rules against its answer key; text normalization;
+KPI values, DuckDB aggregations, month-over-month, year-over-year and Pareto results;
+the custom SQL guard and editor; the SQL & KPIs layout; the recent files list; the light
+and dark themes (complete palettes, text contrast, settings and the app icon); and the
+CSV, Excel and Power BI exports. Twenty-two tests use Qt's offscreen platform (twenty
+drive the main window or the Fix dialog, one the mapping dialog, one the table model),
+so no screen is needed.
 
 ## Build the executable
 
@@ -354,10 +359,37 @@ This opens the window, loads the sample, removes duplicates, runs the KPIs,
 writes a Power BI package and an Excel file to a temporary folder, and
 writes the results as JSON.
 
-## Sample dataset
+## Sample data
 
 All files in `sample_data/` are **synthetic**: made-up data with no real businesses,
 customers or personal information.
+
+### Messy multi-table sample
+
+`sample_data/messy/` holds five related tables with planted problems, about 450 KB in
+total: stores (29 rows), customers (1,020), products (123), sales (3,030, as `.xlsx` and
+as `.csv`) and returns (303). `sales` points to stores, customers and products, and
+`returns` points to `sales`. Open any of them with **File > Open sample dataset**, or
+click **Try sample data** on the empty Import & Preview tab (it opens the sales table).
+They load through the normal pipeline (import options, column mapping, quality checks).
+
+The planted problems include negative and zero quantities, missing and zero prices,
+discounts outside 0–100, DD/MM/YYYY and future dates, payment-method spelling variants,
+lower-case product ids and customer ids with a leading space (join breakers), orphan
+keys and exact duplicate rows. `sample_data/messy/manifest.json` is the answer key with
+exact counts, and [sample_data/messy/README.md](sample_data/messy/README.md) lists which
+of them the default rules flag. Counts are measured before duplicate rows are appended,
+and problems on different columns can share a row.
+
+The tables are generated by `scripts/make_sample_data.py` (seeded, so the same arguments
+give the same data). To generate a large file locally for performance tests (about 30 MB,
+not committed: `sample_data/large/` and `*.large.*` files are git-ignored):
+
+```bat
+python scripts\make_sample_data.py sample_data\large --large-rows 500000
+```
+
+### Demo files
 
 `retail_sales_clean.csv` and `retail_sales_demo.csv` are generated with a fixed seed
 by `scripts/generate_sample_data.py`: about 1,500 orders across six European

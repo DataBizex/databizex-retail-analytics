@@ -32,7 +32,12 @@ echo [4/4] Packaging with PyInstaller ...
 python -m PyInstaller --noconfirm --clean --onedir --windowed --name DataBizex ^
     --icon "assets\icon.ico" ^
     --add-data "assets;assets" ^
-    --add-data "sample_data;sample_data" ^
+    --add-data "sample_data\*.csv;sample_data" ^
+    --add-data "sample_data\README.md;sample_data" ^
+    --add-data "sample_data\messy\retail_messy_*.xlsx;sample_data\messy" ^
+    --add-data "sample_data\messy\retail_messy_4_sales.csv;sample_data\messy" ^
+    --add-data "sample_data\messy\manifest.json;sample_data\messy" ^
+    --add-data "sample_data\messy\README.md;sample_data\messy" ^
     --add-data "powerbi;powerbi" ^
     --add-data "rules;rules" ^
     --exclude-module tkinter ^
@@ -50,7 +55,12 @@ if /i "%~1"=="--onefile" (
         --workpath build\onefile ^
         --icon "assets\icon.ico" ^
         --add-data "assets;assets" ^
-        --add-data "sample_data;sample_data" ^
+        --add-data "sample_data\*.csv;sample_data" ^
+        --add-data "sample_data\README.md;sample_data" ^
+        --add-data "sample_data\messy\retail_messy_*.xlsx;sample_data\messy" ^
+        --add-data "sample_data\messy\retail_messy_4_sales.csv;sample_data\messy" ^
+        --add-data "sample_data\messy\manifest.json;sample_data\messy" ^
+        --add-data "sample_data\messy\README.md;sample_data\messy" ^
         --add-data "powerbi;powerbi" ^
         --add-data "rules;rules" ^
         --exclude-module tkinter ^

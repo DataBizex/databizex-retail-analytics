@@ -29,6 +29,16 @@ def sample_data_path() -> Path:
     return resource_path("sample_data", "retail_sales_demo.csv")
 
 
+def sample_data_dir() -> Path:
+    """Folder of the bundled sample files (inside the install folder or the unpacked exe)."""
+    return resource_path("sample_data")
+
+
+def messy_sample_dir() -> Path:
+    """The small, messy multi-table sample (stores, customers, products, sales, returns)."""
+    return resource_path("sample_data", "messy")
+
+
 def user_data_dir() -> Path:
     """Per-user writable folder for logs (never the install folder)."""
     base = os.environ.get("LOCALAPPDATA")

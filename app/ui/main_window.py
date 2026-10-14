@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import time
@@ -88,7 +89,7 @@ from app.exports.exporter import (
     export_tables_csv,
     generate_powerbi_package,
 )
-from app.paths import icon_path, sample_data_path, user_data_dir
+from app.paths import icon_path, messy_sample_dir, sample_data_dir, sample_data_path, user_data_dir
 from app.ui import theme
 from app.ui.column_mapping_dialog import ColumnMappingDialog
 from app.ui.fix_dialog import FixDialog
@@ -252,6 +253,42 @@ class ScoreBar(QWidget):
         self.bar.setAccessibleName(f"{self.title}: {text}")
 
 
+# The messy multi-table sample (sample_data/messy): file, table in manifest.json, menu label.
+MESSY_SAMPLES = [
+    ("retail_messy_1_stores.xlsx", "stores", "Stores"),
+    ("retail_messy_2_customers.xlsx", "customers", "Customers"),
+    ("retail_messy_3_products.xlsx", "products", "Products"),
+    ("retail_messy_4_sales.xlsx", "sales", "Sales"),
+    ("retail_messy_5_returns.xlsx", "returns", "Returns"),
+    ("retail_messy_4_sales.csv", "sales", "Sales as CSV"),
+]
+MESSY_SALES = "retail_messy_4_sales.xlsx"  # what "Try sample data" opens
+
+
+def messy_samples(folder: Path) -> list[tuple[str, Path]]:
+    """(menu label, path) for the bundled messy sample files that exist, e.g. "Sales (3,030 rows, messy)"."""
+    try:
+        tables = json.loads((folder / "manifest.json").read_text(encoding="utf-8")).get("tables", {})
+    except (OSError, ValueError, AttributeError):
+        tables = {}  # labels without row counts
+    entries = []
+    for file, table, label in MESSY_SAMPLES:
+        path = folder / file
+        if not path.is_file():
+            continue
+        rows = tables.get(table, {}).get("rows") if isinstance(tables.get(table), dict) else None
+        entries.append((f"{label} ({rows:,} rows, messy)" if isinstance(rows, int) else f"{label} (messy)", path))
+    return entries
+
+
+def _is_bundled_sample(path: Path) -> bool:
+    """True for files inside the app's own sample_data folder."""
+    try:
+        return path.resolve().is_relative_to(sample_data_dir().resolve())
+    except (OSError, ValueError):
+        return False
+
+
 def _empty_state(text: str) -> QWidget:
     """A centred, muted two-line hint for a tab without data."""
     label = QLabel(text)
@@ -324,10 +361,15 @@ class MainWindow(QMainWindow):
         self.recent_menu = file_menu.addMenu("Open &Recent")
         self.recent_menu.setToolTipsVisible(True)
         file_menu.addAction(sample_action)
+        self.sample_menu = file_menu.addMenu("Open sample &dataset")
+        self.sample_menu.setToolTipsVisible(True)
+        file_menu.setToolTipsVisible(True)  # explains a disabled "Open sample dataset"
         file_menu.addSeparator()
         file_menu.addAction(exit_action)
         file_menu.aboutToShow.connect(self._rebuild_recent_menu)
+        file_menu.aboutToShow.connect(self._rebuild_sample_menu)
         self._rebuild_recent_menu()
+        self._rebuild_sample_menu()
         edit_menu = self.menuBar().addMenu("&Edit")
         # Ctrl+Z: text editors (e.g. the SQL editor) keep their own undo while they have the focus.
         self.undo_action = QAction("&Undo last fix", self, shortcut="Ctrl+Z", triggered=self.undo_last_fix)
@@ -365,6 +407,51 @@ class MainWindow(QMainWindow):
         self.recent_menu.addSeparator()
         self.recent_menu.addAction(QAction("Clear recent files", self.recent_menu, enabled=bool(paths),
                                            triggered=self._clear_recent_files))
+
+    def _rebuild_sample_menu(self) -> None:
+        """File > Open sample dataset: the bundled messy tables; disabled when the folder is missing."""
+        self.sample_menu.clear()
+        folder = messy_sample_dir()
+        entries = messy_samples(folder) if folder.is_dir() else []
+        for label, path in entries:
+            action = QAction(label, self.sample_menu, triggered=lambda _checked=False, p=path: self.load_path(p))
+            action.setToolTip(f"{path.name}: synthetic data with planted problems. Opens like any other file.")
+            self.sample_menu.addAction(action)
+        enabled = bool(entries)
+        self.sample_menu.menuAction().setEnabled(enabled)
+        self.sample_menu.menuAction().setToolTip(
+            "Synthetic, deliberately messy related tables (stores, customers, products, sales, returns)."
+            if enabled else f"The sample dataset folder was not found:\n{folder}")
+
+    def open_messy_sales_sample(self) -> bool:
+        """The "Try sample data" button: open the messy sales table through the normal pipeline."""
+        path = messy_sample_dir() / MESSY_SALES
+        if not path.is_file():
+            self._error("Sample data missing", f"The bundled sample file was not found:\n{path}")
+            return False
+        return self.load_path(path)
+
+    def _import_empty_state(self) -> QWidget:
+        """The empty Import & Preview tab: the usual hint plus a secondary "Try sample data" button."""
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.addStretch(1)
+        layout.addWidget(_empty_state("No data loaded.\nOpen a file or load the sample data to get started."))
+        self.try_sample_btn = QPushButton("Try sample data")
+        available = (messy_sample_dir() / MESSY_SALES).is_file()
+        self.try_sample_btn.setEnabled(available)
+        self.try_sample_btn.setToolTip(
+            "Open the messy sales sample (synthetic, 3,000 orders with planted problems)." if available
+            else f"The sample dataset folder was not found:\n{messy_sample_dir()}")
+        self.try_sample_btn.clicked.connect(self.open_messy_sales_sample)
+        row = QHBoxLayout()
+        row.addStretch(1)
+        row.addWidget(self.try_sample_btn)
+        row.addStretch(1)
+        layout.addSpacing(10)
+        layout.addLayout(row)
+        layout.addStretch(1)
+        return page
 
     def _open_recent(self, path: Path) -> bool:
         if not path.is_file():
@@ -431,7 +518,7 @@ class MainWindow(QMainWindow):
              "Nothing to export yet.\nOpen a file or load the sample data first."),
         ):
             stack = QStackedWidget()
-            stack.addWidget(_empty_state(hint))
+            stack.addWidget(self._import_empty_state() if build == self._build_import_tab else _empty_state(hint))
             stack.addWidget(build())
             self.empty_stacks.append(stack)
             self.tabs.addTab(stack, title)
@@ -882,9 +969,9 @@ class MainWindow(QMainWindow):
         if self.column_mapping and self.run_kpis():
             message += " — KPIs calculated with your column mapping"
         self.statusBar().showMessage(message, 10000)
-        # The bundled sample has its own menu entry, and a one-file build unpacks it to a new
-        # temporary folder on every start, so a recent entry for it would soon be stale.
-        if path.resolve() != sample_data_path().resolve():
+        # Bundled samples have their own menu entries, and a one-file build unpacks them to a new
+        # temporary folder on every start, so a recent entry for one would soon be stale.
+        if not _is_bundled_sample(path):
             recent_files.add_path(path)
         return True
 
