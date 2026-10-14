@@ -3,6 +3,9 @@
 A Windows desktop tool that checks retail sales exports for quality problems,
 calculates business KPIs with SQL, and prepares clean data for Power BI.
 
+### 20-second demo
+https://github.com/user-attachments/assets/54df7143-94ee-4f4d-8513-8fd6c83d0869
+
 ![SQL & KPIs tab](screenshots/03_sql_kpis.png)
 
 ## Why this project
