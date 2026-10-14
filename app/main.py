@@ -104,7 +104,7 @@ def run_smoke_test(window, output: Path) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog=APP_NAME)
     parser.add_argument("--smoke-test", metavar="OUTPUT_JSON", type=Path,
-                        help="load the sample data, run checks and KPIs, write a JSON report and exit")
+                        help="load the demo data, run checks and KPIs, write a JSON report and exit")
     args = parser.parse_args(argv)
 
     log_file = setup_logging()

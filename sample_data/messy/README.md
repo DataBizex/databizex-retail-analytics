@@ -5,8 +5,8 @@ DataBizex quality checks and guided fixes on something closer to a real export.
 **All data is synthetic**: names, e-mail addresses, ids and amounts are generated and
 belong to no real person or company.
 
-Open any file from the app with **File > Open sample dataset**, or click **Try sample
-data** on the empty Import & Preview tab (it opens the sales table). The files load
+Open any file from the app with **File > Open sample dataset**, or click **Try messy
+sample data** on the empty Import & Preview tab (it opens the sales table). The files load
 through the normal import pipeline, so the import options, column mapping and quality
 checks behave exactly as for your own files.
 

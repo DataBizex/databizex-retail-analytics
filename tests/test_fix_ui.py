@@ -108,7 +108,8 @@ def test_outlier_rules_cannot_be_fixed(window):
     problem = win._fix_problem("Outliers (IQR): quantity")
     assert "warnings only" in problem
     win.failed_combo.setCurrentIndex(0)  # "All failed rows"
-    assert not win.fix_btn.isEnabled() and "one failed rule" in win.fix_btn.toolTip()
+    assert not win.fix_btn.isEnabled()
+    assert win.fix_btn.toolTip() == "Pick a failing rule in the Rule list to see fix options."
 
 
 def test_undo_and_reset_through_the_window(window, monkeypatch):

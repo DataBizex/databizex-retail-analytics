@@ -64,7 +64,8 @@ wrong and nobody can tell why. Teams need to:
   A column gets statistics when at least 80% of its non-empty values are numbers (same
   parser as the quality checks); the rest are counted as `non_numeric` and left in the data.
 - Empty, header-only, unreadable and headerless files handled without crashing.
-- **Load sample data** button for the bundled demo file, and **File > Open sample dataset**
+- **Load demo data** button (and File menu item) for the bundled single-table demo file, and
+  **File > Open sample dataset**
   for five related, deliberately messy tables (stores, customers, products, sales, returns);
   see [Sample data](#sample-data).
 - **Map Your Columns** dialog when `quantity`, `unit_price`, `discount_pct`,
@@ -307,7 +308,7 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The suite has 372 tests, using small fixtures with hand-checked results. They
+The suite has 382 tests, using small fixtures with hand-checked results. They
 cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
 regional number and date detection and conversion; English, German, French and Dutch
 header guessing; remembered file layouts; source line numbers; profiling,
@@ -319,11 +320,12 @@ suggestions for all 25 default rules, undo and the change log exports; the messy
 generator (byte-identical output, keys and planted problems against the manifest), every
 bundled sample file and the default rules against its answer key; text normalization;
 KPI values, DuckDB aggregations, month-over-month, year-over-year and Pareto results;
-the custom SQL guard and editor; the SQL & KPIs layout; the recent files list; the light
-and dark themes (complete palettes, text contrast, settings and the app icon); and the
-CSV, Excel and Power BI exports. Twenty-two tests use Qt's offscreen platform (twenty
-drive the main window or the Fix dialog, one the mapping dialog, one the table model),
-so no screen is needed.
+the custom SQL guard and editor; status bar messages (working messages always cleared)
+and the Fix button hints; the SQL & KPIs layout; the recent files list; the light and
+dark themes (complete palettes, text contrast, settings and the app icon); and the CSV,
+Excel and Power BI exports. Thirty-two tests use Qt's offscreen platform (thirty drive
+the main window or the Fix dialog, one the mapping dialog, one the table model), so no
+screen is needed.
 
 ## Build the executable
 
@@ -370,7 +372,7 @@ customers or personal information.
 total: stores (29 rows), customers (1,020), products (123), sales (3,030, as `.xlsx` and
 as `.csv`) and returns (303). `sales` points to stores, customers and products, and
 `returns` points to `sales`. Open any of them with **File > Open sample dataset**, or
-click **Try sample data** on the empty Import & Preview tab (it opens the sales table).
+click **Try messy sample data** on the empty Import & Preview tab (it opens the sales table).
 They load through the normal pipeline (import options, column mapping, quality checks).
 
 The planted problems include negative and zero quantities, missing and zero prices,

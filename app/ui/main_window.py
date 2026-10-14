@@ -107,6 +107,17 @@ ABOUT_TEXT = (
     "preparing data for Power BI. DataBizex.com"
 )
 CHART_HINT = "Run KPI queries to draw this chart"
+# Status bar: "working" messages stay until the operation ends (then they are cleared),
+# results clear after STATUS_RESULT_MS, errors after STATUS_ERROR_MS (always one line).
+STATUS_RESULT_MS = 9000
+STATUS_ERROR_MS = 15000
+STATUS_LINE_MAX = 220
+DEMO_DATA_TIP = "Loads the single-table demo (retail_sales_demo.csv). More messy sample tables: File > Open sample dataset."
+MESSY_SAMPLE_TIP = ("Opens the messy sales table (synthetic, 3,000 orders with planted problems). More messy sample t"
+                    "ables: File > Open sample dataset. The single-table demo: Load demo data.")
+NO_RULE_SELECTED = "Pick a failing rule in the Rule list to see fix options."
+RULE_PASSED = "This rule has no failing rows."
+FIX_TIP = "Tip: choose one rule, then click Fix..."
 CHART_MIN_HEIGHT = 320  # px; the chart column scrolls when the window is shorter than three charts
 PARETO_LABELLED = 10  # Pareto x-axis labels for the top products only (all bars are drawn)
 MIN_WINDOW_SIZE = (1100, 700)
@@ -160,6 +171,15 @@ def pareto_summary(pareto: pd.DataFrame | None) -> str:
     if pareto is None or pareto.empty:
         return ""
     return f"{int(pareto['in_top_80'].sum()):,} of {len(pareto):,} products make 80% of net revenue."
+
+
+def _first_line(text: object) -> str:
+    """The first non-empty line of a message, without a "Traceback ..." block."""
+    for line in str(text).splitlines():
+        line = line.strip()
+        if line and not line.startswith("Traceback"):
+            return line
+    return ""
 
 
 def _engine_message(exc: Exception) -> str:
@@ -262,7 +282,7 @@ MESSY_SAMPLES = [
     ("retail_messy_5_returns.xlsx", "returns", "Returns"),
     ("retail_messy_4_sales.csv", "sales", "Sales as CSV"),
 ]
-MESSY_SALES = "retail_messy_4_sales.xlsx"  # what "Try sample data" opens
+MESSY_SALES = "retail_messy_4_sales.xlsx"  # what "Try messy sample data" opens
 
 
 def messy_samples(folder: Path) -> list[tuple[str, Path]]:
@@ -355,7 +375,9 @@ class MainWindow(QMainWindow):
     def _build_menu(self) -> None:
         file_menu = self.menuBar().addMenu("&File")
         open_action = QAction("&Open data file...", self, shortcut="Ctrl+O", triggered=self.open_file)
-        sample_action = QAction("Load &sample data", self, triggered=self.load_sample)
+        sample_action = QAction("Load &demo data", self, triggered=self.load_sample)
+        sample_action.setToolTip(DEMO_DATA_TIP)
+        sample_action.setStatusTip(DEMO_DATA_TIP)
         exit_action = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
         file_menu.addAction(open_action)
         self.recent_menu = file_menu.addMenu("Open &Recent")
@@ -424,7 +446,7 @@ class MainWindow(QMainWindow):
             if enabled else f"The sample dataset folder was not found:\n{folder}")
 
     def open_messy_sales_sample(self) -> bool:
-        """The "Try sample data" button: open the messy sales table through the normal pipeline."""
+        """The "Try messy sample data" button: open the messy sales table through the normal pipeline."""
         path = messy_sample_dir() / MESSY_SALES
         if not path.is_file():
             self._error("Sample data missing", f"The bundled sample file was not found:\n{path}")
@@ -432,17 +454,16 @@ class MainWindow(QMainWindow):
         return self.load_path(path)
 
     def _import_empty_state(self) -> QWidget:
-        """The empty Import & Preview tab: the usual hint plus a secondary "Try sample data" button."""
+        """The empty Import & Preview tab: the usual hint plus a secondary "Try messy sample data" button."""
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.addStretch(1)
-        layout.addWidget(_empty_state("No data loaded.\nOpen a file or load the sample data to get started."))
-        self.try_sample_btn = QPushButton("Try sample data")
+        layout.addWidget(_empty_state("No data loaded.\nOpen a file or load the demo data to get started."))
+        self.try_sample_btn = QPushButton("Try messy sample data")
         available = (messy_sample_dir() / MESSY_SALES).is_file()
         self.try_sample_btn.setEnabled(available)
         self.try_sample_btn.setToolTip(
-            "Open the messy sales sample (synthetic, 3,000 orders with planted problems)." if available
-            else f"The sample dataset folder was not found:\n{messy_sample_dir()}")
+            MESSY_SAMPLE_TIP if available else f"The sample dataset folder was not found:\n{messy_sample_dir()}")
         self.try_sample_btn.clicked.connect(self.open_messy_sales_sample)
         row = QHBoxLayout()
         row.addStretch(1)
@@ -481,8 +502,8 @@ class MainWindow(QMainWindow):
         open_btn = QPushButton("Open file...")
         open_btn.setToolTip("Open a .csv or .xlsx sales export (Ctrl+O). The file is only read, never changed.")
         open_btn.clicked.connect(self.open_file)
-        sample_btn = QPushButton("Load sample data")
-        sample_btn.setToolTip("Load the bundled demo sales file to try every feature.")
+        sample_btn = QPushButton("Load demo data")
+        sample_btn.setToolTip(DEMO_DATA_TIP)
         sample_btn.clicked.connect(self.load_sample)
         about_btn = QPushButton("About")
         about_btn.setToolTip("Version and author information.")
@@ -509,13 +530,13 @@ class MainWindow(QMainWindow):
         self.empty_stacks: list[QStackedWidget] = []
         for build, title, hint in (
             (self._build_import_tab, "Import && Preview",
-             "No data loaded.\nOpen a file or load the sample data to get started."),
+             "No data loaded.\nOpen a file or load the demo data to get started."),
             (self._build_quality_tab, "Data Quality",
-             "No data to check yet.\nOpen a file or load the sample data to run the quality checks."),
+             "No data to check yet.\nOpen a file or load the demo data to run the quality checks."),
             (self._build_kpi_tab, "SQL && KPIs",
-             "No data loaded.\nOpen a file or load the sample data, then run the KPI queries."),
+             "No data loaded.\nOpen a file or load the demo data, then run the KPI queries."),
             (self._build_export_tab, "Export && Reporting",
-             "Nothing to export yet.\nOpen a file or load the sample data first."),
+             "Nothing to export yet.\nOpen a file or load the demo data first."),
         ):
             stack = QStackedWidget()
             stack.addWidget(self._import_empty_state() if build == self._build_import_tab else _empty_state(hint))
@@ -530,7 +551,10 @@ class MainWindow(QMainWindow):
         self.progress.setMaximumWidth(160)
         self.progress.hide()
         self.statusBar().addPermanentWidget(self.progress)
-        self.statusBar().showMessage("Ready. Open a file or load the sample data.")
+        self._status_kind: str | None = None  # kind of the message on screen: working / info / error / hint
+        self.statusBar().messageChanged.connect(self._status_changed)
+        self.tabs.currentChanged.connect(lambda _index: self.clear_working_status())
+        self.show_status("Ready. Open a file or load the demo data.", "hint")
 
     def _build_import_tab(self) -> QWidget:
         tab = QWidget()
@@ -636,6 +660,10 @@ class MainWindow(QMainWindow):
         failed_top.addStretch(1)
         failed_top.addWidget(self.export_failed_btn)
         failed_layout.addLayout(failed_top)
+        self.fix_hint = QLabel(FIX_TIP)
+        theme.set_role(self.fix_hint, "muted")
+        self.fix_hint.setVisible(False)
+        failed_layout.addWidget(self.fix_hint)
         self.failed_table = DataTable()
         failed_layout.addWidget(self.failed_table)
 
@@ -838,9 +866,37 @@ class MainWindow(QMainWindow):
         return tab
 
     # ------------------------------------------------------------------ helpers
+    def show_status(self, message: str, kind: str = "info", timeout_ms: int | None = None) -> None:
+        """The one way to write to the status bar.
+
+        kind "working": stays until the operation ends (_busy clears it in every case);
+        "info": a result, cleared after STATUS_RESULT_MS; "error": cleared after STATUS_ERROR_MS;
+        "hint": stays until replaced. A newer message always replaces the older one, and the
+        older one's timeout cannot clear it (QStatusBar restarts its timer on every message).
+        Errors are shortened to their first line, so no traceback ever reaches the status bar.
+        """
+        if timeout_ms is None:
+            timeout_ms = {"info": STATUS_RESULT_MS, "error": STATUS_ERROR_MS}.get(kind, 0)
+        text = " ".join(str(message).split()) if kind != "error" else _first_line(message)
+        if len(text) > STATUS_LINE_MAX:
+            text = text[:STATUS_LINE_MAX - 1] + "\u2026"
+        self._status_kind = kind
+        self.statusBar().showMessage(text, timeout_ms)
+
+    def clear_working_status(self) -> None:
+        """Remove a leftover "working" message (results and errors keep their own timeout)."""
+        if self._status_kind == "working":
+            self.statusBar().clearMessage()
+
+    def _status_changed(self, text: str) -> None:
+        if not text:
+            self._status_kind = None
+
     @contextmanager
     def _busy(self, message: str):
-        self.statusBar().showMessage(message)
+        """Show a "working" message, wait cursor and progress bar while the block runs, and remove them
+        however the block ends (result, nothing to do, cancel or exception)."""
+        self.show_status(message, "working")
         self.progress.show()
         QApplication.setOverrideCursor(Qt.WaitCursor)
         QApplication.processEvents()
@@ -849,9 +905,10 @@ class MainWindow(QMainWindow):
         finally:
             QApplication.restoreOverrideCursor()
             self.progress.hide()
+            self.clear_working_status()
 
     def _error(self, title: str, message: str) -> None:
-        self.statusBar().showMessage(f"{title}: {message}", 10000)
+        self.show_status(f"{title}: {message}", "error")
         QMessageBox.warning(self, title, message)
 
     def _unexpected(self, action: str, exc: Exception) -> None:
@@ -862,11 +919,11 @@ class MainWindow(QMainWindow):
             f"Something went wrong during {action}:\n\n{exc}\n\n"
             f"The app is still usable. Details were written to:\n{log_file}",
         )
-        self.statusBar().showMessage(f"Error during {action}", 10000)
+        self.show_status(f"Error during {action}. Details are in the log file.", "error")
 
     def _require_data(self) -> bool:
         if self.working_df is None:
-            QMessageBox.information(self, "No data", "Open a file or load the sample data first.")
+            QMessageBox.information(self, "No data", "Open a file or load the demo data first.")
             return False
         return True
 
@@ -900,7 +957,7 @@ class MainWindow(QMainWindow):
 
     def _log_export(self, text: str) -> None:
         self.export_log.appendPlainText(text)
-        self.statusBar().showMessage(text, 10000)
+        self.show_status(text)
 
     # ------------------------------------------------------------------ loading
     def open_file(self) -> None:
@@ -916,6 +973,7 @@ class MainWindow(QMainWindow):
         return self.load_path(path)
 
     def load_path(self, path: Path) -> bool:
+        self.statusBar().clearMessage()  # nothing from the previous file stays on screen
         try:
             with self._busy(f"Loading {path.name}..."):
                 result = load_file(path)
@@ -968,7 +1026,7 @@ class MainWindow(QMainWindow):
         # After a mapping the user has already confirmed the fields, so compute KPIs straight away.
         if self.column_mapping and self.run_kpis():
             message += " — KPIs calculated with your column mapping"
-        self.statusBar().showMessage(message, 10000)
+        self.show_status(message)
         # Bundled samples have their own menu entries, and a one-file build unpacks them to a new
         # temporary folder on every start, so a recent entry for one would soon be stale.
         if not _is_bundled_sample(path):
@@ -1055,6 +1113,7 @@ class MainWindow(QMainWindow):
             self._unexpected("text variant search", exc)
             return
         if not variants:
+            self.show_status("No text variants found.")
             QMessageBox.information(self, "Nothing to normalize",
                                     "No column has the same value written with different case or spacing.")
             return
@@ -1063,7 +1122,7 @@ class MainWindow(QMainWindow):
             return
         selected = dialog.selected()
         if not selected:
-            self.statusBar().showMessage("No columns selected; nothing normalized.", 10000)
+            self.show_status("No columns selected; nothing normalized.")
             return
         try:
             with self._busy("Normalizing text..."):
@@ -1091,6 +1150,7 @@ class MainWindow(QMainWindow):
         ask: confirm first when fixes are logged (the button and the Edit menu ask)."""
         if not self._require_data():
             return
+        self.clear_working_status()
         logged = len(self.change_log)
         if ask and logged:
             answer = QMessageBox.question(
@@ -1107,7 +1167,7 @@ class MainWindow(QMainWindow):
         self.change_log.preparation = self._preparation_lines()
         self._clear_kpis()
         self._refresh_all()
-        self.statusBar().showMessage("Working copy reset to the original imported data.", 10000)
+        self.show_status("Working copy reset to the original imported data.")
 
     def load_rule_set(self) -> None:
         start = default_rules_path().parent
@@ -1133,7 +1193,7 @@ class MainWindow(QMainWindow):
         except Exception as exc:  # noqa: BLE001
             self._unexpected("validation", exc)
             return
-        self.statusBar().showMessage(f"Rule set {path.name} loaded: {len(rules)} rules.", 10000)
+        self.show_status(f"Rule set {path.name} loaded: {len(rules)} rules.")
 
     def _update_rules_label(self) -> None:
         self.rules_label.setText(f"Rule set: {self.rules_source} ({len(self.rules)} rules)")
@@ -1238,7 +1298,7 @@ class MainWindow(QMainWindow):
         self._show_selected_query()
         self._draw_charts()
         self._refresh_state_label()
-        self.statusBar().showMessage("KPI queries finished.", 10000)
+        self.show_status("KPI queries finished.")
         return True
 
     def _clear_kpis(self) -> None:
@@ -1297,20 +1357,18 @@ class MainWindow(QMainWindow):
                 result, total = self.db.run_custom(text)
         except GuardError as exc:
             self._custom_note(str(exc), error=True)
-            self.statusBar().showMessage("Query not run: only read-only SELECT queries are allowed.", 10000)
+            self.show_status("Query not run: only read-only SELECT queries are allowed.", "error")
             return False
         except KpiInputError as exc:
             self._custom_note("The working data could not be loaded into table sales.", error=True, detail=str(exc))
-            self.statusBar().showMessage("Query not run: the working data could not be loaded.", 10000)
+            self.show_status("Query not run: the working data could not be loaded.", "error")
             return False
         except duckdb.Error as exc:
             self._custom_note("DuckDB could not run this query. Check the table and column names and the "
                               "SQL syntax.", error=True, detail=_engine_message(exc))
-            self.statusBar().showMessage("Query failed: check the table and column names and the SQL syntax.",
-                                         10000)
+            self.show_status("Query failed: check the table and column names and the SQL syntax.", "error")
             return False
         except Exception as exc:  # noqa: BLE001
-            self.statusBar().clearMessage()
             self._unexpected("running the SQL query", exc)
             return False
         elapsed = time.perf_counter() - started
@@ -1321,8 +1379,7 @@ class MainWindow(QMainWindow):
             self._custom_note(f"Showing first {len(result):,} of {total:,} rows.")
         else:
             self._custom_note(f"{total:,} row{'s' if total != 1 else ''}.")
-        self.statusBar().showMessage(f"Query returned {total:,} row{'s' if total != 1 else ''} in {elapsed:.2f} s",
-                                     10000)
+        self.show_status(f"Query returned {total:,} row{'s' if total != 1 else ''} in {elapsed:.2f} s")
         return True
 
     def export_custom_result(self) -> None:
@@ -1556,20 +1613,27 @@ class MainWindow(QMainWindow):
         if self.working_df is None:
             return "Load data first."
         if check is None or check == ALL_FAILED:
-            return "Choose one failed rule (not \"All failed rows\") to fix it."
+            return NO_RULE_SELECTED
         rule = self._rules_by_check().get(check)
         if rule is None:
             return "This check is not a rule of the current rule set."
         if not fixes.suggested_actions(rule):
             return "Outliers are warnings only: check them by hand. No automatic fix is offered."
         if self.row_flags is None or check not in self.row_flags or not bool(self.row_flags[check].any()):
-            return "This rule passed: nothing to fix."
+            return RULE_PASSED
         return ""
 
     def _update_fix_button(self) -> None:
-        problem = self._fix_problem(self.failed_combo.currentData())
+        """Fix... is enabled only for one failing rule; the tooltip and status tip say why not."""
+        current = self.failed_combo.currentData()
+        problem = self._fix_problem(current)
+        tip = problem or "Preview and apply a fix for the selected rule."
         self.fix_btn.setEnabled(not problem)
-        self.fix_btn.setToolTip(problem or "Preview and apply a fix for the selected rule.")
+        self.fix_btn.setToolTip(tip)
+        self.fix_btn.setStatusTip(tip)
+        # The tip only shows while "All failed rows" is chosen and there is a rule to pick.
+        has_failing_rules = self.failed_combo.count() > 1
+        self.fix_hint.setVisible(has_failing_rules and current in (None, ALL_FAILED))
 
     def _quality_context_menu(self, pos) -> None:
         index = self.quality_table.indexAt(pos)
@@ -1581,7 +1645,8 @@ class MainWindow(QMainWindow):
         action = menu.addAction("Fix this rule...")
         problem = self._fix_problem(check)
         action.setEnabled(not problem)
-        action.setToolTip(problem)
+        action.setToolTip(problem or "Preview and apply a fix for this rule.")
+        action.setStatusTip(problem or "Preview and apply a fix for this rule.")
         menu.setToolTipsVisible(True)
         action.triggered.connect(lambda: self.open_fix_dialog(check))
         menu.exec(self.quality_table.viewport().mapToGlobal(pos))
@@ -1591,7 +1656,7 @@ class MainWindow(QMainWindow):
         check = check if check is not None else self.failed_combo.currentData()
         problem = self._fix_problem(check)
         if problem:
-            self.statusBar().showMessage(problem, 10000)
+            self.show_status(problem)
             return False
         rule = self._rules_by_check()[check]
         failed = int(self.row_flags[check].sum())
@@ -1623,7 +1688,7 @@ class MainWindow(QMainWindow):
         if normalized_columns is not None:
             self.normalized_columns = normalized_columns
         self._refresh_after_change(rerun_kpis)
-        self.statusBar().showMessage(message, 10000)
+        self.show_status(message)
 
     def _refresh_after_change(self, rerun_kpis: bool = True) -> None:
         """Quality checks, previews, profile, KPIs and table sales (DuckDB) follow the working copy."""
@@ -1641,14 +1706,14 @@ class MainWindow(QMainWindow):
             message = ("Nothing to undo." if not len(self.change_log) else
                        f"Older fixes cannot be undone: only the last {SNAPSHOT_LIMIT} are kept. "
                        "Use Reset working copy to original to start again.")
-            self.statusBar().showMessage(message, 10000)
+            self.show_status(message)
             return False
         entry, (working, duplicates_removed, normalized_columns) = undone
         self.working_df = working
         self.duplicates_removed, self.normalized_columns = duplicates_removed, normalized_columns
         self._refresh_after_change()
-        self.statusBar().showMessage(f"Undone: {entry.rule} ({entry.action}). The working copy is back to the "
-                                     "state before that fix.", 10000)
+        self.show_status(f"Undone: {entry.rule} ({entry.action}). The working copy is back to the state before "
+                         "that fix.")
         return True
 
     def _refresh_change_log(self) -> None:
@@ -1733,7 +1798,7 @@ class MainWindow(QMainWindow):
 
     def _refresh_state_label(self) -> None:
         if self.working_df is None:
-            self.state_label.setText("No data loaded. Use <b>Open file...</b> or <b>Load sample data</b>.")
+            self.state_label.setText("No data loaded. Use <b>Open file...</b> or <b>Load demo data</b>.")
             return
         original_rows = len(self.original_df)
         working_rows = len(self.working_df)
