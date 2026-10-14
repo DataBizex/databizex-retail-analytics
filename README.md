@@ -1,4 +1,4 @@
-# DataBizex — Retail Analytics & Data Quality
+﻿# DataBizex — Retail Analytics & Data Quality
 
 A Windows desktop tool that checks retail sales exports for quality problems,
 calculates business KPIs with SQL, and prepares clean data for Power BI.
@@ -229,7 +229,7 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The suite has 129 tests, using small fixtures with hand-checked results. They
+The suite has 131 tests, using small fixtures with hand-checked results. They
 cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
 regional number and date detection and conversion; English, German, French and Dutch
 header guessing; source line numbers; profiling,
