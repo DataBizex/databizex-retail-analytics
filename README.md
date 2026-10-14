@@ -1,5 +1,7 @@
 # DataBizex — Retail Analytics & Data Quality
 
+[![tests](https://github.com/DataBizex/databizex-retail-analytics/actions/workflows/tests.yml/badge.svg)](https://github.com/DataBizex/databizex-retail-analytics/actions/workflows/tests.yml)
+
 A Windows desktop tool that checks retail sales exports for quality problems,
 calculates business KPIs with SQL, and prepares clean data for Power BI.
 
