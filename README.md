@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/54df7143-94ee-4f4d-8513-8fd6c83d0869
 
 ## Download
 
-Get DataBizex.exe from the [latest release](https://github.com/DataBizex/databizex-retail-analytics/releases/latest). No installation: download and run.
+Get `DataBizex.exe` from the [latest release](https://github.com/DataBizex/databizex-retail-analytics/releases/latest). No installation: download and run.
 
 On first launch, Windows SmartScreen may show "Windows protected your PC". This appears because the executable is not code-signed (a paid certificate), not because anything is wrong. Click **More info**, then **Run anyway**. You can also build the app yourself from this repository and compare.
 
