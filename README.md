@@ -112,10 +112,14 @@ wrong and nobody can tell why. Teams need to:
 **SQL & KPIs**
 - Working data loaded into an embedded DuckDB table `sales`.
 - Predefined SQL: headline KPIs, revenue by country, by category,
-  by month (valid dates only) with month-over-month change (`MoM %`, via `LAG`),
-  top 5 products.
+  by month (valid dates only) with month-over-month (`MoM %`, via `LAG`) and
+  year-over-year change (`YoY %`, against the same calendar month a year earlier),
+  top 5 products, and a Pareto analysis of products (share and cumulative share of net
+  revenue, the smallest set of top products reaching 80%, and "N of M products make 80%
+  of net revenue").
 - KPI cards: net revenue, units sold, estimated gross profit, gross margin, order lines used.
-- Charts (Matplotlib): revenue by country, monthly revenue trend.
+- Charts (Matplotlib): revenue by country, monthly revenue trend, and a Pareto chart
+  (product revenue bars with the cumulative share line and an 80% guide).
 - Shows whether KPIs use original or cleaned data, and how many rows were excluded.
 - The SQL text for each result is shown in the app.
 
@@ -196,8 +200,8 @@ All data logic lives outside `app/ui`, so almost all tests run without a window.
 
 All reporting queries are standard, read-only SQL
 (`SELECT`, `SUM`, `COUNT`, `CASE`, `COALESCE`, `NULLIF`, `CAST`, `ROUND`, `EXTRACT`,
-`GROUP BY`, `ORDER BY`, `LIMIT`, and the standard window function `LAG` with a named
-`WINDOW`). They run unchanged on MySQL 8+ and PostgreSQL (window functions need
+`GROUP BY`, `ORDER BY`, `LIMIT`, and the standard window functions `LAG`, running `SUM`
+and a `RANGE BETWEEN 12 PRECEDING AND 12 PRECEDING` frame, with named `WINDOW`s). They run unchanged on MySQL 8+ and PostgreSQL (window functions need
 MySQL 8 or later) against a `sales` table with the same columns. DuckDB is used only as an embedded
 engine, so no database server is needed.
 
@@ -248,16 +252,17 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The suite has 164 tests, using small fixtures with hand-checked results. They
+The suite has 170 tests, using small fixtures with hand-checked results. They
 cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
 regional number and date detection and conversion; English, German, French and Dutch
 header guessing; remembered file layouts; source line numbers; profiling,
 duplicate detection and removal (the source file stays unchanged); every validation
 rule type, the quality score formula and the default rule set's counts on the demo
 file; failed rows, their highlighted cells and their export; text normalization; KPI
-values and DuckDB aggregations; the recent files list; and the CSV, Excel and Power BI
-exports. Six tests use Qt's offscreen platform (four drive the main window, one the
-mapping dialog, one the table model), so no screen is needed.
+values, DuckDB aggregations, month-over-month, year-over-year and Pareto results; the
+recent files list; and the CSV, Excel and Power BI exports. Six tests use Qt's offscreen
+platform (four drive the main window, one the mapping dialog, one the table model), so
+no screen is needed.
 
 ## Build the executable
 

@@ -90,7 +90,7 @@ ABOUT_TEXT = (
     "industry workflows: validating messy sales exports, computing business KPIs and "
     "preparing data for Power BI. DataBizex.com"
 )
-KPI_TABLE_KEYS = ["by_country", "by_category", "by_month", "top_products"]
+KPI_TABLE_KEYS = ["by_country", "by_category", "by_month", "top_products", "pareto"]
 FAILED_ROWS_SHOWN = 500
 SCORE_TITLES = {
     "overall": "Quality score",
@@ -108,15 +108,38 @@ SCORE_TOOLTIP = (
 
 
 def _mom_text(value: float) -> str:
-    """Month-over-month change as shown in the table: "+12.4%", "-3.1%" or "n/a"."""
+    """Month-over-month (or year-over-year) change as shown in the table: "+12.4%", "-3.1%" or "n/a"."""
     return "n/a" if pd.isna(value) else f"{value:+.1f}%"
+
+
+def _share_text(value: float) -> str:
+    return "n/a" if pd.isna(value) else f"{value:.1f}%"
+
+
+# Per query: {result column: (shown as, formatter)}; only the table view uses these.
+DISPLAY_COLUMNS = {
+    "by_month": {"mom_pct": ("MoM %", _mom_text), "yoy_pct": ("YoY %", _mom_text)},
+    "pareto": {"share_pct": ("Share %", _share_text), "cum_share_pct": ("Cumulative %", _share_text),
+               "in_top_80": ("Top 80%", lambda v: "Yes" if v == 1 else "")},
+}
 
 
 def _display_frame(key: str, frame: pd.DataFrame | None) -> pd.DataFrame | None:
     """Query result as shown in the SQL & KPIs table (the stored and exported results keep raw numbers)."""
-    if key == "by_month" and frame is not None and "mom_pct" in frame.columns:
-        frame = frame.assign(mom_pct=frame["mom_pct"].map(_mom_text)).rename(columns={"mom_pct": "MoM %"})
+    if frame is None:
+        return frame
+    columns = {col: spec for col, spec in DISPLAY_COLUMNS.get(key, {}).items() if col in frame.columns}
+    if columns:
+        frame = frame.assign(**{col: frame[col].map(fmt) for col, (_name, fmt) in columns.items()})
+        frame = frame.rename(columns={col: name for col, (name, _fmt) in columns.items()})
     return frame
+
+
+def pareto_summary(pareto: pd.DataFrame | None) -> str:
+    """ "N of M products make 80% of net revenue." ("" without products)."""
+    if pareto is None or pareto.empty:
+        return ""
+    return f"{int(pareto['in_top_80'].sum()):,} of {len(pareto):,} products make 80% of net revenue."
 
 
 def _money(value: float) -> str:
@@ -149,8 +172,14 @@ class ChartCanvas(FigureCanvasQTAgg):
         self.ax = self.figure.add_subplot(111)
         self.clear("Run KPI queries to draw this chart")
 
+    def reset(self):
+        """A fresh figure with one axes (drops a secondary axis from an earlier draw)."""
+        self.figure.clear()
+        self.ax = self.figure.add_subplot(111)
+        return self.ax
+
     def clear(self, message: str) -> None:
-        self.ax.clear()
+        self.reset()
         self.ax.set_axis_off()
         self.ax.text(0.5, 0.5, message, ha="center", va="center", color="#777")
         self.draw_idle()
@@ -434,6 +463,9 @@ class MainWindow(QMainWindow):
             self.query_combo.addItem(QUERIES[key].title, key)
         self.query_combo.currentIndexChanged.connect(self._show_selected_query)
         left_layout.addWidget(self.query_combo)
+        self.pareto_label = QLabel()
+        self.pareto_label.setVisible(False)
+        left_layout.addWidget(self.pareto_label)
         self.result_table = DataTable()
         left_layout.addWidget(self.result_table, 2)
         sql_label = QLabel("SQL (standard, read-only; runs unchanged on MySQL/PostgreSQL):")
@@ -448,8 +480,10 @@ class MainWindow(QMainWindow):
         right_layout.setContentsMargins(0, 0, 0, 0)
         self.country_chart = ChartCanvas()
         self.month_chart = ChartCanvas()
+        self.pareto_chart = ChartCanvas()
         right_layout.addWidget(self.country_chart)
         right_layout.addWidget(self.month_chart)
+        right_layout.addWidget(self.pareto_chart)
 
         splitter.addWidget(left)
         splitter.addWidget(right)
@@ -884,6 +918,7 @@ class MainWindow(QMainWindow):
         self.exclusion_label.setText("")
         self.country_chart.clear("Run KPI queries to draw this chart")
         self.month_chart.clear("Run KPI queries to draw this chart")
+        self.pareto_chart.clear("Run KPI queries to draw this chart")
         self._show_selected_query()
 
     def _show_selected_query(self) -> None:
@@ -892,6 +927,9 @@ class MainWindow(QMainWindow):
             return
         self.sql_view.setPlainText(QUERIES[key].sql)
         self.result_table.show_frame(_display_frame(key, self.kpi_results.get(key)), float_decimals=2)
+        summary = pareto_summary(self.kpi_results.get("pareto")) if key == "pareto" else ""
+        self.pareto_label.setText(f"<b>{summary}</b>")
+        self.pareto_label.setVisible(bool(summary))
 
     def _draw_charts(self) -> None:
         euro = FuncFormatter(lambda v, _pos: f"€{v / 1000:,.0f}k")
@@ -929,6 +967,27 @@ class MainWindow(QMainWindow):
             self.month_chart.clear("Monthly trend: n/a (order_date not available)")
         else:
             self.month_chart.clear("No rows with valid dates")
+
+        pareto = self.kpi_results.get("pareto")
+        if pareto is not None and not pareto.empty and pareto["net_revenue"].sum() > 0:
+            ax = self.pareto_chart.reset()
+            positions = list(range(len(pareto)))
+            ax.bar(positions, pareto["net_revenue"], color="#2f6f9f")
+            ax.yaxis.set_major_formatter(euro)
+            ax.set_title("Pareto: net revenue by product")
+            step = max(1, len(pareto) // 8)
+            ticks = list(range(0, len(pareto), step))
+            ax.set_xticks(ticks)
+            ax.set_xticklabels([pareto["product"].iloc[i] for i in ticks], rotation=45, ha="right")
+            ax.grid(axis="y", alpha=0.3)
+            share = ax.twinx()
+            share.plot(positions, pareto["cum_share_pct"], marker="o", markersize=3, color="#c0504d", linewidth=1.5)
+            share.axhline(80, linestyle=":", color="#555", linewidth=1)
+            share.set_ylim(0, 105)
+            share.yaxis.set_major_formatter(FuncFormatter(lambda v, _pos: f"{v:.0f}%"))
+            self.pareto_chart.draw_idle()
+        else:
+            self.pareto_chart.clear("No valid rows for this chart")
 
     # ------------------------------------------------------------------ exports
     def _run_export(self, description: str, func, *args) -> object | None:

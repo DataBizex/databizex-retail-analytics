@@ -1,8 +1,8 @@
 """Embedded DuckDB database holding the working dataset as table `sales`.
 
 All reporting queries are plain, read-only standard SQL (SELECT, SUM, CASE,
-EXTRACT, GROUP BY, ORDER BY, LIMIT, and the LAG window function) so they also run on
-MySQL 8+ and PostgreSQL.
+EXTRACT, GROUP BY, ORDER BY, LIMIT, and window functions such as LAG and running SUM)
+so they also run on MySQL 8+ and PostgreSQL.
 """
 
 from __future__ import annotations
@@ -80,7 +80,9 @@ ORDER BY net_revenue DESC""",
     order_month,
     net_revenue,
     ROUND(CAST(100.0 * (net_revenue - LAG(net_revenue) OVER w)
-               / NULLIF(LAG(net_revenue) OVER w, 0) AS DECIMAL(38, 4)), 1) AS mom_pct
+               / NULLIF(LAG(net_revenue) OVER w, 0) AS DECIMAL(38, 4)), 1) AS mom_pct,
+    ROUND(CAST(100.0 * (net_revenue - MAX(net_revenue) OVER prior_year)
+               / NULLIF(MAX(net_revenue) OVER prior_year, 0) AS DECIMAL(38, 4)), 1) AS yoy_pct
 FROM (
     SELECT
         EXTRACT(YEAR FROM order_date)  AS order_year,
@@ -90,7 +92,10 @@ FROM (
     WHERE kpi_valid = 1 AND date_valid = 1
     GROUP BY EXTRACT(YEAR FROM order_date), EXTRACT(MONTH FROM order_date)
 ) AS monthly
-WINDOW w AS (ORDER BY order_year, order_month)
+WINDOW w AS (ORDER BY order_year, order_month),
+       -- exactly the same calendar month one year earlier (12 months back), if present
+       prior_year AS (ORDER BY order_year * 12 + order_month
+                      RANGE BETWEEN 12 PRECEDING AND 12 PRECEDING)
 ORDER BY order_year, order_month""",
         ),
         NamedQuery(
@@ -105,6 +110,30 @@ WHERE kpi_valid = 1
 GROUP BY COALESCE(product, '{UNKNOWN_LABEL}')
 ORDER BY net_revenue DESC
 LIMIT 5""",
+        ),
+        NamedQuery(
+            "pareto",
+            "Top products (Pareto)",
+            f"""SELECT
+    product,
+    net_revenue,
+    ROUND(CAST(100.0 * net_revenue / NULLIF(SUM(net_revenue) OVER (), 0) AS DECIMAL(38, 4)), 1) AS share_pct,
+    ROUND(CAST(100.0 * SUM(net_revenue) OVER running
+               / NULLIF(SUM(net_revenue) OVER (), 0) AS DECIMAL(38, 4)), 1) AS cum_share_pct,
+    -- 1 while the products before this one are still below 80%: the product that
+    -- reaches or crosses 80% is the last one included
+    CASE WHEN 100.0 * (SUM(net_revenue) OVER running - net_revenue) < 80.0 * SUM(net_revenue) OVER ()
+         THEN 1 ELSE 0 END AS in_top_80
+FROM (
+    SELECT
+        COALESCE(product, '{UNKNOWN_LABEL}') AS product,
+        SUM({NET_REVENUE_SQL})  AS net_revenue
+    FROM sales
+    WHERE kpi_valid = 1
+    GROUP BY COALESCE(product, '{UNKNOWN_LABEL}')
+) AS by_product
+WINDOW running AS (ORDER BY net_revenue DESC, product ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)
+ORDER BY net_revenue DESC, product""",
         ),
     ]
 }
