@@ -13,11 +13,14 @@ from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
 from PySide6.QtGui import QBrush, QColor
 from PySide6.QtWidgets import QAbstractItemView, QHeaderView, QTableView
 
+from app.data.display import format_whole
+
 STATUS_COLOURS = {
     "OK": QColor("#d8f0dc"),
     "Issue": QColor("#fde2c8"),
     "Unavailable": QColor("#e4e4e4"),
 }
+FAILED_CELL_COLOUR = QColor("#f8cccc")  # light red; black text stays readable
 
 
 class DataFrameModel(QAbstractTableModel):
@@ -25,11 +28,20 @@ class DataFrameModel(QAbstractTableModel):
         super().__init__()
         self._df = df if df is not None else pd.DataFrame()
         self._float_decimals = float_decimals
+        self._highlight: set[tuple[int, int]] = set()
+        self._whole: set[int] = set()
 
-    def set_frame(self, df: pd.DataFrame | None, float_decimals: int | None = None) -> None:
+    def set_frame(self, df: pd.DataFrame | None, float_decimals: int | None = None,
+                  highlight: set[tuple[int, str]] | None = None,
+                  whole_number_columns: set[str] | None = None) -> None:
+        """highlight: (row position, column name) cells to colour; whole_number_columns: float
+        columns shown without a trailing ".0" (see app.data.display)."""
         self.beginResetModel()
         self._df = df if df is not None else pd.DataFrame()
         self._float_decimals = float_decimals
+        positions = {name: i for i, name in enumerate(self._df.columns)}
+        self._highlight = {(row, positions[col]) for row, col in highlight or () if col in positions}
+        self._whole = {positions[col] for col in whole_number_columns or () if col in positions}
         self.endResetModel()
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:  # noqa: N802 (Qt API)
@@ -38,9 +50,11 @@ class DataFrameModel(QAbstractTableModel):
     def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:  # noqa: N802
         return 0 if parent.isValid() else self._df.shape[1]
 
-    def _format(self, value: object) -> str:
+    def _format(self, value: object, whole: bool = False) -> str:
         if value is None or (not isinstance(value, str) and pd.isna(value)):
             return ""
+        if whole and isinstance(value, float):
+            return format_whole(value)
         if isinstance(value, float) and self._float_decimals is not None:
             return f"{value:,.{self._float_decimals}f}"
         if isinstance(value, pd.Timestamp):
@@ -52,9 +66,11 @@ class DataFrameModel(QAbstractTableModel):
             return None
         value = self._df.iat[index.row(), index.column()]
         if role == Qt.DisplayRole:
-            return self._format(value)
+            return self._format(value, index.column() in self._whole)
         if role == Qt.TextAlignmentRole and isinstance(value, numbers.Number) and not isinstance(value, bool):
             return int(Qt.AlignRight | Qt.AlignVCenter)
+        if role == Qt.BackgroundRole and (index.row(), index.column()) in self._highlight:
+            return QBrush(FAILED_CELL_COLOUR)
         if role == Qt.BackgroundRole and self._df.columns[index.column()] == "status":
             colour = STATUS_COLOURS.get(str(value))
             return QBrush(colour) if colour else None
@@ -84,8 +100,10 @@ class DataTable(QTableView):
         self.horizontalHeader().setStretchLastSection(stretch_last)
         self.verticalHeader().setDefaultSectionSize(22)
 
-    def show_frame(self, df: pd.DataFrame | None, float_decimals: int | None = None) -> None:
-        self.model_.set_frame(df, float_decimals)
+    def show_frame(self, df: pd.DataFrame | None, float_decimals: int | None = None,
+                   highlight: set[tuple[int, str]] | None = None,
+                   whole_number_columns: set[str] | None = None) -> None:
+        self.model_.set_frame(df, float_decimals, highlight, whole_number_columns)
         self.resizeColumnsToContents()
         for col in range(self.model_.columnCount()):
             if self.columnWidth(col) > 320:

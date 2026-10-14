@@ -41,6 +41,9 @@ wrong and nobody can tell why. Teams need to:
 
 **Import & Preview**
 - Open `.csv` or `.xlsx` (legacy `.xls` is rejected with an explanation).
+- **File > Open Recent** lists the last 10 opened files (name, full path as tooltip), stored
+  locally; a file that no longer exists is removed from the list when clicked. The bundled
+  sample is not listed.
 - Detects `,` `;` tab or `|` delimiters, UTF-8 or Windows-1252 encoding.
 - Detects regional number and date formats per column: decimal comma (`43,92`,
   `1.234,56`), thousands separators, and `YYYY-MM-DD`, `DD.MM.YYYY`, `DD/MM/YYYY` or
@@ -89,6 +92,10 @@ wrong and nobody can tell why. Teams need to:
   rows that failed it, with `source_row` (the line in the source file, header = line 1) and
   `failed_rules` (every rule the row failed). Up to 500 rows are shown; **Export failed rows
   to CSV...** writes all of them.
+- In the failed rows table, the cells that caused each failure have a light red background
+  (the rule's column or columns; for missing values, the empty cells). Rules without a
+  column, such as exact duplicate rows, highlight nothing. Display only: the data is not
+  changed.
 - **Remove exact duplicates** on the in-memory working copy only.
 - **Text variants** (warning, not scored): values in a categorical-looking text column that
   are the same apart from case or spacing (" germany", "GERMANY", "Germany "), and values
@@ -241,15 +248,16 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The suite has 149 tests, using small fixtures with hand-checked results. They
+The suite has 164 tests, using small fixtures with hand-checked results. They
 cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
 regional number and date detection and conversion; English, German, French and Dutch
 header guessing; remembered file layouts; source line numbers; profiling,
 duplicate detection and removal (the source file stays unchanged); every validation
 rule type, the quality score formula and the default rule set's counts on the demo
-file; failed rows and their export; text normalization; KPI values and DuckDB
-aggregations; and the CSV, Excel and Power BI exports. Four tests use Qt's offscreen
-platform (three drive the main window, one the mapping dialog), so no screen is needed.
+file; failed rows, their highlighted cells and their export; text normalization; KPI
+values and DuckDB aggregations; the recent files list; and the CSV, Excel and Power BI
+exports. Six tests use Qt's offscreen platform (four drive the main window, one the
+mapping dialog, one the table model), so no screen is needed.
 
 ## Build the executable
 

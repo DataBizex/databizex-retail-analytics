@@ -51,8 +51,9 @@ from app.data.formats import (
     detect_formats,
     import_summary,
 )
-from app.data import layout_memory
-from app.data.failed_rows import ALL_FAILED, failed_rule_choices, failed_rows
+from app.data import layout_memory, recent_files
+from app.data.display import whole_number_columns
+from app.data.failed_rows import ALL_FAILED, failed_cells, failed_rule_choices, failed_rows
 from app.data.loader import FILE_DIALOG_FILTER, DataLoadError, load_file, with_source_rows
 from app.data.normalize import apply_normalization, find_text_variants
 from app.data.profiler import dataset_overview, numeric_summary, profile_columns
@@ -202,11 +203,41 @@ class MainWindow(QMainWindow):
         open_action = QAction("&Open data file...", self, shortcut="Ctrl+O", triggered=self.open_file)
         sample_action = QAction("Load &sample data", self, triggered=self.load_sample)
         exit_action = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
-        file_menu.addActions([open_action, sample_action])
+        file_menu.addAction(open_action)
+        self.recent_menu = file_menu.addMenu("Open &Recent")
+        self.recent_menu.setToolTipsVisible(True)
+        file_menu.addAction(sample_action)
         file_menu.addSeparator()
         file_menu.addAction(exit_action)
+        file_menu.aboutToShow.connect(self._rebuild_recent_menu)
+        self._rebuild_recent_menu()
         help_menu = self.menuBar().addMenu("&Help")
         help_menu.addAction(QAction("&About DataBizex", self, triggered=self.show_about))
+
+    def _rebuild_recent_menu(self) -> None:
+        """File > Open Recent from recent_files.json; rebuilt each time the File menu opens."""
+        self.recent_menu.clear()
+        paths = recent_files.get_paths()
+        for path in paths:
+            action = QAction(path.name.replace("&", "&&"), self.recent_menu,
+                             triggered=lambda _checked=False, p=path: self._open_recent(p))
+            action.setToolTip(str(path))
+            action.setStatusTip(str(path))
+            self.recent_menu.addAction(action)
+        if not paths:
+            self.recent_menu.addAction(QAction("(no recent files)", self.recent_menu, enabled=False))
+        self.recent_menu.addSeparator()
+        self.recent_menu.addAction(QAction("Clear recent files", self.recent_menu, enabled=bool(paths),
+                                           triggered=self._clear_recent_files))
+
+    def _open_recent(self, path: Path) -> bool:
+        if not path.is_file():
+            recent_files.remove_path(path)  # load_path below shows the usual "File not found" error
+        return self.load_path(path)
+
+    def _clear_recent_files(self) -> None:
+        recent_files.clear()
+        self._rebuild_recent_menu()
 
     def _build_ui(self) -> None:
         central = QWidget()
@@ -589,6 +620,10 @@ class MainWindow(QMainWindow):
         if self.column_mapping and self.run_kpis():
             message += " — KPIs calculated with your column mapping"
         self.statusBar().showMessage(message, 10000)
+        # The bundled sample has its own menu entry, and a one-file build unpacks it to a new
+        # temporary folder on every start, so a recent entry for it would soon be stale.
+        if path.resolve() != sample_data_path().resolve():
+            recent_files.add_path(path)
         return True
 
     def _ask_import_options(self, path: Path, detection: FormatDetection,
@@ -763,7 +798,12 @@ class MainWindow(QMainWindow):
             return
         table, total = failed_rows(self.working_df, self.quality_summary, self.row_flags, key,
                                    limit=FAILED_ROWS_SHOWN, rules=self.rules)
-        self.failed_table.show_frame(table, float_decimals=2)
+        labels = table.iloc[:, 0].tolist()  # source_row, the working copy's index
+        cells = failed_cells(self.working_df, self.quality_summary, self.row_flags, key, self.rules, labels)
+        position = {label: i for i, label in enumerate(labels)}
+        self.failed_table.show_frame(table, float_decimals=2,
+                                     highlight={(position[label], col) for label, col in cells},
+                                     whole_number_columns=whole_number_columns(self.working_df))
         if total > len(table):
             self.failed_count_label.setText(f"Showing {len(table):,} of {total:,} rows")
         else:
@@ -1026,7 +1066,8 @@ class MainWindow(QMainWindow):
             f"{overview['missing_cells']:,} missing cells (original import). "
             f"Showing the first {min(PREVIEW_ROWS, len(self.original_df))} rows."
         )
-        self.preview_table.show_frame(self.original_df.head(PREVIEW_ROWS))
+        self.preview_table.show_frame(self.original_df.head(PREVIEW_ROWS),
+                                      whole_number_columns=whole_number_columns(self.original_df))
         self.profile_table.show_frame(profile_columns(self.original_df), float_decimals=2)
         # Uses the import-converted values (e.g. "43,92" -> 43.92), before mapping or cleaning.
         imported = self.conversion.df if self.conversion is not None else self.original_df
@@ -1036,9 +1077,9 @@ class MainWindow(QMainWindow):
         self.quality_table.show_frame(summary)
         self._show_score(quality_score(self.rules, summary, row_flags))
         self._refresh_failed_rows()
-        self.change_table.show_frame(change_summary(self.original_df, df, self.rules,
-                                                    self._normalized_source_columns(),
-                                                    self.column_mapping))
+        change = change_summary(self.original_df, df, self.rules, self._normalized_source_columns(),
+                                self.column_mapping)
+        self.change_table.show_frame(change, whole_number_columns=whole_number_columns(change))
         self.reset_btn.setEnabled(self.duplicates_removed > 0 or bool(self.normalized_columns))
 
     def show_about(self) -> None:

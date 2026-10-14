@@ -89,3 +89,43 @@ def failed_rows(df: pd.DataFrame, summary: pd.DataFrame, row_flags: pd.DataFrame
     table.insert(0, row_col, index.to_numpy())
     table[rules_col] = [FAILED_RULES_SEPARATOR.join(names[row]) for row in listed]
     return table.reset_index(drop=True), total
+
+
+def _rule_columns(rule: Rule) -> list[str]:
+    """The columns a rule checks; [] when it has no specific column (e.g. whole-row duplicates)."""
+    if rule.type == "unique":
+        return list(rule.params.get("columns", []))
+    if rule.type == "cross_column":
+        return [rule.column, rule.params["other"]]
+    return [] if rule.column == ALL_COLUMNS else [rule.column]
+
+
+def failed_cells(df: pd.DataFrame, summary: pd.DataFrame, row_flags: pd.DataFrame, selection: str,
+                 rules: list[Rule], index=None) -> set[tuple[object, str]]:
+    """(row label, column) of the cells that made rows fail, for highlighting.
+
+    The checks are the selected one, or for ALL_FAILED every error rule with failures
+    (as in failed_row_mask). Each failed check marks its own column(s) in that row; the
+    aggregate missing-values check marks the row's empty cells. Rules without a column
+    (whole-row duplicates) mark nothing. index limits the rows (default: all rows).
+    """
+    checks = failed_checks(summary, "error") if selection == ALL_FAILED else [selection]
+    by_name = {rule.name: rule for rule in expand_rules(rules, df)}
+    rows = row_flags.index if index is None else pd.Index(index)
+    cells: set[tuple[object, str]] = set()
+    for check in checks:
+        rule = by_name.get(check)
+        if rule is None or check not in row_flags.columns:
+            continue
+        flags = row_flags.loc[rows, check]
+        failing = flags.index[flags.to_numpy(dtype=bool)]
+        if failing.empty:
+            continue
+        if rule.type == "not_null" and rule.column == ALL_COLUMNS:
+            missing = df.loc[failing].isna()
+            for label, row in zip(missing.index, missing.to_numpy()):
+                cells.update((label, column) for column in missing.columns[row])
+        else:
+            columns = [c for c in _rule_columns(rule) if c in df.columns]
+            cells.update((label, column) for label in failing for column in columns)
+    return cells
