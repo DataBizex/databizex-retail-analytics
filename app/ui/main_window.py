@@ -13,12 +13,13 @@ import matplotlib
 
 matplotlib.use("QtAgg")
 
+import duckdb
 import pandas as pd
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from matplotlib.ticker import FuncFormatter
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QFont
+from PySide6.QtGui import QAction, QFont, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -68,6 +69,7 @@ from app.data.rules import (
     validate,
 )
 from app.database.duckdb_manager import QUERIES, DuckDBManager
+from app.database.sql_guard import GuardError
 from app.exports.exporter import (
     ExportError,
     export_csv,
@@ -142,6 +144,16 @@ def pareto_summary(pareto: pd.DataFrame | None) -> str:
     return f"{int(pareto['in_top_80'].sum()):,} of {len(pareto):,} products make 80% of net revenue."
 
 
+def _engine_message(exc: Exception) -> str:
+    """DuckDB's message without its "LINE 1: ..." caret block, which only lines up in a monospace font."""
+    return str(exc).split("\nLINE ")[0].strip()
+
+
+def _short_label(text: object, length: int = 16) -> str:
+    text = str(text)
+    return text if len(text) <= length else text[:length - 1] + "…"
+
+
 def _money(value: float) -> str:
     return "n/a" if pd.isna(value) else f"€ {value:,.2f}"
 
@@ -213,6 +225,11 @@ class MainWindow(QMainWindow):
         self.kpi_headline: dict[str, float] = {}
         self.kpi_basis = ""
         self.db = DuckDBManager()
+        # True while table `sales` holds the current working data (set by loading it, cleared with the KPIs).
+        self.sales_current = False
+        # Last successful custom SQL query and its displayed rows (None after the data changes).
+        self.custom_statement: str | None = None
+        self.custom_result: pd.DataFrame | None = None
         # Validation rule set: the shipped retail default until the user loads another.
         self.rules = []
         self.rules_source = "no rule set"
@@ -474,6 +491,7 @@ class MainWindow(QMainWindow):
         self.sql_view.setReadOnly(True)
         self.sql_view.setFont(QFont("Consolas", 9))
         left_layout.addWidget(self.sql_view, 1)
+        left_layout.addWidget(self._build_custom_sql(), 2)
 
         right = QWidget()
         right_layout = QVBoxLayout(right)
@@ -491,6 +509,35 @@ class MainWindow(QMainWindow):
         layout.addWidget(splitter, 1)
         self._show_selected_query()
         return tab
+
+    def _build_custom_sql(self) -> QWidget:
+        box = QGroupBox("Custom SQL (read-only: one SELECT or WITH query on table sales)")
+        layout = QVBoxLayout(box)
+        self.custom_sql = QPlainTextEdit("SELECT * FROM sales LIMIT 100")
+        self.custom_sql.setFont(QFont("Consolas", 9))
+        self.custom_sql.setMaximumHeight(90)
+        layout.addWidget(self.custom_sql)
+        for keys in ("Ctrl+Return", "Ctrl+Enter"):  # main and keypad Enter
+            shortcut = QShortcut(QKeySequence(keys), self.custom_sql)
+            shortcut.setContext(Qt.WidgetWithChildrenShortcut)
+            shortcut.activated.connect(self.run_custom_sql)
+        buttons = QHBoxLayout()
+        self.custom_run_btn = QPushButton("Run (Ctrl+Enter)")
+        self.custom_run_btn.clicked.connect(self.run_custom_sql)
+        self.custom_export_btn = QPushButton("Export result to CSV...")
+        self.custom_export_btn.clicked.connect(self.export_custom_result)
+        self.custom_export_btn.setEnabled(False)
+        buttons.addWidget(self.custom_run_btn)
+        buttons.addWidget(self.custom_export_btn)
+        buttons.addStretch(1)
+        layout.addLayout(buttons)
+        self.custom_message = QLabel()
+        self.custom_message.setWordWrap(True)
+        self.custom_message.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        layout.addWidget(self.custom_message)
+        self.custom_table = DataTable()
+        layout.addWidget(self.custom_table, 1)
+        return box
 
     def _build_export_tab(self) -> QWidget:
         tab = QWidget()
@@ -870,6 +917,7 @@ class MainWindow(QMainWindow):
         try:
             with self._busy("Running SQL queries in DuckDB..."):
                 prepared = self.db.load_sales(self.working_df, self.unavailable_columns)
+                self.sales_current = True
                 results = self.db.run_all()
                 headline = self.db.headline()
         except KpiInputError as exc:
@@ -907,6 +955,10 @@ class MainWindow(QMainWindow):
         return True
 
     def _clear_kpis(self) -> None:
+        """Called whenever the working data changes: KPIs, table sales and the custom result are stale."""
+        self.sales_current = False
+        if self.custom_result is not None:
+            self._clear_custom_result("The data changed. Run the query again to see current results.")
         self.kpi_results = {}
         self.kpi_headline = {}
         self.kpi_basis = ""
@@ -930,6 +982,75 @@ class MainWindow(QMainWindow):
         summary = pareto_summary(self.kpi_results.get("pareto")) if key == "pareto" else ""
         self.pareto_label.setText(f"<b>{summary}</b>")
         self.pareto_label.setVisible(bool(summary))
+
+    # ------------------------------------------------------------------ custom SQL
+    def _custom_note(self, text: str, error: bool = False, detail: str = "") -> None:
+        """The line under the editor: a row count, or an error sentence plus its technical detail."""
+        self.custom_message.setStyleSheet("color: #a61b1b;" if error else "color: #555;")
+        self.custom_message.setText(text + (f"\nTechnical detail: {detail}" if detail else ""))
+
+    def _clear_custom_result(self, note: str = "") -> None:
+        self.custom_statement, self.custom_result = None, None
+        self.custom_table.show_frame(None)
+        self.custom_export_btn.setEnabled(False)
+        self._custom_note(note)
+
+    def run_custom_sql(self) -> bool:
+        """Run the editor's query (guarded, read-only) on table sales; errors are shown under the editor."""
+        if self.working_df is None:
+            self._custom_note("Load data first: the query runs on table sales, built from the working data.",
+                              error=True)
+            return False
+        text = self.custom_sql.toPlainText()
+        try:
+            with self._busy("Running your SQL query in DuckDB..."):
+                if not self.sales_current:  # the same table the KPI queries use; the cards are not touched
+                    self.db.load_sales(self.working_df, self.unavailable_columns)
+                    self.sales_current = True
+                result, total = self.db.run_custom(text)
+        except GuardError as exc:
+            self._custom_note(str(exc), error=True)
+            return False
+        except KpiInputError as exc:
+            self._custom_note("The working data could not be loaded into table sales.", error=True, detail=str(exc))
+            return False
+        except duckdb.Error as exc:
+            self._custom_note("DuckDB could not run this query. Check the table and column names and the "
+                              "SQL syntax.", error=True, detail=_engine_message(exc))
+            return False
+        except Exception as exc:  # noqa: BLE001
+            self._unexpected("running the SQL query", exc)
+            return False
+        self.custom_statement, self.custom_result = text, result
+        self.custom_table.show_frame(result, whole_number_columns=whole_number_columns(result))
+        self.custom_export_btn.setEnabled(True)
+        if total > len(result):
+            self._custom_note(f"Showing first {len(result):,} of {total:,} rows.")
+        else:
+            self._custom_note(f"{total:,} row{'s' if total != 1 else ''}.")
+        return True
+
+    def export_custom_result(self) -> None:
+        """Write every row of the last successful custom query (the table shows at most 1,000)."""
+        if self.custom_statement is None:
+            QMessageBox.information(self, "No query result", "Run a custom SQL query first.")
+            return
+        path = self._ask_save_path("Export query result (CSV)", f"{self._default_stem()}_query.csv", "CSV (*.csv)")
+        if not path:
+            return
+        if self.source_path and path.resolve() == self.source_path.resolve():
+            self._error("Export blocked", "Choose a different file: the source file is never overwritten.")
+            return
+
+        def write() -> int:
+            full, total = self.db.run_custom(self.custom_statement, max_rows=None)
+            export_csv(full, path)
+            return total
+
+        total = self._run_export("Exporting query result", write)
+        if total is not None:
+            self._log_export(f"Custom SQL result exported: {path} ({total:,} rows)")
+            QMessageBox.information(self, "Export complete", f"Saved {total:,} rows:\n{path}")
 
     def _draw_charts(self) -> None:
         euro = FuncFormatter(lambda v, _pos: f"€{v / 1000:,.0f}k")
@@ -978,7 +1099,8 @@ class MainWindow(QMainWindow):
             step = max(1, len(pareto) // 8)
             ticks = list(range(0, len(pareto), step))
             ax.set_xticks(ticks)
-            ax.set_xticklabels([pareto["product"].iloc[i] for i in ticks], rotation=45, ha="right")
+            ax.set_xticklabels([_short_label(pareto["product"].iloc[i]) for i in ticks], rotation=45, ha="right",
+                               fontsize=8)
             ax.grid(axis="y", alpha=0.3)
             share = ax.twinx()
             share.plot(positions, pareto["cum_share_pct"], marker="o", markersize=3, color="#c0504d", linewidth=1.5)

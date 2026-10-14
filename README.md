@@ -122,6 +122,13 @@ wrong and nobody can tell why. Teams need to:
   (product revenue bars with the cumulative share line and an 80% guide).
 - Shows whether KPIs use original or cleaned data, and how many rows were excluded.
 - The SQL text for each result is shown in the app.
+- **Custom SQL** editor (read-only): one `SELECT` or `WITH` query on table `sales`, run with
+  **Run** or Ctrl+Enter. A guard (`app/database/sql_guard.py`) rejects anything else: more
+  than one statement, and words such as `INSERT`, `UPDATE`, `DELETE`, `DROP`, `CREATE`,
+  `ATTACH`, `COPY`, `SET` or `PRAGMA` outside quoted text and comments. Errors from the guard
+  or from DuckDB are shown under the editor with the technical detail. Up to 1,000 rows are
+  shown ("Showing first 1,000 of N rows"); **Export result to CSV...** writes every row.
+  The query never changes the data, the KPI cards or the predefined queries.
 
 **Export & Reporting**
 - Working data to CSV or Excel; quality report, failed rows and KPI tables to CSV.
@@ -252,7 +259,7 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The suite has 170 tests, using small fixtures with hand-checked results. They
+The suite has 228 tests, using small fixtures with hand-checked results. They
 cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
 regional number and date detection and conversion; English, German, French and Dutch
 header guessing; remembered file layouts; source line numbers; profiling,
@@ -260,9 +267,9 @@ duplicate detection and removal (the source file stays unchanged); every validat
 rule type, the quality score formula and the default rule set's counts on the demo
 file; failed rows, their highlighted cells and their export; text normalization; KPI
 values, DuckDB aggregations, month-over-month, year-over-year and Pareto results; the
-recent files list; and the CSV, Excel and Power BI exports. Six tests use Qt's offscreen
-platform (four drive the main window, one the mapping dialog, one the table model), so
-no screen is needed.
+custom SQL guard and editor; the recent files list; and the CSV, Excel and Power BI
+exports. Seven tests use Qt's offscreen platform (five drive the main window, one the
+mapping dialog, one the table model), so no screen is needed.
 
 ## Build the executable
 
@@ -337,7 +344,6 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 - One table at a time, held in memory: the whole file is loaded, so very large files
   (millions of rows) are slow.
 - No joins: data from several files or tables cannot be combined.
-- No free-form SQL editor; only the predefined queries run.
 - Executables are not code-signed, so Windows SmartScreen may warn on first launch from a
   download.
 - Legacy `.xls` files are not supported (save as `.xlsx` or `.csv`), and only the first
@@ -360,7 +366,6 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 ## Future improvements
 
 - Removing duplicates by key columns (detection already works via `unique` rules).
-- Read-only custom SQL editor with a SELECT-only guard.
 - Background thread for loading very large files.
 - Windows installer with Inno Setup once the build is stable.
 - PDF summary report of the quality checks and KPIs.

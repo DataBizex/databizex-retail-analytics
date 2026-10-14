@@ -15,6 +15,7 @@ import duckdb
 import pandas as pd
 
 from app.analytics.kpis import UNKNOWN_LABEL, gross_margin, prepare_sales_frame
+from app.database.sql_guard import check_sql
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ TABLE_COLUMNS = [
     "quantity", "unit_price", "discount_pct", "unit_cost", "kpi_valid", "date_valid",
 ]
 
+CUSTOM_MAX_ROWS = 1000  # rows of a custom query result kept for display
 NET_REVENUE_SQL = "quantity * unit_price * (1 - discount_pct / 100.0)"
 GROSS_PROFIT_SQL = f"({NET_REVENUE_SQL}) - quantity * unit_cost"
 
@@ -187,6 +189,28 @@ class DuckDBManager:
                                        for y, m in zip(result["order_year"], result["order_month"])])
             result = result.drop(columns=["order_year", "order_month"])
         return result
+
+    def run_custom(self, sql: str, max_rows: int | None = CUSTOM_MAX_ROWS) -> tuple[pd.DataFrame, int]:
+        """(first max_rows result rows, or all with None; total row count) of a user's query.
+
+        The query passes sql_guard.check_sql first (GuardError if it is not one read-only
+        SELECT). It runs once; rows past max_rows are counted chunk by chunk, not kept.
+        DuckDB errors (unknown column, syntax) propagate as duckdb.Error.
+        """
+        cursor = self._con.execute(check_sql(sql))
+        columns = [d[0] for d in cursor.description]
+        kept: list[pd.DataFrame] = []
+        rows = total = 0
+        while True:
+            chunk = cursor.fetch_df_chunk()
+            if chunk.empty:
+                break
+            total += len(chunk)
+            if max_rows is None or rows < max_rows:
+                kept.append(chunk if max_rows is None else chunk.iloc[:max_rows - rows])
+                rows += len(kept[-1])
+        result = pd.concat(kept, ignore_index=True) if kept else pd.DataFrame(columns=columns)
+        return result, total
 
     def headline(self) -> dict[str, float]:
         row = self.run("headline").iloc[0]
