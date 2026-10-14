@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import csv
 import logging
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -65,7 +66,10 @@ def load_file(path: str | Path, delimiter: str | None = None, encoding: str | No
             df, encoding, delimiter = _read_excel(path), None, None
     except DataLoadError:
         raise
-    except (pd.errors.EmptyDataError, pd.errors.ParserError, UnicodeDecodeError, ValueError, OSError) as exc:
+    except pd.errors.ParserError as exc:
+        logger.exception("Failed to parse %s", path)
+        raise DataLoadError(_parser_error_message(exc)) from exc
+    except (pd.errors.EmptyDataError, UnicodeDecodeError, ValueError, OSError) as exc:
         logger.exception("Failed to read %s", path)
         raise DataLoadError(f"Could not read the file: {exc}") from exc
 
@@ -125,9 +129,24 @@ def _read_csv(path: Path, header: int | None = 0, encoding: str | None = None,
             return df, enc, sep
         except UnicodeDecodeError as exc:
             last_error = exc
-    if encoding:
-        raise DataLoadError(f"Could not decode the file as {encoding} text: {last_error}")
-    raise DataLoadError(f"Could not decode the file as UTF-8 or Windows-1252 text: {last_error}")
+    tried = encoding if encoding else "UTF-8 and Windows-1252"
+    raise DataLoadError(
+        f"The file is not readable as text (tried {tried}). If it is actually an Excel file "
+        "renamed to .csv, open it in Excel and save it as CSV or .xlsx.\n"
+        f"Technical detail: {last_error}"
+    )
+
+
+def _parser_error_message(exc: pd.errors.ParserError) -> str:
+    match = re.search(r"line (\d+)", str(exc))
+    if match:
+        text = (f"Line {match.group(1)} of the file has a different number of columns than the header row. "
+                "A value may contain an extra delimiter, or the line is broken. "
+                "Check that line in a text editor, or re-export the file.")
+    else:
+        text = ("Some lines have a different number of columns than the header row. "
+                "The file may be broken or use mixed delimiters.")
+    return f"{text}\nTechnical detail: {exc}"
 
 
 def _csv_record_lines(path: Path, encoding: str, delimiter: str, header: int | None,
@@ -163,7 +182,10 @@ def _read_excel(path: Path, header: int | None = 0) -> pd.DataFrame:
     try:
         return pd.read_excel(path, sheet_name=0, header=header, engine="openpyxl")
     except Exception as exc:  # openpyxl raises several unrelated exception types
-        raise DataLoadError(f"Could not read the Excel file (first sheet): {exc}") from exc
+        raise DataLoadError(
+            "The Excel file could not be opened. It may be corrupted, password-protected, "
+            f"or not a real .xlsx file.\nTechnical detail: {exc}"
+        ) from exc
 
 
 def _looks_like_value(name: object) -> bool:

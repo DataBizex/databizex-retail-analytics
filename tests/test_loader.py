@@ -60,6 +60,28 @@ def test_corrupt_xlsx_raises(tmp_path):
         load_file(path)
 
 
+def test_fake_xlsx_explains_excel_problem(tmp_path):
+    path = tmp_path / "fake.xlsx"
+    path.write_text("order_id,quantity\nX1,2\n", encoding="utf-8")
+    with pytest.raises(DataLoadError) as info:
+        load_file(path)
+    message = str(info.value)
+    assert message.startswith("The Excel file could not be opened.")
+    assert "password-protected" in message
+    assert "\nTechnical detail: " in message
+
+
+def test_inconsistent_csv_row_names_line(tmp_path):
+    path = tmp_path / "ragged.csv"
+    path.write_text("order_id,quantity,price\nX1,2,9.5\nX2,3,4.0\nX3,1,2,5,extra\n", encoding="utf-8")
+    with pytest.raises(DataLoadError) as info:
+        load_file(path, delimiter=",")
+    message = str(info.value)
+    assert "Line 4 of the file" in message
+    assert "different number of columns than the header row" in message
+    assert "\nTechnical detail: " in message
+
+
 def test_missing_file_raises(tmp_path):
     with pytest.raises(DataLoadError, match="not found"):
         load_file(tmp_path / "nope.csv")
