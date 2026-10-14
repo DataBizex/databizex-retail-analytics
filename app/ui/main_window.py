@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -32,6 +33,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QMainWindow,
+    QMenu,
     QMessageBox,
     QPlainTextEdit,
     QProgressBar,
@@ -39,6 +41,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QSplitter,
     QStackedWidget,
+    QTableView,
     QTabWidget,
     QVBoxLayout,
     QWidget,
@@ -56,7 +59,8 @@ from app.data.formats import (
     detect_formats,
     import_summary,
 )
-from app.data import layout_memory, recent_files
+from app.data import fixes, layout_memory, recent_files
+from app.data.change_log import KIND_NORMALIZATION, SNAPSHOT_LIMIT, ChangeEntry, ChangeLog
 from app.data.display import whole_number_columns
 from app.data.failed_rows import ALL_FAILED, failed_cells, failed_rule_choices, failed_rows
 from app.data.loader import FILE_DIALOG_FILTER, DataLoadError, load_file, with_source_rows
@@ -67,7 +71,9 @@ from app.data.rules import (
     QualityScore,
     RulesError,
     default_rules,
+    Rule,
     default_rules_path,
+    expand_rules,
     load_rules,
     quality_score,
     validate,
@@ -77,6 +83,7 @@ from app.database.sql_guard import GuardError
 from app.exports.exporter import (
     ExportError,
     export_csv,
+    export_change_log as write_change_log,
     export_excel,
     export_tables_csv,
     generate_powerbi_package,
@@ -84,6 +91,7 @@ from app.exports.exporter import (
 from app.paths import icon_path, sample_data_path, user_data_dir
 from app.ui import theme
 from app.ui.column_mapping_dialog import ColumnMappingDialog
+from app.ui.fix_dialog import FixDialog
 from app.ui.import_options_dialog import ImportOptionsDialog
 from app.ui.normalize_dialog import NormalizeDialog
 from app.ui.data_table import DataTable
@@ -278,6 +286,8 @@ class MainWindow(QMainWindow):
         self.mapping_notes: list[str] = []
         self.duplicates_removed = 0
         self.normalized_columns: list[str] = []  # working-copy columns with text variants merged
+        # Every fix applied to the working copy this session (with undo); cleared on load and reset.
+        self.change_log = ChangeLog()
         self.kpi_results: dict[str, pd.DataFrame] = {}
         self.kpi_headline: dict[str, float] = {}
         self.kpi_basis = ""
@@ -318,6 +328,13 @@ class MainWindow(QMainWindow):
         file_menu.addAction(exit_action)
         file_menu.aboutToShow.connect(self._rebuild_recent_menu)
         self._rebuild_recent_menu()
+        edit_menu = self.menuBar().addMenu("&Edit")
+        # Ctrl+Z: text editors (e.g. the SQL editor) keep their own undo while they have the focus.
+        self.undo_action = QAction("&Undo last fix", self, shortcut="Ctrl+Z", triggered=self.undo_last_fix)
+        self.undo_action.setEnabled(False)
+        edit_menu.addAction(self.undo_action)
+        edit_menu.addAction(QAction("&Reset working copy to original...", self,
+                                    triggered=lambda: self.reset_working_copy(ask=True)))
         view_menu = self.menuBar().addMenu("&View")
         theme_menu = view_menu.addMenu("&Theme")
         self.theme_actions = QActionGroup(self)
@@ -464,7 +481,7 @@ class MainWindow(QMainWindow):
         self.normalize_btn = QPushButton("Normalize text...")
         self.normalize_btn.clicked.connect(self.normalize_text)
         self.reset_btn = QPushButton("Reset working copy to original")
-        self.reset_btn.clicked.connect(self.reset_working_copy)
+        self.reset_btn.clicked.connect(lambda: self.reset_working_copy(ask=True))
         self.load_rules_btn = QPushButton("Load rule set...")
         self.load_rules_btn.clicked.connect(self.load_rule_set)
         self.rules_label = QLabel()
@@ -479,9 +496,9 @@ class MainWindow(QMainWindow):
         layout.addLayout(buttons)
 
         note = QLabel(
-            "Checks only report problems. Rows with missing values are never deleted or filled. "
-            "Removing duplicates and normalizing text change the in-memory working copy only — "
-            "the source file is never modified."
+            "Checks only report problems. Rows with missing values are never deleted or filled unless you "
+            "choose a fix for that rule. Removing duplicates, normalizing text and fixes change the "
+            "in-memory working copy only and are logged (Change log) — the source file is never modified."
         )
         note.setWordWrap(True)
         theme.set_role(note, "muted")
@@ -522,8 +539,12 @@ class MainWindow(QMainWindow):
         theme.set_role(self.failed_count_label, "muted")
         self.export_failed_btn = QPushButton("Export failed rows to CSV...")
         self.export_failed_btn.clicked.connect(self.export_failed_rows)
+        self.fix_btn = QPushButton("Fix...")
+        theme.mark_primary(self.fix_btn)
+        self.fix_btn.clicked.connect(lambda: self.open_fix_dialog())
         failed_top.addWidget(QLabel("Rule:"))
         failed_top.addWidget(self.failed_combo)
+        failed_top.addWidget(self.fix_btn)
         failed_top.addWidget(self.failed_count_label)
         failed_top.addStretch(1)
         failed_top.addWidget(self.export_failed_btn)
@@ -531,10 +552,18 @@ class MainWindow(QMainWindow):
         self.failed_table = DataTable()
         failed_layout.addWidget(self.failed_table)
 
+        self.quality_table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.quality_table.customContextMenuRequested.connect(self._quality_context_menu)
+
+        # Failed rows and the change log share the lower half as two views.
+        self.quality_views = QTabWidget()
+        self.quality_views.addTab(failed_box, "Failed rows")
+        self.quality_views.addTab(self._build_change_log_view(), "Change log")
+
         vertical = QSplitter(Qt.Vertical)
         vertical.addWidget(splitter)
-        vertical.addWidget(failed_box)
-        vertical.setSizes([420, 300])
+        vertical.addWidget(self.quality_views)
+        vertical.setSizes([400, 320])
         layout.addWidget(vertical, 1)
         return tab
 
@@ -687,7 +716,7 @@ class MainWindow(QMainWindow):
             ("Export working data to CSV...", self.export_working_csv,
              "All rows and columns of the current working copy, as CSV (UTF-8)."),
             ("Export working data to Excel...", self.export_working_excel,
-             "The working copy as an .xlsx workbook (one sheet)."),
+             "The working copy as an .xlsx workbook, plus a \"Change log\" sheet when fixes were applied."),
             ("Export quality report to CSV...", self.export_quality_report,
              "The quality summary table for the working data."),
             ("Export failed rows to CSV...", self.export_failed_rows,
@@ -697,7 +726,10 @@ class MainWindow(QMainWindow):
              "Headline KPIs and every KPI result table, one CSV per table, into a folder you choose."),
             ("Generate Power BI package...", self.export_powerbi,
              "sales_clean.csv (rows valid for KPIs), data_dictionary.md, POWER_BI_GUIDE.md and "
-             "package_info.txt in a folder you choose. No .pbix file is created."),
+             "package_info.txt in a folder you choose, plus change_log.csv and change_log.md when fixes "
+             "were applied. No .pbix file is created."),
+            ("Export change log...", self.export_change_log,
+             "Every fix applied to the working copy, as a Markdown audit report or a CSV table."),
         ]
         grid = QGridLayout()
         self.export_buttons: list[QPushButton] = []
@@ -760,8 +792,14 @@ class MainWindow(QMainWindow):
             cleaning.append(f"{self.duplicates_removed:,} exact duplicates removed")
         if self.normalized_columns:
             cleaning.append("text normalized in " + ", ".join(self.normalized_columns))
+        fixed = ""
+        if len(self.change_log):
+            count = len(self.change_log)
+            fixed = f" — Working copy: {count:,} fix{'es' if count != 1 else ''} applied"
         if cleaning:
-            return f"Cleaned working data ({'; '.join(cleaning)}){mapped}"
+            return f"Cleaned working data ({'; '.join(cleaning)}){mapped}{fixed}"
+        if fixed:
+            return f"Fixed working data{mapped}{fixed}"
         return f"Original imported data (no cleaning applied){mapped}"
 
     def _ask_save_path(self, caption: str, default_name: str, file_filter: str) -> Path | None:
@@ -828,6 +866,8 @@ class MainWindow(QMainWindow):
         self.import_options = options
         self.column_mapping = self._ask_column_mapping(result.df, memory) if needs_mapping(result.df) else None
         self._make_working_copy()
+        self.change_log.clear()
+        self.change_log.preparation = self._preparation_lines()
         if options_confirmed or self.column_mapping:
             self._remember_layout(layout, memory, options if options_confirmed else None)
         self.duplicates_removed = 0
@@ -902,18 +942,21 @@ class MainWindow(QMainWindow):
         try:
             with self._busy("Removing exact duplicates..."):
                 cleaned, removed = remove_exact_duplicates(self.working_df)
+                entry = None
+                if removed:
+                    rule = Rule(name="Remove exact duplicates", column="*", type="unique", params={"columns": []})
+                    _same_rows, entry = fixes.run_fix(self.working_df, rule, fixes.FixAction.FIX_DUPLICATES, None,
+                                                      self.rules, self.unavailable_columns)
+                    entry.kind = KIND_NORMALIZATION
         except Exception as exc:  # noqa: BLE001
             self._unexpected("duplicate removal", exc)
             return
         if removed == 0:
             QMessageBox.information(self, "No duplicates", "The working data has no exact duplicate rows.")
             return
-        self.working_df = cleaned
-        self.duplicates_removed += removed
-        self._clear_kpis()
-        self._refresh_all()
-        self.statusBar().showMessage(
-            f"Removed {removed:,} exact duplicate rows from the working copy (source file unchanged).", 10000)
+        self._apply_change(cleaned, entry,
+                           f"Removed {removed:,} exact duplicate rows from the working copy (source file unchanged).",
+                           duplicates_removed=self.duplicates_removed + removed, rerun_kpis=False)
 
     def normalize_text(self) -> None:
         if not self._require_data():
@@ -942,24 +985,39 @@ class MainWindow(QMainWindow):
             self._unexpected("text normalization", exc)
             return
         changed = sum(g.changes for col in selected for g in variants[col])
-        self.working_df = normalized
-        self.normalized_columns += [c for c in selected if c not in self.normalized_columns]
-        had_kpis = bool(self.kpi_results)
-        self._clear_kpis()
-        self._refresh_all()
+        entry = fixes.entry_from_frames(self.working_df, normalized, "Normalize text", "NORMALIZE_TEXT",
+                                        list(selected), {"columns": list(selected)})
+        entry.kind = KIND_NORMALIZATION
+        before, after = fixes.measure(self.working_df, self.rules, self.unavailable_columns), \
+            fixes.measure(normalized, self.rules, self.unavailable_columns)
+        entry.quality_score_before, entry.quality_score_after = before.quality_score, after.quality_score
+        entry.valid_rows_before, entry.valid_rows_after = before.valid_rows, after.valid_rows
         # KPIs that were on screen are recalculated so charts show the merged values.
-        if had_kpis:
-            self.run_kpis()
-        self.statusBar().showMessage(
+        self._apply_change(
+            normalized, entry,
             f"Normalized {changed:,} values in {', '.join(selected)} (working copy only; source file unchanged).",
-            10000)
+            normalized_columns=self.normalized_columns + [c for c in selected if c not in self.normalized_columns])
 
-    def reset_working_copy(self) -> None:
+    def reset_working_copy(self, ask: bool = False) -> None:
+        """Rebuild the working copy from the original import and clear the change log.
+
+        ask: confirm first when fixes are logged (the button and the Edit menu ask)."""
         if not self._require_data():
             return
-        self._make_working_copy()  # rebuilt from the original: undoes duplicate removal and normalization
+        logged = len(self.change_log)
+        if ask and logged:
+            answer = QMessageBox.question(
+                self, "Reset working copy",
+                f"Reset the working copy to the original import?\n\nThis discards {logged:,} logged "
+                f"fix{'es' if logged != 1 else ''} and clears the change log. The source file is not affected.",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if answer != QMessageBox.Yes:
+                return
+        self._make_working_copy()  # rebuilt from the original: undoes duplicate removal, normalization and fixes
         self.duplicates_removed = 0
         self.normalized_columns = []
+        self.change_log.clear()
+        self.change_log.preparation = self._preparation_lines()
         self._clear_kpis()
         self._refresh_all()
         self.statusBar().showMessage("Working copy reset to the original imported data.", 10000)
@@ -1013,6 +1071,7 @@ class MainWindow(QMainWindow):
         self._show_failed_rows()
 
     def _show_failed_rows(self) -> None:
+        self._update_fix_button()
         key = self.failed_combo.currentData()
         if key is None or self.working_df is None:
             self.failed_table.show_frame(None)
@@ -1142,6 +1201,7 @@ class MainWindow(QMainWindow):
                               error=True)
             return False
         text = self.custom_sql.toPlainText()
+        started = time.perf_counter()
         try:
             with self._busy("Running your SQL query in DuckDB..."):
                 if not self.sales_current:  # the same table the KPI queries use; the cards are not touched
@@ -1150,17 +1210,23 @@ class MainWindow(QMainWindow):
                 result, total = self.db.run_custom(text)
         except GuardError as exc:
             self._custom_note(str(exc), error=True)
+            self.statusBar().showMessage("Query not run: only read-only SELECT queries are allowed.", 10000)
             return False
         except KpiInputError as exc:
             self._custom_note("The working data could not be loaded into table sales.", error=True, detail=str(exc))
+            self.statusBar().showMessage("Query not run: the working data could not be loaded.", 10000)
             return False
         except duckdb.Error as exc:
             self._custom_note("DuckDB could not run this query. Check the table and column names and the "
                               "SQL syntax.", error=True, detail=_engine_message(exc))
+            self.statusBar().showMessage("Query failed: check the table and column names and the SQL syntax.",
+                                         10000)
             return False
         except Exception as exc:  # noqa: BLE001
+            self.statusBar().clearMessage()
             self._unexpected("running the SQL query", exc)
             return False
+        elapsed = time.perf_counter() - started
         self.custom_statement, self.custom_result = text, result
         self.custom_table.show_frame(result, whole_number_columns=whole_number_columns(result))
         self.custom_export_btn.setEnabled(True)
@@ -1168,6 +1234,8 @@ class MainWindow(QMainWindow):
             self._custom_note(f"Showing first {len(result):,} of {total:,} rows.")
         else:
             self._custom_note(f"{total:,} row{'s' if total != 1 else ''}.")
+        self.statusBar().showMessage(f"Query returned {total:,} row{'s' if total != 1 else ''} in {elapsed:.2f} s",
+                                     10000)
         return True
 
     def export_custom_result(self) -> None:
@@ -1286,7 +1354,8 @@ class MainWindow(QMainWindow):
             self._error("Export blocked", "Choose a different file: the source file is never overwritten.")
             return
         if path:
-            written = self._run_export("Exporting Excel", export_excel, self.working_df, path, "working_data")
+            written = self._run_export("Exporting Excel", export_excel, self.working_df, path, "working_data",
+                                       self.change_log)
             if written:
                 self._log_export(f"Excel exported: {written} ({len(self.working_df):,} rows)")
                 QMessageBox.information(self, "Export complete", f"Saved:\n{written}")
@@ -1330,11 +1399,241 @@ class MainWindow(QMainWindow):
         source = self.source_path.name if self.source_path else ""
         written = self._run_export("Generating Power BI package", generate_powerbi_package,
                                    self.working_df, folder, source, self.data_state_text(),
-                                   self.unavailable_columns, self.import_settings_text())
+                                   self.unavailable_columns, self.import_settings_text(), self.change_log)
         if written:
             self._log_export(f"Power BI package written to {folder}: " + ", ".join(p.name for p in written))
             QMessageBox.information(self, "Power BI package ready",
                                     f"Files saved in:\n{folder}\n\nOpen POWER_BI_GUIDE.md for the next steps.")
+
+    # ------------------------------------------------------------------ guided fixes
+    def _build_change_log_view(self) -> QWidget:
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(6, 8, 6, 6)
+        top = QHBoxLayout()
+        self.undo_btn = QPushButton("Undo last fix")
+        self.undo_btn.setToolTip("Restore the working copy as it was before the most recent fix (Ctrl+Z).")
+        self.undo_btn.clicked.connect(self.undo_last_fix)
+        self.export_log_btn = QPushButton("Export change log...")
+        self.export_log_btn.setToolTip("Save the log as a Markdown audit report or a CSV table.")
+        self.export_log_btn.clicked.connect(self.export_change_log)
+        self.change_log_note = QLabel()
+        theme.set_role(self.change_log_note, "muted")
+        top.addWidget(self.undo_btn)
+        top.addWidget(self.export_log_btn)
+        top.addWidget(self.change_log_note, 1)
+        layout.addLayout(top)
+
+        self.change_log_stack = QStackedWidget()
+        self.change_log_stack.addWidget(_empty_state("No fixes applied yet.\nSelect a failed rule and choose Fix..."))
+        self.change_log_table = DataTable()
+        self.change_log_table.setSelectionMode(QTableView.SingleSelection)
+        self.change_log_table.selectionModel().currentRowChanged.connect(lambda *_: self._show_change_entry())
+        details = QWidget()
+        details_layout = QVBoxLayout(details)
+        details_layout.setContentsMargins(0, 0, 0, 0)
+        self.change_detail = QLabel()
+        self.change_detail.setWordWrap(True)
+        self.change_detail.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.change_detail.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+        self.change_samples = DataTable()
+        details_layout.addWidget(self.change_detail)
+        details_layout.addWidget(self.change_samples, 1)
+        self.change_log_splitter = QSplitter(Qt.Horizontal)
+        self.change_log_splitter.setChildrenCollapsible(False)
+        self.change_log_splitter.addWidget(self.change_log_table)
+        self.change_log_splitter.addWidget(details)
+        self.change_log_splitter.setStretchFactor(0, 55)
+        self.change_log_splitter.setStretchFactor(1, 45)
+        self.change_log_splitter.setSizes([550, 450])
+        self.change_log_stack.addWidget(self.change_log_splitter)
+        layout.addWidget(self.change_log_stack, 1)
+        return page
+
+    def _preparation_lines(self) -> list[str]:
+        """How the working copy was prepared before any fix (shown in the change log exports)."""
+        lines = []
+        if not self.import_options.is_default():
+            lines.append(f"Import options: {self.import_settings_text()}")
+        if self.column_mapping:
+            mapped = ", ".join(f"{field} <- {source}" for field, source in self.column_mapping.items() if source)
+            lines.append(f"Column mapping: {mapped}")
+        return lines
+
+    def _rules_by_check(self) -> dict[str, Rule]:
+        return {rule.name: rule for rule in expand_rules(self.rules, self.working_df)} \
+            if self.working_df is not None else {}
+
+    def _fix_problem(self, check: str | None) -> str:
+        """Why a check cannot be fixed now ("" when it can)."""
+        if self.working_df is None:
+            return "Load data first."
+        if check is None or check == ALL_FAILED:
+            return "Choose one failed rule (not \"All failed rows\") to fix it."
+        rule = self._rules_by_check().get(check)
+        if rule is None:
+            return "This check is not a rule of the current rule set."
+        if not fixes.suggested_actions(rule):
+            return "Outliers are warnings only: check them by hand. No automatic fix is offered."
+        if self.row_flags is None or check not in self.row_flags or not bool(self.row_flags[check].any()):
+            return "This rule passed: nothing to fix."
+        return ""
+
+    def _update_fix_button(self) -> None:
+        problem = self._fix_problem(self.failed_combo.currentData())
+        self.fix_btn.setEnabled(not problem)
+        self.fix_btn.setToolTip(problem or "Preview and apply a fix for the selected rule.")
+
+    def _quality_context_menu(self, pos) -> None:
+        index = self.quality_table.indexAt(pos)
+        frame = self.quality_table.model_._df
+        if not index.isValid() or "check" not in frame.columns:
+            return
+        check = str(frame["check"].iloc[index.row()])
+        menu = QMenu(self)
+        action = menu.addAction("Fix this rule...")
+        problem = self._fix_problem(check)
+        action.setEnabled(not problem)
+        action.setToolTip(problem)
+        menu.setToolTipsVisible(True)
+        action.triggered.connect(lambda: self.open_fix_dialog(check))
+        menu.exec(self.quality_table.viewport().mapToGlobal(pos))
+
+    def open_fix_dialog(self, check: str | None = None) -> bool:
+        """Show the Fix dialog for a failed rule (default: the one chosen under Failed rows)."""
+        check = check if check is not None else self.failed_combo.currentData()
+        problem = self._fix_problem(check)
+        if problem:
+            self.statusBar().showMessage(problem, 10000)
+            return False
+        rule = self._rules_by_check()[check]
+        failed = int(self.row_flags[check].sum())
+        try:
+            dialog = FixDialog(self.working_df, rule, self.rules, failed, self.unavailable_columns, self)
+        except Exception as exc:  # noqa: BLE001
+            self._unexpected("preparing the fix", exc)
+            return False
+        if not dialog.exec():
+            return False
+        result = dialog.fix_result()
+        if result is None:
+            return False
+        new_df, entry = result
+        self._apply_change(new_df, entry,
+                           f"Fix applied: {entry.rows_affected:,} row{'s' if entry.rows_affected != 1 else ''} "
+                           "changed. Undo available.")
+        return True
+
+    def _apply_change(self, new_df: pd.DataFrame, entry: ChangeEntry, message: str,
+                      duplicates_removed: int | None = None, normalized_columns: list[str] | None = None,
+                      rerun_kpis: bool = True) -> None:
+        """Make new_df the working copy, log entry with the state before it, and refresh every view."""
+        state = (self.working_df, self.duplicates_removed, list(self.normalized_columns))
+        self.change_log.add(entry, state)
+        self.working_df = new_df
+        if duplicates_removed is not None:
+            self.duplicates_removed = duplicates_removed
+        if normalized_columns is not None:
+            self.normalized_columns = normalized_columns
+        self._refresh_after_change(rerun_kpis)
+        self.statusBar().showMessage(message, 10000)
+
+    def _refresh_after_change(self, rerun_kpis: bool = True) -> None:
+        """Quality checks, previews, profile, KPIs and table sales (DuckDB) follow the working copy."""
+        had_kpis = bool(self.kpi_results)
+        self._clear_kpis()  # also marks table sales stale, so the next query loads the new working copy
+        self._refresh_all()
+        if had_kpis and rerun_kpis:
+            self.run_kpis()
+
+    def undo_last_fix(self) -> bool:
+        if self.working_df is None:
+            return False
+        undone = self.change_log.undo_last()
+        if undone is None:
+            message = ("Nothing to undo." if not len(self.change_log) else
+                       f"Older fixes cannot be undone: only the last {SNAPSHOT_LIMIT} are kept. "
+                       "Use Reset working copy to original to start again.")
+            self.statusBar().showMessage(message, 10000)
+            return False
+        entry, (working, duplicates_removed, normalized_columns) = undone
+        self.working_df = working
+        self.duplicates_removed, self.normalized_columns = duplicates_removed, normalized_columns
+        self._refresh_after_change()
+        self.statusBar().showMessage(f"Undone: {entry.rule} ({entry.action}). The working copy is back to the "
+                                     "state before that fix.", 10000)
+        return True
+
+    def _refresh_change_log(self) -> None:
+        log = self.change_log
+        has_entries = len(log) > 0
+        self.change_log_stack.setCurrentIndex(1 if has_entries else 0)
+        self.undo_action.setEnabled(log.can_undo())
+        self.undo_btn.setEnabled(log.can_undo())
+        self.export_log_btn.setEnabled(has_entries)
+        if not has_entries:
+            self.change_log_note.setText("")
+            self.change_log_table.show_frame(None)
+            self.change_samples.show_frame(None)
+            self.change_detail.setText("")
+            return
+        undoable = log.undoable_count()
+        note = f"{len(log):,} change{'s' if len(log) != 1 else ''} logged this session (not saved after closing)."
+        if undoable < len(log):
+            note += f" Only the last {undoable} can be undone; use Reset for older ones."
+        self.change_log_note.setText(note)
+
+        def score(before, after) -> str:
+            show = lambda v: "n/a" if v is None else f"{v:.1f}"  # noqa: E731
+            return f"{show(before)} -> {show(after)}"
+
+        rows = [{"#": e.id, "time": e.timestamp[11:19], "rule": e.rule, "action": e.action,
+                 "rows": e.rows_affected, "cells": e.cells_changed,
+                 "score": score(e.quality_score_before, e.quality_score_after)} for e in log.entries]
+        self.change_log_table.show_frame(pd.DataFrame(rows))
+        self.change_log_table.selectRow(len(rows) - 1)
+        self._show_change_entry()
+
+    def _show_change_entry(self) -> None:
+        index = self.change_log_table.currentIndex()
+        entries = self.change_log.entries
+        if not index.isValid() or index.row() >= len(entries):
+            self.change_detail.setText("")
+            self.change_samples.show_frame(None)
+            return
+        e = entries[index.row()]
+        parameters = ", ".join(f"{k}: {v}" for k, v in e.parameters.items()
+                               if k != "kept_row_for_removed") or "none"
+        rows = f"{e.rows_affected:,}" + (f" (first {len(e.source_rows):,} stored)" if e.truncated else "")
+        valid = "" if e.valid_rows_before is None else \
+            f"<br>Rows valid for KPIs: {e.valid_rows_before:,} -> {e.valid_rows_after:,}"
+        self.change_detail.setText(
+            f"<b>#{e.id} {e.rule}</b> — {e.action} ({e.kind})<br>"
+            f"Columns: {', '.join(e.columns) or '(whole row)'}<br>Parameters: {parameters}<br>"
+            f"Rows affected: {rows}; cells changed: {e.cells_changed:,}{valid}")
+        self.change_samples.show_frame(pd.DataFrame(e.samples, columns=["source_row", "column", "before", "after"]))
+
+    def export_change_log(self) -> None:
+        if not len(self.change_log):
+            QMessageBox.information(self, "No changes logged",
+                                    "No fixes applied yet. Select a failed rule and choose Fix...")
+            return
+        start = str(Path.home() / "Documents" / f"{self._default_stem()}_change_log.md")
+        path, selected = QFileDialog.getSaveFileName(self, "Export change log", start,
+                                                      "Markdown report (*.md);;CSV (*.csv)")
+        if not path:
+            return
+        path = Path(path)
+        if path.suffix.lower() not in (".md", ".csv"):
+            path = path.with_suffix(".csv" if selected.startswith("CSV") else ".md")
+        if self.source_path and path.resolve() == self.source_path.resolve():
+            self._error("Export blocked", "Choose a different file: the source file is never overwritten.")
+            return
+        source = self.source_path.name if self.source_path else ""
+        written = self._run_export("Exporting change log", write_change_log, self.change_log, path, source)
+        if written:
+            self._log_export(f"Change log exported: {written} ({len(self.change_log):,} entries)")
+            QMessageBox.information(self, "Export complete", f"Saved:\n{written}")
 
     # ------------------------------------------------------------------ refresh
     def _normalized_source_columns(self) -> dict[str, str]:
@@ -1370,6 +1669,7 @@ class MainWindow(QMainWindow):
                        *self.export_buttons]:
             widget.setEnabled(has_data)
         self._refresh_state_label()
+        self._refresh_change_log()
         for stack in self.empty_stacks:
             stack.setCurrentIndex(1 if has_data else 0)
         self.export_failed_btn.setEnabled(has_data)

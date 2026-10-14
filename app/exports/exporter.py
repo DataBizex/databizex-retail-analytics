@@ -16,6 +16,7 @@ import pandas as pd
 
 from app import __version__
 from app.analytics.kpis import prepare_sales_frame, validity_summary
+from app.data.change_log import ChangeLog
 from app.paths import resource_path
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,9 @@ logger = logging.getLogger(__name__)
 CSV_ENCODING = "utf-8-sig"  # BOM so Excel detects UTF-8 correctly
 POWERBI_CSV_NAME = "sales_clean.csv"
 POWERBI_DOCS = ["POWER_BI_GUIDE.md", "data_dictionary.md"]
+CHANGE_LOG_SHEET = "Change log"
+CHANGE_LOG_CSV = "change_log.csv"
+CHANGE_LOG_MD = "change_log.md"
 POWERBI_COLUMNS = [
     "order_id", "order_date", "year", "month", "country", "product", "category",
     "quantity", "unit_price", "discount_pct", "unit_cost", "net_revenue", "gross_profit",
@@ -53,18 +57,43 @@ def export_csv(df: pd.DataFrame, path: str | Path) -> Path:
     return path
 
 
-def export_excel(df: pd.DataFrame, path: str | Path, sheet_name: str = "data") -> Path:
+def export_excel(df: pd.DataFrame, path: str | Path, sheet_name: str = "data",
+                 change_log: ChangeLog | None = None) -> Path:
+    """df as one sheet; a non-empty change_log adds a "Change log" sheet."""
     path = Path(path)
     if path.suffix.lower() != ".xlsx":
         path = path.with_suffix(".xlsx")
     try:
         with pd.ExcelWriter(path, engine="openpyxl") as writer:
             df.to_excel(writer, sheet_name=sheet_name[:31], index=False)
+            if change_log is not None and len(change_log):
+                change_log.to_dataframe().to_excel(writer, sheet_name=CHANGE_LOG_SHEET, index=False)
     except OSError as exc:
         logger.exception("Excel export failed")
         raise _friendly(exc, path) from exc
     logger.info("Exported %d rows to %s", len(df), path)
     return path
+
+
+def _write_text(path: Path, text: str, encoding: str) -> Path:
+    try:
+        path.write_text(text, encoding=encoding, newline="\n")
+    except OSError as exc:
+        logger.exception("Export failed")
+        raise _friendly(exc, path) from exc
+    return path
+
+
+def export_change_log(change_log: ChangeLog, path: str | Path, source_name: str = "") -> Path:
+    """The change log as CSV (same encoding as the other CSV exports) or, for a .md path, as a
+    readable Markdown audit report (UTF-8 without BOM)."""
+    path = Path(path)
+    if path.suffix.lower() == ".md":
+        written = _write_text(path, change_log.to_markdown(source_name), "utf-8")
+    else:
+        written = export_csv(change_log.to_dataframe(), path)
+    logger.info("Exported change log (%d entries) to %s", len(change_log), path)
+    return written
 
 
 def export_tables_csv(tables: dict[str, pd.DataFrame], folder: str | Path) -> list[Path]:
@@ -89,11 +118,13 @@ def powerbi_frame(working: pd.DataFrame, unavailable: Collection[str] = ()) -> p
 
 def generate_powerbi_package(working: pd.DataFrame, folder: str | Path,
                              source_name: str = "", data_state: str = "",
-                             unavailable: Collection[str] = (), import_settings: str = "") -> list[Path]:
+                             unavailable: Collection[str] = (), import_settings: str = "",
+                             change_log: ChangeLog | None = None) -> list[Path]:
     """Write sales_clean.csv, the guide, the data dictionary and package_info.txt.
 
     unavailable: columns marked "not available" in the column mapping.
     import_settings: how the file was read and its numbers/dates parsed (formats.import_summary).
+    change_log: when it has entries, change_log.csv and change_log.md are added.
     """
     folder = Path(folder)
     if not folder.is_dir():
@@ -112,6 +143,11 @@ def generate_powerbi_package(working: pd.DataFrame, folder: str | Path,
             raise _friendly(exc, target) from exc
         written.append(target)
 
+    fixes = len(change_log) if change_log is not None else 0
+    if fixes:
+        written.append(export_csv(change_log.to_dataframe(), folder / CHANGE_LOG_CSV))
+        written.append(_write_text(folder / CHANGE_LOG_MD, change_log.to_markdown(source_name), "utf-8"))
+
     info = folder / "package_info.txt"
     lines = [
         f"DataBizex v{__version__} - Power BI package",
@@ -123,6 +159,8 @@ def generate_powerbi_package(working: pd.DataFrame, folder: str | Path,
         f"Rows exported to {POWERBI_CSV_NAME} (valid for KPIs): {summary.kpi_rows}",
         f"Rows excluded (invalid/missing quantity, price, discount or cost): {summary.excluded_rows}",
         f"Exported rows without a valid order_date (blank date): {summary.kpi_rows_without_valid_date}",
+        *([f"Fixes applied to the working copy: {fixes} (see {CHANGE_LOG_MD} and {CHANGE_LOG_CSV})"]
+          if fixes else []),
         "",
         "No .pbix file is included. Follow POWER_BI_GUIDE.md to build the report.",
     ]

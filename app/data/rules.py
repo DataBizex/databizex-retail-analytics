@@ -380,3 +380,8 @@ def quality_score(rules: list[Rule], summary: pd.DataFrame, row_flags: pd.DataFr
         scores[dimension] = 100.0 * (1 - failed / total)
     present = [s for s in scores.values() if s is not None]
     return QualityScore(**scores, overall=sum(present) / len(present) if present else None)
+
+
+def rule_failures(df: pd.DataFrame, rule: Rule) -> pd.Series:
+    """Row flags for one (expanded) rule: True = the row fails it. All False when a needed column is absent."""
+    return _check(df, rule)[1]

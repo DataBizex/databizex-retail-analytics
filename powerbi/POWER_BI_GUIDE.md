@@ -7,7 +7,10 @@ in Power BI Desktop (free, Windows) in about 15 minutes.
 `sales_clean.csv` contains only rows that passed the DataBizex quality rules
 (valid, non-negative quantity, price and cost; discount 0–100).
 `net_revenue` and `gross_profit` are already calculated per row.
-See `package_info.txt` for how many rows were exported and excluded.
+See `package_info.txt` for how many rows were exported and excluded. When fixes were applied
+to the working copy in DataBizex, the package also contains `change_log.md` (a readable audit
+report: every fix with its counts, parameters and sample rows) and `change_log.csv` (the same
+entries as a table). The source file itself is never changed.
 
 ## 1. Load the CSV
 

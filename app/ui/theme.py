@@ -161,6 +161,8 @@ QLabel[role="title"] {{ font-size: 16pt; font-weight: 600; }}
 QLabel[role="info"] {{ background: {p.info}; color: {p.text}; border: 1px solid {p.border};
     border-radius: 6px; padding: 6px 10px; }}
 QLabel[role="empty"] {{ color: {p.text_muted}; font-size: 11pt; }}
+QLabel[role="dialogTitle"] {{ font-size: 13pt; font-weight: 600; }}
+QLabel[role="strong"] {{ font-weight: 600; }}
 
 QFrame#kpiCard {{ background: {p.surface}; border: 1px solid {p.border}; border-radius: 8px; }}
 QFrame#kpiCard QLabel {{ background: transparent; }}

@@ -33,7 +33,7 @@ discounts). If these go straight into a report, revenue and margin are
 wrong and nobody can tell why. Teams need to:
 
 - see what is wrong with a file before using it,
-- fix only what is safe to fix (exact duplicates),
+- fix problems only after previewing them, with every change logged and undoable,
 - calculate KPIs on valid rows only, with excluded rows reported,
 - hand a clean, documented dataset to Power BI.
 
@@ -100,6 +100,12 @@ wrong and nobody can tell why. Teams need to:
   column, such as exact duplicate rows, highlight nothing. Display only: the data is not
   changed.
 - **Remove exact duplicates** on the in-memory working copy only.
+- Guided fixes with a change log (exclude, set missing, map values, fill, trim/case, remove
+  duplicates), undo, and an exportable audit trail. Select a failed rule and choose
+  **Fix...** (or right-click it in the quality summary): the dialog explains the problem,
+  offers the actions that fit the rule, and previews up to 20 rows before -> after with the
+  row and cell counts and the quality score change. Outlier rules are warnings only and get
+  no automatic fix. See [Fixing data safely](#fixing-data-safely).
 - **Text variants** (warning, not scored): values in a categorical-looking text column that
   are the same apart from case or spacing (" germany", "GERMANY", "Germany "), and values
   with stray spaces even if they have no other spelling ("Spain " becomes "Spain"). **Normalize
@@ -109,8 +115,9 @@ wrong and nobody can tell why. Teams need to:
   merged. **Reset working copy to original** undoes it; the source line
   and `package_info.txt` record which columns were normalized.
 - Before/after table: original import vs working data.
-- Rows with missing values are never deleted or filled with zero.
-  The source file is never modified.
+- Rows with missing values are never deleted or filled with zero, unless you choose
+  **Exclude rows** or **Fill** for that rule in the Fix dialog. The source file is never
+  modified.
 
 **SQL & KPIs**
 - Working data loaded into an embedded DuckDB table `sales`.
@@ -137,9 +144,40 @@ wrong and nobody can tell why. Teams need to:
 **Export & Reporting**
 - Working data to CSV or Excel; quality report, failed rows and KPI tables to CSV.
 - **Generate Power BI package**: `sales_clean.csv`, `data_dictionary.md`,
-  `POWER_BI_GUIDE.md`, `package_info.txt`.
+  `POWER_BI_GUIDE.md`, `package_info.txt`, plus `change_log.csv` and `change_log.md` when
+  fixes were applied.
+- **Export change log...**: every fix as a Markdown audit report or a CSV table. The Excel
+  export adds a "Change log" sheet when fixes were applied.
 - Success messages appear only after the file was written.
   Permission and path errors are shown, not hidden.
+
+## Fixing data safely
+
+- **The original never changes.** Fixes apply to the in-memory working copy only. The
+  source file and the original import stay as they were; exports write new files.
+- **Preview before apply.** Every fix opens a dialog with the exact number of rows and
+  cells that will change, up to 20 rows before -> after, and the quality score before and
+  after, computed on a copy. Nothing changes until you click **Apply**, and Apply stays
+  disabled when nothing would change.
+- **Undo.** **Edit > Undo last fix** (Ctrl+Z) or **Undo last fix** in the Change log view
+  restores the working copy exactly as it was. The last 10 fixes can be undone;
+  **Reset working copy to original** goes back to the import and clears the log (it asks
+  first when fixes are logged).
+- **Logged and exported.** The Change log view (Data Quality tab) lists every fix with its
+  rule, action, counts, parameters, affected source rows (up to 5,000 stored, with the full
+  count) and sample rows, and the quality score and KPI-valid rows before and after. The
+  existing **Remove exact duplicates** and **Normalize text** steps are logged as well. The
+  log goes into the Excel export, the Power BI package and **Export change log...**
+  (Markdown or CSV). It lives in memory for the session and is not saved between sessions.
+
+| Action | What it does | Offered for |
+|---|---|---|
+| Exclude rows | Removes the failing rows from the working copy | missing values, invalid types, ranges, cross-column checks |
+| Set missing | Empties the offending cells; the rows stay | invalid types, ranges, cross-column checks |
+| Map values | Replaces values from a table you fill in (unmapped values stay) | invalid types, text variants, allowed values, patterns |
+| Fill | Fills the cells with one value, checked against the column type | missing values, invalid types, ranges |
+| Trim / case | Trims spaces and optionally sets UPPER, lower or Title case | text variants |
+| Remove duplicates | Removes duplicates, keeping the first occurrence | duplicate rules |
 
 ## Screenshots
 
@@ -198,7 +236,8 @@ file (.csv/.xlsx) ──read-only──> original DataFrame ──copy──> wo
                                        │                        │
                                  profile + checks        import conversion (numbers, dates)
                                                          column mapping
-                                                         remove exact duplicates / normalize text
+                                                         remove exact duplicates / normalize text /
+                                                         guided fixes (previewed, logged, undoable)
                                                                 │
                                          prepare: typed columns + kpi_valid / date_valid flags
                                                                 │
@@ -265,18 +304,21 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The suite has 297 tests, using small fixtures with hand-checked results. They
+The suite has 355 tests, using small fixtures with hand-checked results. They
 cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
 regional number and date detection and conversion; English, German, French and Dutch
 header guessing; remembered file layouts; source line numbers; profiling,
 duplicate detection and removal (the source file stays unchanged); every validation
 rule type, the quality score formula and the default rule set's counts on the demo
-file; failed rows, their highlighted cells and their export; text normalization; KPI
-values, DuckDB aggregations, month-over-month, year-over-year and Pareto results; the
-custom SQL guard and editor; the SQL & KPIs layout; the recent files list; the light and
-dark themes (complete palettes, text contrast, settings and the app icon); and the CSV,
-Excel and Power BI exports. Twelve tests use Qt's offscreen platform (ten drive the main
-window, one the mapping dialog, one the table model), so no screen is needed.
+file; failed rows, their highlighted cells and their export; every guided fix action
+(result, change log entry, idempotency, original and source file untouched), fix
+suggestions for all 25 default rules, undo and the change log exports; text
+normalization; KPI values, DuckDB aggregations, month-over-month, year-over-year and
+Pareto results; the custom SQL guard and editor; the SQL & KPIs layout; the recent files
+list; the light and dark themes (complete palettes, text contrast, settings and the app
+icon); and the CSV, Excel and Power BI exports. Eighteen tests use Qt's offscreen
+platform (sixteen drive the main window or the Fix dialog, one the mapping dialog, one
+the table model), so no screen is needed.
 
 ## Build the executable
 
@@ -363,15 +405,14 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 - The Import & Preview preview and column profile show the file as read; only the numeric
   statistics use the import-converted values.
 - Rule sets are not remembered between sessions.
-- Only exact duplicates are removed. A `unique` rule on key columns (e.g. `order_id`)
-  reports near-duplicates, but they are not removed.
+- The change log lives in memory for one session and is not saved; only the last 10 fixes
+  can be undone (Reset working copy to original always goes back to the import).
 - Text normalization only merges case and spacing differences; there is no fuzzy matching.
 - The packaged app is about 225 MB as a folder (or a 97 MB single exe with slower start).
   No installer yet.
 
 ## Future improvements
 
-- Removing duplicates by key columns (detection already works via `unique` rules).
 - Background thread for loading very large files.
 - Windows installer with Inno Setup once the build is stable.
 - PDF summary report of the quality checks and KPIs.
