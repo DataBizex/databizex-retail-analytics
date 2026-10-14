@@ -71,6 +71,17 @@ def test_fake_xlsx_explains_excel_problem(tmp_path):
     assert "\nTechnical detail: " in message
 
 
+def test_undecodable_csv_explains_text_problem(tmp_path):
+    path = tmp_path / "binary.csv"
+    junk = b"\x81\x8d\x8f\x90\x9d"  # undefined in Windows-1252 and invalid UTF-8
+    path.write_bytes(b"order_id,city\nX1," + junk * 4 + b"\nX2," + junk + b"\n")
+    with pytest.raises(DataLoadError) as info:
+        load_file(path)
+    message = str(info.value)
+    assert "not readable as text" in message
+    assert "Technical detail:" in message
+
+
 def test_inconsistent_csv_row_names_line(tmp_path):
     path = tmp_path / "ragged.csv"
     path.write_text("order_id,quantity,price\nX1,2,9.5\nX2,3,4.0\nX3,1,2,5,extra\n", encoding="utf-8")
