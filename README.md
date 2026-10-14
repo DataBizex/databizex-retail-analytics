@@ -51,6 +51,8 @@ wrong and nobody can tell why. Teams need to:
   converted in the working copy only; values that do not fit keep their text, so the
   quality checks still report them. The settings appear in the source line and in the
   Power BI `package_info.txt`.
+- Remembers import settings and column mapping per file layout, stored locally, and
+  pre-fills the dialogs next time.
 - Preview of the first 100 rows (the full dataset is never put in the GUI).
 - Row/column counts, inferred dtypes, missing and unique counts, numeric statistics.
   A column gets statistics when at least 80% of its non-empty values are numbers (same
@@ -332,7 +334,7 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
   decimal number before the import options apply.
 - The Import & Preview preview and column profile show the file as read; only the numeric
   statistics use the import-converted values.
-- Mappings, import options and rule sets are not remembered between sessions.
+- Rule sets are not remembered between sessions.
 - Only exact duplicates are removed. A `unique` rule on key columns (e.g. `order_id`)
   reports near-duplicates, but they are not removed.
 - Text normalization only merges case and spacing differences; there is no fuzzy matching.
@@ -342,7 +344,6 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 
 ## Future improvements
 
-- Remember column mappings and import options per file layout.
 - Removing duplicates by key columns (detection already works via `unique` rules).
 - Read-only custom SQL editor with a SELECT-only guard.
 - Background thread for loading very large files.

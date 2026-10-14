@@ -62,3 +62,14 @@ def quality_df(quality_csv: Path) -> pd.DataFrame:
     from app.data.loader import load_file
 
     return load_file(quality_csv).df
+
+
+@pytest.fixture(autouse=True)
+def isolated_layout_memory(tmp_path: Path, monkeypatch) -> Path:
+    """Keep layout_memory.json out of the real user data folder during every test."""
+    import app.data.layout_memory as layout_memory
+
+    folder = tmp_path / "user_data"
+    folder.mkdir()
+    monkeypatch.setattr(layout_memory, "user_data_dir", lambda: folder)
+    return folder

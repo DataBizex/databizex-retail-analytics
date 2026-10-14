@@ -51,6 +51,7 @@ from app.data.formats import (
     detect_formats,
     import_summary,
 )
+from app.data import layout_memory
 from app.data.failed_rows import ALL_FAILED, failed_rule_choices, failed_rows
 from app.data.loader import FILE_DIALOG_FILTER, DataLoadError, load_file, with_source_rows
 from app.data.normalize import apply_normalization, find_text_variants
@@ -536,10 +537,14 @@ class MainWindow(QMainWindow):
             self._unexpected(f"loading {path.name}", exc)
             return False
 
+        layout = list(result.df.columns)  # the layout key: column names as first read
+        memory = layout_memory.find(layout)
         detection = detect_formats(result.df, result.delimiter, result.encoding)
         options = detection.options
+        options_confirmed = False
         if not detection.is_default():
-            options = self._ask_import_options(path, detection)
+            remembered = layout_memory.remembered_options(memory, detection.options)
+            options, options_confirmed = self._ask_import_options(path, detection, remembered)
             if (options.delimiter, options.encoding) != (result.delimiter, result.encoding):
                 try:
                     with self._busy(f"Reading {path.name} with the chosen delimiter and encoding..."):
@@ -556,8 +561,10 @@ class MainWindow(QMainWindow):
         self.original_df = result.df
         self.source_rows = result.source_rows
         self.import_options = options
-        self.column_mapping = self._ask_column_mapping(result.df) if needs_mapping(result.df) else None
+        self.column_mapping = self._ask_column_mapping(result.df, memory) if needs_mapping(result.df) else None
         self._make_working_copy()
+        if options_confirmed or self.column_mapping:
+            self._remember_layout(layout, memory, options if options_confirmed else None)
         self.duplicates_removed = 0
         self.normalized_columns = []
         self._clear_kpis()
@@ -572,21 +579,33 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(message, 10000)
         return True
 
-    def _ask_import_options(self, path: Path, detection: FormatDetection) -> ImportOptions:
-        dialog = ImportOptionsDialog(path.name, detection, self)
+    def _ask_import_options(self, path: Path, detection: FormatDetection,
+                            remembered: ImportOptions | None = None) -> tuple[ImportOptions, bool]:
+        """(options to use, whether the user confirmed them)."""
+        dialog = ImportOptionsDialog(path.name, detection, self, remembered=remembered)
         if not dialog.exec():
             logger.info("Import options declined; using the file as read, without conversion")
             read = detection.options
-            return ImportOptions(delimiter=read.delimiter, encoding=read.encoding)
-        return dialog.options()
+            return ImportOptions(delimiter=read.delimiter, encoding=read.encoding), False
+        return dialog.options(), True
 
-    def _ask_column_mapping(self, df: pd.DataFrame) -> dict[str, str | None] | None:
+    def _ask_column_mapping(self, df: pd.DataFrame, memory: dict | None = None) -> dict[str, str | None] | None:
         columns = list(df.columns)
-        dialog = ColumnMappingDialog(columns, guess_mapping(columns), self)
+        remembered = layout_memory.remembered_mapping(memory, columns)
+        initial = {**guess_mapping(columns), **(remembered or {})}
+        dialog = ColumnMappingDialog(columns, initial, self, remembered=remembered is not None)
         if not dialog.exec():
             logger.info("Column mapping skipped; using the file's column names as they are")
             return None
         return dialog.mapping()
+
+    def _remember_layout(self, layout: list[str], memory: dict | None, options: ImportOptions | None) -> None:
+        """Save what the user confirmed for this layout; a dialog that was declined or not shown
+        keeps what was remembered before."""
+        previous = memory or {}
+        stored_options = (layout_memory.options_to_dict(options) if options
+                          else previous.get("import_options"))
+        layout_memory.remember(layout, stored_options, self.column_mapping or previous.get("column_mapping"))
 
     def _make_working_copy(self) -> None:
         """Set working_df from original_df: number/date conversion, then the column mapping if chosen."""

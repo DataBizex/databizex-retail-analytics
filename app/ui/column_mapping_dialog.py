@@ -13,16 +13,22 @@ from PySide6.QtWidgets import (
 )
 
 from app.data.column_mapping import EXPECTED_COLUMNS, NOT_AVAILABLE_LABEL, mapping_problems
+from app.data.layout_memory import REMEMBERED_NOTE
 
 
 class ColumnMappingDialog(QDialog):
-    def __init__(self, columns: list[str], guess: dict[str, str | None], parent=None) -> None:
+    def __init__(self, columns: list[str], guess: dict[str, str | None], parent=None,
+                 remembered: bool = False) -> None:
+        """guess: initial selection; remembered: it comes from a previous session (shows a note)."""
         super().__init__(parent)
         self.setWindowTitle("Map Your Columns")
         self.setModal(True)
         self._columns = [str(c) for c in columns]
 
         layout = QVBoxLayout(self)
+        if remembered:
+            note = QLabel(f"<b>{REMEMBERED_NOTE}</b>")
+            layout.addWidget(note)
         intro = QLabel(
             "Some columns DataBizex uses for KPIs were not found by name. Choose which column of "
             "your file holds each field, or pick “(not available)”. Your file is not changed.\n\n"
