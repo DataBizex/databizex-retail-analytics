@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 
 from app.analytics.kpis import headline_kpis
@@ -39,6 +40,49 @@ def test_revenue_by_month_uses_valid_dates_only(db):
     result = db.run("by_month")
     assert list(result["month"]) == ["2024-01", "2024-02"]
     assert list(result["net_revenue"]) == pytest.approx([230.0, 100.0])  # A5 (invalid date) left out
+
+
+def test_month_over_month_change(db):
+    result = db.run("by_month")
+    assert pd.isna(result["mom_pct"].iloc[0])  # first month has no previous month
+    assert result["mom_pct"].iloc[1] == -56.5  # (100 - 230) / 230 = -56.52%
+
+
+def test_month_over_month_on_demo_data():
+    df, _ = remove_exact_duplicates(load_file(sample_data_path()).df)
+    manager = DuckDBManager()
+    manager.load_sales(df)
+    result = manager.run("by_month").set_index("month")
+    manager.close()
+    assert pd.isna(result.loc["2024-01", "mom_pct"])
+    # 2024-01: 14,152.275; 2024-02: 19,133.80 -> 4,981.525 / 14,152.275 = +35.20%
+    assert result.loc["2024-01", "net_revenue"] == pytest.approx(14152.275)
+    assert result.loc["2024-02", "net_revenue"] == pytest.approx(19133.8)
+    assert result.loc["2024-02", "mom_pct"] == 35.2
+
+
+def test_month_over_month_is_null_after_a_zero_revenue_month():
+    df = pd.DataFrame({"order_id": ["a", "b", "c"], "order_date": ["2024-01-05", "2024-02-05", "2024-03-05"],
+                       "country": "X", "product": "P", "category": "C", "quantity": [1, 2, 1],
+                       "unit_price": [0, 10, 30], "discount_pct": 0, "unit_cost": 0})
+    manager = DuckDBManager()
+    manager.load_sales(df)
+    result = manager.run("by_month")
+    manager.close()
+    assert list(result["net_revenue"]) == pytest.approx([0.0, 20.0, 30.0])
+    assert pd.isna(result["mom_pct"].iloc[0]) and pd.isna(result["mom_pct"].iloc[1])
+    assert result["mom_pct"].iloc[2] == 50.0
+
+
+def test_monthly_table_shows_signed_mom_percent():
+    from app.ui.main_window import _display_frame
+
+    frame = pd.DataFrame({"month": ["2024-01", "2024-02", "2024-03"], "net_revenue": [1.0, 2.0, 1.0],
+                          "mom_pct": [float("nan"), 12.4, -3.1]})
+    shown = _display_frame("by_month", frame)
+    assert list(shown.columns) == ["month", "net_revenue", "MoM %"]
+    assert list(shown["MoM %"]) == ["n/a", "+12.4%", "-3.1%"]
+    assert "mom_pct" in frame.columns  # the stored result keeps the raw numbers
 
 
 def test_top_products_sql(db):

@@ -106,6 +106,18 @@ SCORE_TOOLTIP = (
 )
 
 
+def _mom_text(value: float) -> str:
+    """Month-over-month change as shown in the table: "+12.4%", "-3.1%" or "n/a"."""
+    return "n/a" if pd.isna(value) else f"{value:+.1f}%"
+
+
+def _display_frame(key: str, frame: pd.DataFrame | None) -> pd.DataFrame | None:
+    """Query result as shown in the SQL & KPIs table (the stored and exported results keep raw numbers)."""
+    if key == "by_month" and frame is not None and "mom_pct" in frame.columns:
+        frame = frame.assign(mom_pct=frame["mom_pct"].map(_mom_text)).rename(columns={"mom_pct": "MoM %"})
+    return frame
+
+
 def _money(value: float) -> str:
     return "n/a" if pd.isna(value) else f"€ {value:,.2f}"
 
@@ -839,7 +851,7 @@ class MainWindow(QMainWindow):
         if key is None:
             return
         self.sql_view.setPlainText(QUERIES[key].sql)
-        self.result_table.show_frame(self.kpi_results.get(key), float_decimals=2)
+        self.result_table.show_frame(_display_frame(key, self.kpi_results.get(key)), float_decimals=2)
 
     def _draw_charts(self) -> None:
         euro = FuncFormatter(lambda v, _pos: f"€{v / 1000:,.0f}k")

@@ -105,7 +105,8 @@ wrong and nobody can tell why. Teams need to:
 **SQL & KPIs**
 - Working data loaded into an embedded DuckDB table `sales`.
 - Predefined SQL: headline KPIs, revenue by country, by category,
-  by month (valid dates only), top 5 products.
+  by month (valid dates only) with month-over-month change (`MoM %`, via `LAG`),
+  top 5 products.
 - KPI cards: net revenue, units sold, estimated gross profit, gross margin, order lines used.
 - Charts (Matplotlib): revenue by country, monthly revenue trend.
 - Shows whether KPIs use original or cleaned data, and how many rows were excluded.
@@ -187,9 +188,10 @@ All data logic lives outside `app/ui`, so almost all tests run without a window.
 ### Portable SQL
 
 All reporting queries are standard, read-only SQL
-(`SELECT`, `SUM`, `COUNT`, `CASE`, `COALESCE`, `EXTRACT`, `GROUP BY`,
-`ORDER BY`, `LIMIT`). They run unchanged on MySQL and PostgreSQL against
-a `sales` table with the same columns. DuckDB is used only as an embedded
+(`SELECT`, `SUM`, `COUNT`, `CASE`, `COALESCE`, `NULLIF`, `CAST`, `ROUND`, `EXTRACT`,
+`GROUP BY`, `ORDER BY`, `LIMIT`, and the standard window function `LAG` with a named
+`WINDOW`). They run unchanged on MySQL 8+ and PostgreSQL (window functions need
+MySQL 8 or later) against a `sales` table with the same columns. DuckDB is used only as an embedded
 engine, so no database server is needed.
 
 ## KPI definitions and assumptions
@@ -239,15 +241,15 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The suite has 131 tests, using small fixtures with hand-checked results. They
+The suite has 149 tests, using small fixtures with hand-checked results. They
 cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
 regional number and date detection and conversion; English, German, French and Dutch
-header guessing; source line numbers; profiling,
+header guessing; remembered file layouts; source line numbers; profiling,
 duplicate detection and removal (the source file stays unchanged); every validation
 rule type, the quality score formula and the default rule set's counts on the demo
 file; failed rows and their export; text normalization; KPI values and DuckDB
-aggregations; and the CSV, Excel and Power BI exports. Three tests use Qt's offscreen
-platform (two drive the main window, one the mapping dialog), so no screen is needed.
+aggregations; and the CSV, Excel and Power BI exports. Four tests use Qt's offscreen
+platform (three drive the main window, one the mapping dialog), so no screen is needed.
 
 ## Build the executable
 

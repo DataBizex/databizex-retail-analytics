@@ -1,7 +1,8 @@
 """Embedded DuckDB database holding the working dataset as table `sales`.
 
 All reporting queries are plain, read-only standard SQL (SELECT, SUM, CASE,
-EXTRACT, GROUP BY, ORDER BY, LIMIT) so they also run on MySQL and PostgreSQL.
+EXTRACT, GROUP BY, ORDER BY, LIMIT, and the LAG window function) so they also run on
+MySQL 8+ and PostgreSQL.
 """
 
 from __future__ import annotations
@@ -75,12 +76,21 @@ ORDER BY net_revenue DESC""",
             "by_month",
             "Revenue by month (valid dates only)",
             f"""SELECT
-    EXTRACT(YEAR FROM order_date)  AS order_year,
-    EXTRACT(MONTH FROM order_date) AS order_month,
-    SUM({NET_REVENUE_SQL})  AS net_revenue
-FROM sales
-WHERE kpi_valid = 1 AND date_valid = 1
-GROUP BY EXTRACT(YEAR FROM order_date), EXTRACT(MONTH FROM order_date)
+    order_year,
+    order_month,
+    net_revenue,
+    ROUND(CAST(100.0 * (net_revenue - LAG(net_revenue) OVER w)
+               / NULLIF(LAG(net_revenue) OVER w, 0) AS DECIMAL(38, 4)), 1) AS mom_pct
+FROM (
+    SELECT
+        EXTRACT(YEAR FROM order_date)  AS order_year,
+        EXTRACT(MONTH FROM order_date) AS order_month,
+        SUM({NET_REVENUE_SQL})  AS net_revenue
+    FROM sales
+    WHERE kpi_valid = 1 AND date_valid = 1
+    GROUP BY EXTRACT(YEAR FROM order_date), EXTRACT(MONTH FROM order_date)
+) AS monthly
+WINDOW w AS (ORDER BY order_year, order_month)
 ORDER BY order_year, order_month""",
         ),
         NamedQuery(
