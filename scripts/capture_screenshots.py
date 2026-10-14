@@ -26,7 +26,7 @@ SHOTS = ["01_import_preview.png", "02_data_quality.png", "03_sql_kpis.png", "04_
 
 
 def main() -> int:
-    app = create_application(sys.argv)
+    app = create_application(sys.argv, theme_mode="light")  # README screenshots use the light theme
     window = MainWindow()
     window.resize(1360, 860)
     window.show()

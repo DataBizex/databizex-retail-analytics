@@ -39,6 +39,9 @@ wrong and nobody can tell why. Teams need to:
 
 ## Features
 
+- Light and dark themes (**View > Theme**: Light, Dark or System, which follows Windows),
+  remembered between sessions and applied live, including the charts.
+
 **Import & Preview**
 - Open `.csv` or `.xlsx` (legacy `.xls` is rejected with an explanation).
 - **File > Open Recent** lists the last 10 opened files (name, full path as tooltip), stored
@@ -118,11 +121,12 @@ wrong and nobody can tell why. Teams need to:
   revenue, the smallest set of top products reaching 80%, and "N of M products make 80%
   of net revenue").
 - KPI cards: net revenue, units sold, estimated gross profit, gross margin, order lines used.
-- Charts (Matplotlib): revenue by country, monthly revenue trend, and a Pareto chart
-  (product revenue bars with the cumulative share line and an 80% guide).
+- Charts (Matplotlib) in a scrolling column beside the tables: revenue by country, monthly
+  revenue trend, and a Pareto chart (product revenue bars with the cumulative share line and
+  an 80% guide; the top 10 products are named on the axis).
 - Shows whether KPIs use original or cleaned data, and how many rows were excluded.
-- The SQL text for each result is shown in the app.
-- **Custom SQL** editor (read-only): one `SELECT` or `WITH` query on table `sales`, run with
+- **Predefined queries** view: pick a query to see its result table, with the SQL text below it.
+- **Custom SQL** view, a read-only editor: one `SELECT` or `WITH` query on table `sales`, run with
   **Run** or Ctrl+Enter. A guard (`app/database/sql_guard.py`) rejects anything else: more
   than one statement, and words such as `INSERT`, `UPDATE`, `DELETE`, `DROP`, `CREATE`,
   `ATTACH`, `COPY`, `SET` or `PRAGMA` outside quoted text and comments. Errors from the guard
@@ -171,14 +175,16 @@ databizex-retail-analytics/
 ├── app/
 │   ├── main.py               entry point, logging, --smoke-test mode
 │   ├── paths.py              resource paths (source + PyInstaller bundle)
-│   ├── ui/                   main_window.py, data_table.py, dialogs  (PySide6 only)
+│   ├── settings.py           user preferences (settings.json, e.g. the theme)
+│   ├── ui/                   main_window.py, data_table.py, theme.py, dialogs  (PySide6 only)
 │   ├── data/                 loader.py, formats.py, column_mapping.py, profiler.py,
 │   │                         cleaner.py, rules.py, normalize.py, failed_rows.py
 │   ├── analytics/            kpis.py  (KPI definitions, row validity)
 │   ├── database/             duckdb_manager.py  (table `sales`, SQL queries)
 │   └── exports/              exporter.py  (CSV, Excel, Power BI package)
 ├── sample_data/              synthetic CSV files + README
-├── scripts/                  generate_sample_data.py, capture_screenshots.py
+├── assets/                   icon.png, icon.ico (drawn by scripts/generate_icon.py)
+├── scripts/                  generate_sample_data.py, capture_screenshots.py, generate_icon.py
 ├── tests/                    pytest suite
 ├── powerbi/                  POWER_BI_GUIDE.md, data_dictionary.md
 ├── rules/                    retail_default.json (default validation rule set)
@@ -259,7 +265,7 @@ Logs are written to `%LOCALAPPDATA%\DataBizex\databizex.log`.
 .venv\Scripts\python -m pytest
 ```
 
-The suite has 228 tests, using small fixtures with hand-checked results. They
+The suite has 297 tests, using small fixtures with hand-checked results. They
 cover loading valid, empty, header-only, headerless, unsupported and corrupt files;
 regional number and date detection and conversion; English, German, French and Dutch
 header guessing; remembered file layouts; source line numbers; profiling,
@@ -267,9 +273,10 @@ duplicate detection and removal (the source file stays unchanged); every validat
 rule type, the quality score formula and the default rule set's counts on the demo
 file; failed rows, their highlighted cells and their export; text normalization; KPI
 values, DuckDB aggregations, month-over-month, year-over-year and Pareto results; the
-custom SQL guard and editor; the recent files list; and the CSV, Excel and Power BI
-exports. Seven tests use Qt's offscreen platform (five drive the main window, one the
-mapping dialog, one the table model), so no screen is needed.
+custom SQL guard and editor; the SQL & KPIs layout; the recent files list; the light and
+dark themes (complete palettes, text contrast, settings and the app icon); and the CSV,
+Excel and Power BI exports. Twelve tests use Qt's offscreen platform (ten drive the main
+window, one the mapping dialog, one the table model), so no screen is needed.
 
 ## Build the executable
 
@@ -361,7 +368,6 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 - Text normalization only merges case and spacing differences; there is no fuzzy matching.
 - The packaged app is about 225 MB as a folder (or a 97 MB single exe with slower start).
   No installer yet.
-- The UI uses Qt's light colour scheme even when Windows is in dark mode.
 
 ## Future improvements
 

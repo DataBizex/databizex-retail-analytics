@@ -19,10 +19,12 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from matplotlib.ticker import FuncFormatter
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QFont, QKeySequence, QShortcut
+from PySide6.QtGui import QAction, QActionGroup, QFont, QKeySequence, QPixmap, QShortcut
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
+    QDialog,
+    QDialogButtonBox,
     QFileDialog,
     QFrame,
     QGridLayout,
@@ -34,13 +36,15 @@ from PySide6.QtWidgets import (
     QPlainTextEdit,
     QProgressBar,
     QPushButton,
+    QScrollArea,
     QSplitter,
+    QStackedWidget,
     QTabWidget,
     QVBoxLayout,
     QWidget,
 )
 
-from app import __version__
+from app import __version__, settings
 from app.analytics.kpis import KpiInputError, format_margin, validity_summary
 from app.data.cleaner import change_summary, remove_exact_duplicates, run_quality_checks
 from app.data.column_mapping import ColumnMappingError, apply_column_mapping, guess_mapping, needs_mapping
@@ -77,7 +81,8 @@ from app.exports.exporter import (
     export_tables_csv,
     generate_powerbi_package,
 )
-from app.paths import sample_data_path, user_data_dir
+from app.paths import icon_path, sample_data_path, user_data_dir
+from app.ui import theme
 from app.ui.column_mapping_dialog import ColumnMappingDialog
 from app.ui.import_options_dialog import ImportOptionsDialog
 from app.ui.normalize_dialog import NormalizeDialog
@@ -92,6 +97,10 @@ ABOUT_TEXT = (
     "industry workflows: validating messy sales exports, computing business KPIs and "
     "preparing data for Power BI. DataBizex.com"
 )
+CHART_HINT = "Run KPI queries to draw this chart"
+CHART_MIN_HEIGHT = 320  # px; the chart column scrolls when the window is shorter than three charts
+PARETO_LABELLED = 10  # Pareto x-axis labels for the top products only (all bars are drawn)
+MIN_WINDOW_SIZE = (1100, 700)
 KPI_TABLE_KEYS = ["by_country", "by_category", "by_month", "top_products", "pareto"]
 FAILED_ROWS_SHOWN = 500
 SCORE_TITLES = {
@@ -159,17 +168,19 @@ def _money(value: float) -> str:
 
 
 class KpiCard(QFrame):
+    """A themed card: small muted caption above a large value."""
+
     def __init__(self, title: str) -> None:
         super().__init__()
-        self.setFrameShape(QFrame.StyledPanel)
+        self.setObjectName("kpiCard")
+        self.setMinimumWidth(170)
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(16, 12, 16, 14)
+        layout.setSpacing(4)
         caption = QLabel(title)
-        caption.setStyleSheet("color: #555;")
+        theme.set_role(caption, "cardCaption")
         self.value = QLabel("—")
-        font = QFont()
-        font.setPointSize(15)
-        font.setBold(True)
-        self.value.setFont(font)
+        theme.set_role(self.value, "cardValue")
         layout.addWidget(caption)
         layout.addWidget(self.value)
 
@@ -182,19 +193,64 @@ class ChartCanvas(FigureCanvasQTAgg):
         self.figure = Figure(figsize=(5, 3), tight_layout=True)
         super().__init__(self.figure)
         self.ax = self.figure.add_subplot(111)
-        self.clear("Run KPI queries to draw this chart")
+        self.message = ""  # the empty-state text shown, if any (redrawn on a theme switch)
+        self.clear(CHART_HINT)
 
     def reset(self):
-        """A fresh figure with one axes (drops a secondary axis from an earlier draw)."""
+        """A fresh themed figure with one axes (drops a secondary axis from an earlier draw)."""
         self.figure.clear()
+        theme.style_figure(self.figure)
         self.ax = self.figure.add_subplot(111)
+        self.message = ""
         return self.ax
 
     def clear(self, message: str) -> None:
         self.reset()
-        self.ax.set_axis_off()
-        self.ax.text(0.5, 0.5, message, ha="center", va="center", color="#777")
+        theme.chart_message(self.ax, message)
+        self.message = message
         self.draw_idle()
+
+
+class ScoreBar(QWidget):
+    """One quality score: title and exact value above a bar filled by the theme's thresholds."""
+
+    def __init__(self, title: str, strong: bool = False) -> None:
+        super().__init__()
+        self.title = title
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(4)
+        top = QHBoxLayout()
+        caption = QLabel(title)
+        theme.set_role(caption, "scoreTitleStrong" if strong else "scoreTitle")
+        self.value = QLabel("n/a")
+        theme.set_role(self.value, "scoreValueStrong" if strong else "scoreValue")
+        top.addWidget(caption)
+        top.addStretch(1)
+        top.addWidget(self.value)
+        layout.addLayout(top)
+        self.bar = QProgressBar()
+        self.bar.setRange(0, 1000)  # tenths of a point
+        self.bar.setTextVisible(False)
+        self.bar.setFixedHeight(12 if strong else 8)
+        theme.set_role(self.bar, "score")
+        layout.addWidget(self.bar)
+        self.set_score(None, "n/a")
+
+    def set_score(self, value: float | None, text: str) -> None:
+        self.value.setText(text)
+        self.bar.setValue(0 if value is None else round(max(0.0, min(100.0, value)) * 10))
+        theme.set_role(self.bar, theme.score_level(value), "level")
+        self.bar.setAccessibleName(f"{self.title}: {text}")
+
+
+def _empty_state(text: str) -> QWidget:
+    """A centred, muted two-line hint for a tab without data."""
+    label = QLabel(text)
+    label.setAlignment(Qt.AlignCenter)
+    label.setWordWrap(True)
+    theme.set_role(label, "empty")
+    return label
 
 
 class MainWindow(QMainWindow):
@@ -202,6 +258,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle(WINDOW_TITLE)
         self.resize(1280, 820)
+        self.setMinimumSize(*MIN_WINDOW_SIZE)
 
         # Data state. original_df is never modified after loading.
         self.source_path: Path | None = None
@@ -242,6 +299,10 @@ class MainWindow(QMainWindow):
         self._build_menu()
         self._build_ui()
         self._refresh_all()
+        app = QApplication.instance()
+        hints = app.styleHints() if app is not None else None
+        if hints is not None and hasattr(hints, "colorSchemeChanged"):  # Windows light/dark switch
+            hints.colorSchemeChanged.connect(self._on_system_colour_scheme)
 
     # ------------------------------------------------------------------ UI setup
     def _build_menu(self) -> None:
@@ -257,6 +318,18 @@ class MainWindow(QMainWindow):
         file_menu.addAction(exit_action)
         file_menu.aboutToShow.connect(self._rebuild_recent_menu)
         self._rebuild_recent_menu()
+        view_menu = self.menuBar().addMenu("&View")
+        theme_menu = view_menu.addMenu("&Theme")
+        self.theme_actions = QActionGroup(self)
+        self.theme_actions.setExclusive(True)
+        for mode, label in ((theme.LIGHT_MODE, "&Light"), (theme.DARK_MODE, "&Dark"),
+                            (theme.SYSTEM_MODE, "&System (follow Windows)")):
+            action = QAction(label, self, checkable=True)
+            action.setData(mode)
+            action.setChecked(mode == theme.active_mode())
+            action.triggered.connect(lambda _checked=False, m=mode: self.set_theme_mode(m))
+            self.theme_actions.addAction(action)
+            theme_menu.addAction(action)
         help_menu = self.menuBar().addMenu("&Help")
         help_menu.addAction(QAction("&About DataBizex", self, triggered=self.show_about))
 
@@ -289,22 +362,30 @@ class MainWindow(QMainWindow):
         central = QWidget()
         root = QVBoxLayout(central)
 
+        root.setContentsMargins(14, 10, 14, 8)
+        root.setSpacing(8)
         header = QHBoxLayout()
+        header.setSpacing(10)
+        logo = QLabel()
+        logo.setPixmap(QPixmap(str(icon_path())).scaled(30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         title = QLabel("DataBizex")
-        title_font = QFont()
-        title_font.setPointSize(16)
-        title_font.setBold(True)
-        title.setFont(title_font)
+        theme.set_role(title, "title")
         subtitle = QLabel("Retail Analytics & Data Quality")
-        subtitle.setStyleSheet("color: #555;")
+        theme.set_role(subtitle, "muted")
         self.version_label = QLabel(f"v{__version__}")
-        self.version_label.setStyleSheet("color: #777;")
+        theme.set_role(self.version_label, "muted")
         open_btn = QPushButton("Open file...")
+        open_btn.setToolTip("Open a .csv or .xlsx sales export (Ctrl+O). The file is only read, never changed.")
         open_btn.clicked.connect(self.open_file)
         sample_btn = QPushButton("Load sample data")
+        sample_btn.setToolTip("Load the bundled demo sales file to try every feature.")
         sample_btn.clicked.connect(self.load_sample)
         about_btn = QPushButton("About")
+        about_btn.setToolTip("Version and author information.")
         about_btn.clicked.connect(self.show_about)
+        for button in (open_btn, sample_btn):
+            theme.mark_primary(button)
+        header.addWidget(logo)
         header.addWidget(title)
         header.addWidget(subtitle)
         header.addWidget(self.version_label)
@@ -316,14 +397,27 @@ class MainWindow(QMainWindow):
 
         self.state_label = QLabel()
         self.state_label.setWordWrap(True)
-        self.state_label.setStyleSheet("padding: 6px; background: #eef3f8; border-radius: 4px;")
+        theme.set_role(self.state_label, "info")
         root.addWidget(self.state_label)
 
         self.tabs = QTabWidget()
-        self.tabs.addTab(self._build_import_tab(), "Import && Preview")
-        self.tabs.addTab(self._build_quality_tab(), "Data Quality")
-        self.tabs.addTab(self._build_kpi_tab(), "SQL && KPIs")
-        self.tabs.addTab(self._build_export_tab(), "Export && Reporting")
+        # Each tab shows a centred hint until data is loaded (see _refresh_all).
+        self.empty_stacks: list[QStackedWidget] = []
+        for build, title, hint in (
+            (self._build_import_tab, "Import && Preview",
+             "No data loaded.\nOpen a file or load the sample data to get started."),
+            (self._build_quality_tab, "Data Quality",
+             "No data to check yet.\nOpen a file or load the sample data to run the quality checks."),
+            (self._build_kpi_tab, "SQL && KPIs",
+             "No data loaded.\nOpen a file or load the sample data, then run the KPI queries."),
+            (self._build_export_tab, "Export && Reporting",
+             "Nothing to export yet.\nOpen a file or load the sample data first."),
+        ):
+            stack = QStackedWidget()
+            stack.addWidget(_empty_state(hint))
+            stack.addWidget(build())
+            self.empty_stacks.append(stack)
+            self.tabs.addTab(stack, title)
         root.addWidget(self.tabs, 1)
         self.setCentralWidget(central)
 
@@ -374,7 +468,7 @@ class MainWindow(QMainWindow):
         self.load_rules_btn = QPushButton("Load rule set...")
         self.load_rules_btn.clicked.connect(self.load_rule_set)
         self.rules_label = QLabel()
-        self.rules_label.setStyleSheet("color: #555;")
+        theme.set_role(self.rules_label, "muted")
         self._update_rules_label()
         buttons.addWidget(self.dedupe_btn)
         buttons.addWidget(self.normalize_btn)
@@ -390,19 +484,21 @@ class MainWindow(QMainWindow):
             "the source file is never modified."
         )
         note.setWordWrap(True)
-        note.setStyleSheet("color: #555;")
+        theme.set_role(note, "muted")
         layout.addWidget(note)
 
-        scores = QHBoxLayout()
-        self.score_labels: dict[str, QLabel] = {}
-        for key in SCORE_TITLES:
-            label = QLabel()
-            label.setStyleSheet("padding: 4px 10px; background: #eef3f8; border-radius: 4px;")
-            label.setToolTip(SCORE_TOOLTIP)
-            self.score_labels[key] = label
-            scores.addWidget(label)
-        scores.addStretch(1)
-        layout.addLayout(scores)
+        panel = QFrame()
+        panel.setObjectName("scorePanel")
+        panel.setToolTip(SCORE_TOOLTIP)
+        scores = QHBoxLayout(panel)
+        scores.setContentsMargins(16, 10, 16, 12)
+        scores.setSpacing(22)
+        self.score_bars: dict[str, ScoreBar] = {}
+        for key, title in SCORE_TITLES.items():
+            bar = ScoreBar(title, strong=key == "overall")
+            self.score_bars[key] = bar
+            scores.addWidget(bar, 2 if key == "overall" else 1)
+        layout.addWidget(panel)
         self._show_score(None)
 
         splitter = QSplitter(Qt.Horizontal)
@@ -423,7 +519,7 @@ class MainWindow(QMainWindow):
         self.failed_combo.setMinimumWidth(320)
         self.failed_combo.currentIndexChanged.connect(self._show_failed_rows)
         self.failed_count_label = QLabel()
-        self.failed_count_label.setStyleSheet("color: #555;")
+        theme.set_role(self.failed_count_label, "muted")
         self.export_failed_btn = QPushButton("Export failed rows to CSV...")
         self.export_failed_btn.clicked.connect(self.export_failed_rows)
         failed_top.addWidget(QLabel("Rule:"))
@@ -447,6 +543,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(tab)
         top = QHBoxLayout()
         self.run_kpi_btn = QPushButton("Run KPI queries (DuckDB)")
+        theme.mark_primary(self.run_kpi_btn)
         self.run_kpi_btn.clicked.connect(self.run_kpis)
         self.kpi_basis_label = QLabel()
         self.kpi_basis_label.setWordWrap(True)
@@ -462,67 +559,104 @@ class MainWindow(QMainWindow):
             "gross_margin": KpiCard("Gross margin"),
             "orders": KpiCard("Order lines used"),
         }
+        cards.setHorizontalSpacing(12)
         for i, card in enumerate(self.cards.values()):
             cards.addWidget(card, 0, i)
+            cards.setColumnStretch(i, 1)
         layout.addLayout(cards)
 
         self.exclusion_label = QLabel()
         self.exclusion_label.setWordWrap(True)
-        self.exclusion_label.setStyleSheet("color: #8a4b00;")
+        theme.set_role(self.exclusion_label, "warning")
         layout.addWidget(self.exclusion_label)
 
-        splitter = QSplitter(Qt.Horizontal)
-        left = QWidget()
-        left_layout = QVBoxLayout(left)
-        left_layout.setContentsMargins(0, 0, 0, 0)
+        # Left: the predefined queries and the custom SQL editor as two views, each with the
+        # full height for its table. Right: the charts in a scrolling column.
+        self.kpi_views = QTabWidget()
+        self.kpi_views.addTab(self._build_predefined_queries(), "Predefined queries")
+        self.kpi_views.addTab(self._build_custom_sql(), "Custom SQL")
+
+        self.chart_scroll = QScrollArea()
+        self.chart_scroll.setWidgetResizable(True)
+        self.chart_scroll.setFrameShape(QFrame.NoFrame)
+        charts = QWidget()
+        charts_layout = QVBoxLayout(charts)
+        charts_layout.setContentsMargins(0, 0, 4, 0)
+        charts_layout.setSpacing(8)
+        self.country_chart = ChartCanvas()
+        self.month_chart = ChartCanvas()
+        self.pareto_chart = ChartCanvas()
+        for chart in (self.country_chart, self.month_chart, self.pareto_chart):
+            chart.setMinimumHeight(CHART_MIN_HEIGHT)
+            charts_layout.addWidget(chart)
+        self.chart_scroll.setWidget(charts)
+
+        self.kpi_splitter = QSplitter(Qt.Horizontal)
+        self.kpi_splitter.setChildrenCollapsible(False)
+        self.kpi_splitter.addWidget(self.kpi_views)
+        self.kpi_splitter.addWidget(self.chart_scroll)
+        self.kpi_splitter.setStretchFactor(0, 45)
+        self.kpi_splitter.setStretchFactor(1, 55)
+        self.kpi_splitter.setSizes([450, 550])  # about 45/55; scaled to the real width
+        layout.addWidget(self.kpi_splitter, 1)
+        self._show_selected_query()
+        return tab
+
+    def _build_predefined_queries(self) -> QWidget:
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(6, 8, 6, 6)
         self.query_combo = QComboBox()
         for key in KPI_TABLE_KEYS:
             self.query_combo.addItem(QUERIES[key].title, key)
         self.query_combo.currentIndexChanged.connect(self._show_selected_query)
-        left_layout.addWidget(self.query_combo)
+        layout.addWidget(self.query_combo)
         self.pareto_label = QLabel()
         self.pareto_label.setVisible(False)
-        left_layout.addWidget(self.pareto_label)
+        layout.addWidget(self.pareto_label)
+
         self.result_table = DataTable()
-        left_layout.addWidget(self.result_table, 2)
+        sql_box = QWidget()
+        sql_layout = QVBoxLayout(sql_box)
+        sql_layout.setContentsMargins(0, 4, 0, 0)
         sql_label = QLabel("SQL (standard, read-only; runs unchanged on MySQL/PostgreSQL):")
-        left_layout.addWidget(sql_label)
+        theme.set_role(sql_label, "muted")
+        sql_layout.addWidget(sql_label)
         self.sql_view = QPlainTextEdit()
         self.sql_view.setReadOnly(True)
-        self.sql_view.setFont(QFont("Consolas", 9))
-        left_layout.addWidget(self.sql_view, 1)
-        left_layout.addWidget(self._build_custom_sql(), 2)
-
-        right = QWidget()
-        right_layout = QVBoxLayout(right)
-        right_layout.setContentsMargins(0, 0, 0, 0)
-        self.country_chart = ChartCanvas()
-        self.month_chart = ChartCanvas()
-        self.pareto_chart = ChartCanvas()
-        right_layout.addWidget(self.country_chart)
-        right_layout.addWidget(self.month_chart)
-        right_layout.addWidget(self.pareto_chart)
-
-        splitter.addWidget(left)
-        splitter.addWidget(right)
-        splitter.setSizes([560, 640])
-        layout.addWidget(splitter, 1)
-        self._show_selected_query()
-        return tab
+        theme.set_role(self.sql_view, "code")
+        sql_layout.addWidget(self.sql_view, 1)
+        self.predefined_splitter = QSplitter(Qt.Vertical)
+        self.predefined_splitter.setChildrenCollapsible(False)
+        self.predefined_splitter.addWidget(self.result_table)
+        self.predefined_splitter.addWidget(sql_box)
+        self.predefined_splitter.setStretchFactor(0, 65)
+        self.predefined_splitter.setStretchFactor(1, 35)
+        self.predefined_splitter.setSizes([650, 350])  # about 65/35
+        layout.addWidget(self.predefined_splitter, 1)
+        return page
 
     def _build_custom_sql(self) -> QWidget:
-        box = QGroupBox("Custom SQL (read-only: one SELECT or WITH query on table sales)")
-        layout = QVBoxLayout(box)
+        page = QWidget()
+        page_layout = QVBoxLayout(page)
+        page_layout.setContentsMargins(6, 8, 6, 6)
+        hint = QLabel("Read-only: one SELECT or WITH query on table sales.")
+        theme.set_role(hint, "muted")
+        page_layout.addWidget(hint)
+        editor = QWidget()
+        layout = QVBoxLayout(editor)
+        layout.setContentsMargins(0, 0, 0, 4)
         self.custom_sql = QPlainTextEdit("SELECT * FROM sales LIMIT 100")
-        self.custom_sql.setFont(QFont("Consolas", 9))
-        self.custom_sql.setMaximumHeight(90)
-        layout.addWidget(self.custom_sql)
+        theme.set_role(self.custom_sql, "code")
+        self.custom_sql.setMinimumHeight(60)
+        layout.addWidget(self.custom_sql, 1)
         for keys in ("Ctrl+Return", "Ctrl+Enter"):  # main and keypad Enter
             shortcut = QShortcut(QKeySequence(keys), self.custom_sql)
             shortcut.setContext(Qt.WidgetWithChildrenShortcut)
             shortcut.activated.connect(self.run_custom_sql)
         buttons = QHBoxLayout()
         self.custom_run_btn = QPushButton("Run (Ctrl+Enter)")
+        theme.mark_primary(self.custom_run_btn)
         self.custom_run_btn.clicked.connect(self.run_custom_sql)
         self.custom_export_btn = QPushButton("Export result to CSV...")
         self.custom_export_btn.clicked.connect(self.export_custom_result)
@@ -536,8 +670,15 @@ class MainWindow(QMainWindow):
         self.custom_message.setTextInteractionFlags(Qt.TextSelectableByMouse)
         layout.addWidget(self.custom_message)
         self.custom_table = DataTable()
-        layout.addWidget(self.custom_table, 1)
-        return box
+        self.custom_splitter = QSplitter(Qt.Vertical)
+        self.custom_splitter.setChildrenCollapsible(False)
+        self.custom_splitter.addWidget(editor)
+        self.custom_splitter.addWidget(self.custom_table)
+        self.custom_splitter.setStretchFactor(0, 30)
+        self.custom_splitter.setStretchFactor(1, 70)
+        self.custom_splitter.setSizes([300, 700])  # about 30/70
+        page_layout.addWidget(self.custom_splitter, 1)
+        return page
 
     def _build_export_tab(self) -> QWidget:
         tab = QWidget()
@@ -853,10 +994,10 @@ class MainWindow(QMainWindow):
         self.rules_label.setText(f"Rule set: {self.rules_source} ({len(self.rules)} rules)")
 
     def _show_score(self, score: QualityScore | None) -> None:
-        for key, title in SCORE_TITLES.items():
+        for key in SCORE_TITLES:
             value = getattr(score, key) if score is not None else None
             text = "n/a" if value is None else f"{value:.1f}" + (" / 100" if key == "overall" else "%")
-            self.score_labels[key].setText(f"{title}: <b>{text}</b>")
+            self.score_bars[key].set_score(value, text)
 
     def _refresh_failed_rows(self) -> None:
         """Rebuild the rule dropdown from the latest validation, keeping the selection if it still applies."""
@@ -968,9 +1109,8 @@ class MainWindow(QMainWindow):
             "KPIs not calculated for the current data. Click <b>Run KPI queries</b>." if self.working_df is not None
             else "Load data first.")
         self.exclusion_label.setText("")
-        self.country_chart.clear("Run KPI queries to draw this chart")
-        self.month_chart.clear("Run KPI queries to draw this chart")
-        self.pareto_chart.clear("Run KPI queries to draw this chart")
+        for chart in (self.country_chart, self.month_chart, self.pareto_chart):
+            chart.clear(CHART_HINT)
         self._show_selected_query()
 
     def _show_selected_query(self) -> None:
@@ -986,7 +1126,7 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------ custom SQL
     def _custom_note(self, text: str, error: bool = False, detail: str = "") -> None:
         """The line under the editor: a row count, or an error sentence plus its technical detail."""
-        self.custom_message.setStyleSheet("color: #a61b1b;" if error else "color: #555;")
+        theme.set_role(self.custom_message, "error" if error else "muted")
         self.custom_message.setText(text + (f"\nTechnical detail: {detail}" if detail else ""))
 
     def _clear_custom_result(self, note: str = "") -> None:
@@ -1053,36 +1193,34 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Export complete", f"Saved {total:,} rows:\n{path}")
 
     def _draw_charts(self) -> None:
+        """Draw the three charts from the stored KPI results in the active theme (no queries run)."""
+        p = theme.active()
         euro = FuncFormatter(lambda v, _pos: f"€{v / 1000:,.0f}k")
 
         by_country = self.kpi_results.get("by_country")
-        ax = self.country_chart.ax
-        ax.clear()
-        ax.set_axis_on()
         if by_country is not None and not by_country.empty:
+            ax = self.country_chart.reset()
             data = by_country.sort_values("net_revenue")
-            ax.barh(data["country"], data["net_revenue"], color="#2f6f9f")
+            ax.barh(data["country"], data["net_revenue"], color=p.chart_bar)
             ax.xaxis.set_major_formatter(euro)
             ax.set_title("Net revenue by country")
-            ax.grid(axis="x", alpha=0.3)
+            theme.style_axes(ax, value_axis="x")
             self.country_chart.draw_idle()
         else:
             self.country_chart.clear("No valid rows for this chart")
 
         by_month = self.kpi_results.get("by_month")
-        ax = self.month_chart.ax
-        ax.clear()
-        ax.set_axis_on()
         if by_month is not None and not by_month.empty:
+            ax = self.month_chart.reset()
             positions = list(range(len(by_month)))
-            ax.plot(positions, by_month["net_revenue"], marker="o", color="#2f6f9f", linewidth=1.5)
+            ax.plot(positions, by_month["net_revenue"], marker="o", markersize=4, color=p.chart_line, linewidth=1.6)
             ax.yaxis.set_major_formatter(euro)
             ax.set_title("Net revenue by month (valid dates only)")
             step = max(1, len(by_month) // 8)
             ticks = list(range(0, len(by_month), step))
             ax.set_xticks(ticks)
             ax.set_xticklabels([by_month["month"].iloc[i] for i in ticks], rotation=45, ha="right")
-            ax.grid(alpha=0.3)
+            theme.style_axes(ax, value_axis="y")
             self.month_chart.draw_idle()
         elif "order_date" in self.unavailable_columns:
             self.month_chart.clear("Monthly trend: n/a (order_date not available)")
@@ -1093,25 +1231,26 @@ class MainWindow(QMainWindow):
         if pareto is not None and not pareto.empty and pareto["net_revenue"].sum() > 0:
             ax = self.pareto_chart.reset()
             positions = list(range(len(pareto)))
-            ax.bar(positions, pareto["net_revenue"], color="#2f6f9f")
+            ax.bar(positions, pareto["net_revenue"], color=p.chart_bar)
             ax.yaxis.set_major_formatter(euro)
             ax.set_title("Pareto: net revenue by product")
-            step = max(1, len(pareto) // 8)
-            ticks = list(range(0, len(pareto), step))
-            ax.set_xticks(ticks)
-            ax.set_xticklabels([_short_label(pareto["product"].iloc[i]) for i in ticks], rotation=45, ha="right",
-                               fontsize=8)
-            ax.grid(axis="y", alpha=0.3)
+            # Every bar keeps its tick, but only the top products (highest revenue first) are named.
+            ax.set_xticks(positions)
+            ax.set_xticklabels([_short_label(name) if i < PARETO_LABELLED else ""
+                                for i, name in enumerate(pareto["product"])],
+                               rotation=35, ha="right", rotation_mode="anchor")
+            theme.style_axes(ax, value_axis="y")
             share = ax.twinx()
-            share.plot(positions, pareto["cum_share_pct"], marker="o", markersize=3, color="#c0504d", linewidth=1.5)
-            share.axhline(80, linestyle=":", color="#555", linewidth=1)
+            share.plot(positions, pareto["cum_share_pct"], marker="o", markersize=3, color=p.chart_cumulative,
+                       linewidth=1.6)
+            share.axhline(80, linestyle=":", color=p.chart_guide, linewidth=1.2)
             share.set_ylim(0, 105)
             share.yaxis.set_major_formatter(FuncFormatter(lambda v, _pos: f"{v:.0f}%"))
+            theme.style_secondary_axes(share)
             self.pareto_chart.draw_idle()
         else:
             self.pareto_chart.clear("No valid rows for this chart")
 
-    # ------------------------------------------------------------------ exports
     def _run_export(self, description: str, func, *args) -> object | None:
         try:
             with self._busy(f"{description}..."):
@@ -1231,6 +1370,8 @@ class MainWindow(QMainWindow):
                        *self.export_buttons]:
             widget.setEnabled(has_data)
         self._refresh_state_label()
+        for stack in self.empty_stacks:
+            stack.setCurrentIndex(1 if has_data else 0)
         self.export_failed_btn.setEnabled(has_data)
         if not has_data:
             self.import_info.setText("No file loaded.")
@@ -1264,7 +1405,64 @@ class MainWindow(QMainWindow):
         self.reset_btn.setEnabled(self.duplicates_removed > 0 or bool(self.normalized_columns))
 
     def show_about(self) -> None:
-        QMessageBox.about(self, "About DataBizex", ABOUT_TEXT)
+        self._about_dialog().exec()
+
+    def _about_dialog(self) -> QDialog:
+        dialog = QDialog(self)
+        dialog.setWindowTitle("About DataBizex")
+        outer = QVBoxLayout(dialog)
+        outer.setContentsMargins(20, 18, 20, 14)
+        body = QHBoxLayout()
+        body.setSpacing(18)
+        logo = QLabel()
+        logo.setPixmap(QPixmap(str(icon_path())).scaled(88, 88, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        logo.setAlignment(Qt.AlignTop)
+        body.addWidget(logo)
+        text = QVBoxLayout()
+        name = QLabel("DataBizex")
+        theme.set_role(name, "title")
+        version = QLabel(f"Version {__version__} — Retail Analytics & Data Quality")
+        theme.set_role(version, "muted")
+        about = QLabel(ABOUT_TEXT)
+        about.setWordWrap(True)
+        about.setMinimumWidth(360)
+        for widget in (name, version, about):
+            text.addWidget(widget)
+        text.addStretch(1)
+        body.addLayout(text, 1)
+        outer.addLayout(body)
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok)
+        theme.mark_primary(buttons.button(QDialogButtonBox.Ok))
+        buttons.accepted.connect(dialog.accept)
+        outer.addWidget(buttons)
+        return dialog
+
+    # ------------------------------------------------------------------ theme
+    def set_theme_mode(self, mode: str) -> None:
+        """Switch to light, dark or system, remember it, and restyle everything on screen."""
+        settings.set_value(settings.THEME_KEY, mode)
+        app = QApplication.instance()
+        if app is not None:
+            theme.apply_theme(app, mode)
+        self._after_theme_change()
+
+    def _on_system_colour_scheme(self, *_args) -> None:
+        app = QApplication.instance()
+        if app is not None and theme.active_mode() == theme.SYSTEM_MODE:
+            theme.apply_theme(app, theme.SYSTEM_MODE)
+            self._after_theme_change()
+
+    def _after_theme_change(self) -> None:
+        """Repaint what caches colours: charts (from the stored results, no queries run) and tables."""
+        for action in self.theme_actions.actions():
+            action.setChecked(action.data() == theme.active_mode())
+        if self.kpi_results:
+            self._draw_charts()
+        else:
+            for chart in (self.country_chart, self.month_chart, self.pareto_chart):
+                chart.clear(chart.message or CHART_HINT)
+        for table in self.findChildren(DataTable):
+            table.viewport().update()
 
     def closeEvent(self, event) -> None:  # noqa: N802 (Qt API)
         self.db.close()

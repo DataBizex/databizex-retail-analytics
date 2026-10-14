@@ -30,6 +30,8 @@ if errorlevel 1 (
 
 echo [4/4] Packaging with PyInstaller ...
 python -m PyInstaller --noconfirm --clean --onedir --windowed --name DataBizex ^
+    --icon "assets\icon.ico" ^
+    --add-data "assets;assets" ^
     --add-data "sample_data;sample_data" ^
     --add-data "powerbi;powerbi" ^
     --add-data "rules;rules" ^
@@ -46,6 +48,8 @@ if /i "%~1"=="--onefile" (
     echo [extra] Packaging single-file executable ...
     python -m PyInstaller --noconfirm --clean --onefile --windowed --name DataBizex ^
         --workpath build\onefile ^
+        --icon "assets\icon.ico" ^
+        --add-data "assets;assets" ^
         --add-data "sample_data;sample_data" ^
         --add-data "powerbi;powerbi" ^
         --add-data "rules;rules" ^

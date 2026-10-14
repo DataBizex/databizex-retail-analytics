@@ -23,6 +23,7 @@ from app.data.formats import (
     options_problem,
 )
 from app.data.layout_memory import REMEMBERED_NOTE
+from app.ui import theme
 
 DETECTED_SUFFIX = "  (detected)"
 
@@ -47,7 +48,8 @@ class ImportOptionsDialog(QDialog):
         date_columns = [c for c, f in detection.date_columns.items() if f == detected.date_format]
         if date_columns:
             lines.append("&nbsp;&nbsp;Dates in: " + ", ".join(date_columns))
-        lines += [f"&nbsp;&nbsp;<span style='color:#8a4b00'>{note}</span>" for note in detection.notes]
+        warning = theme.active().warning_text  # rich text: the colour is fixed when the dialog opens
+        lines += [f"&nbsp;&nbsp;<span style='color:{warning}'>{note}</span>" for note in detection.notes]
         lines.append("Nothing is applied until you confirm. Change any setting that is wrong. "
                      "Numbers and dates are converted in the working copy only; your file and the "
                      "original import are not changed.<br>Cancel loads the file as read, without "
@@ -74,6 +76,7 @@ class ImportOptionsDialog(QDialog):
         layout.addLayout(form)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        theme.mark_primary(buttons.button(QDialogButtonBox.Ok))
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)

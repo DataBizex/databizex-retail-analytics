@@ -152,6 +152,7 @@ def test_window_custom_sql_editor(kpi_csv, tmp_path, monkeypatch):
         kpi_tab = next(win.tabs.widget(i) for i in range(win.tabs.count())
                        if win.tabs.widget(i).isAncestorOf(win.custom_sql))
         win.tabs.setCurrentWidget(kpi_tab)  # shortcuts only reach a visible editor in the active window
+        win.kpi_views.setCurrentIndex(1)  # the Custom SQL view
         win.show()
         assert QTest.qWaitForWindowActive(win, 2000)
         win.custom_sql.setFocus()

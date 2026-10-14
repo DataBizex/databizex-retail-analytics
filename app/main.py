@@ -15,12 +15,14 @@ import tempfile
 import traceback
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QTimer
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from app import APP_NAME, __version__
+from app import APP_NAME, __version__, settings
 from app.exports.exporter import export_excel, generate_powerbi_package
-from app.paths import user_data_dir
+from app.paths import icon_path, user_data_dir
+from app.ui import theme
 
 logger = logging.getLogger("databizex")
 
@@ -51,13 +53,22 @@ def install_exception_hook() -> None:
     sys.excepthook = hook
 
 
-def create_application(argv: list[str]) -> QApplication:
-    """QApplication with a fixed light colour scheme so the UI looks the same
-    whether Windows runs in light or dark mode."""
+def saved_theme_mode() -> str:
+    """The theme chosen under View > Theme (settings.json); System when unset or unknown."""
+    mode = settings.get(settings.THEME_KEY, theme.SYSTEM_MODE)
+    return mode if mode in theme.MODES else theme.SYSTEM_MODE
+
+
+def create_application(argv: list[str], theme_mode: str | None = None) -> QApplication:
+    """QApplication with the app icon and the saved (or given) light / dark / system theme:
+    Fusion style, the theme's style sheet and palette, Segoe UI."""
     app = QApplication.instance() or QApplication(argv)
     app.setApplicationName(APP_NAME)
     app.setApplicationVersion(__version__)
-    app.styleHints().setColorScheme(Qt.ColorScheme.Light)
+    icon = icon_path()
+    if icon.is_file():
+        app.setWindowIcon(QIcon(str(icon)))
+    theme.apply_theme(app, theme_mode or saved_theme_mode())
     return app
 
 

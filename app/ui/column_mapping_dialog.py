@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 
 from app.data.column_mapping import EXPECTED_COLUMNS, NOT_AVAILABLE_LABEL, mapping_problems
 from app.data.layout_memory import REMEMBERED_NOTE
+from app.ui import theme
 
 
 class ColumnMappingDialog(QDialog):
@@ -51,6 +52,7 @@ class ColumnMappingDialog(QDialog):
         layout.addLayout(form)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        theme.mark_primary(buttons.button(QDialogButtonBox.Ok))
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)

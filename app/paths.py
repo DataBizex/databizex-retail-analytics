@@ -38,3 +38,8 @@ def user_data_dir() -> Path:
     except OSError:
         folder = Path(tempfile.gettempdir())
     return folder
+
+
+def icon_path() -> Path:
+    """The application icon (assets/icon.png), bundled next to the other resources."""
+    return resource_path("assets", "icon.png")

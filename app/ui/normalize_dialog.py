@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from app.data.normalize import VariantGroup
+from app.ui import theme
 
 
 def _shown(value: str) -> str:
@@ -71,6 +72,7 @@ class NormalizeDialog(QDialog):
         buttons = QDialogButtonBox(QDialogButtonBox.Cancel)
         apply_btn = buttons.addButton("Apply", QDialogButtonBox.AcceptRole)
         apply_btn.setDefault(True)
+        theme.mark_primary(apply_btn)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)

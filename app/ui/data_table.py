@@ -14,13 +14,18 @@ from PySide6.QtGui import QBrush, QColor
 from PySide6.QtWidgets import QAbstractItemView, QHeaderView, QTableView
 
 from app.data.display import format_whole
+from app.ui import theme
 
-STATUS_COLOURS = {
-    "OK": QColor("#d8f0dc"),
-    "Issue": QColor("#fde2c8"),
-    "Unavailable": QColor("#e4e4e4"),
-}
-FAILED_CELL_COLOUR = QColor("#f8cccc")  # light red; black text stays readable
+
+def status_colour(status: str) -> QColor | None:
+    """Background of a quality-summary status cell in the active theme."""
+    p = theme.active()
+    colour = {"OK": p.status_ok, "Issue": p.status_issue, "Unavailable": p.status_unavailable}.get(status)
+    return QColor(colour) if colour else None
+
+
+def failed_cell_colour() -> QColor:
+    return QColor(theme.active().failed_cell)
 
 
 class DataFrameModel(QAbstractTableModel):
@@ -70,9 +75,9 @@ class DataFrameModel(QAbstractTableModel):
         if role == Qt.TextAlignmentRole and isinstance(value, numbers.Number) and not isinstance(value, bool):
             return int(Qt.AlignRight | Qt.AlignVCenter)
         if role == Qt.BackgroundRole and (index.row(), index.column()) in self._highlight:
-            return QBrush(FAILED_CELL_COLOUR)
+            return QBrush(failed_cell_colour())
         if role == Qt.BackgroundRole and self._df.columns[index.column()] == "status":
-            colour = STATUS_COLOURS.get(str(value))
+            colour = status_colour(str(value))
             return QBrush(colour) if colour else None
         return None
 
@@ -98,7 +103,8 @@ class DataTable(QTableView):
         self.setAlternatingRowColors(True)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         self.horizontalHeader().setStretchLastSection(stretch_last)
-        self.verticalHeader().setDefaultSectionSize(22)
+        self.verticalHeader().setDefaultSectionSize(26)
+        self.horizontalHeader().setDefaultAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
     def show_frame(self, df: pd.DataFrame | None, float_decimals: int | None = None,
                    highlight: set[tuple[int, str]] | None = None,

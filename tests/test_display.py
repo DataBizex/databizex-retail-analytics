@@ -78,7 +78,7 @@ def test_table_model_shows_whole_numbers_and_empty_nan():
     from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QApplication
 
-    from app.ui.data_table import FAILED_CELL_COLOUR, DataFrameModel
+    from app.ui.data_table import DataFrameModel, failed_cell_colour
 
     app = QApplication.instance() or QApplication([])
     df = pd.DataFrame({"quantity": [6.0, None], "price": [6.0, 4.5]})
@@ -86,7 +86,7 @@ def test_table_model_shows_whole_numbers_and_empty_nan():
     model.set_frame(df, highlight={(1, "price")}, whole_number_columns=whole_number_columns(df))
     shown = [[model.data(model.index(r, c)) for c in range(2)] for r in range(2)]
     assert shown == [["6", "6.0"], ["", "4.5"]]
-    assert model.data(model.index(1, 1), Qt.BackgroundRole).color() == FAILED_CELL_COLOUR
+    assert model.data(model.index(1, 1), Qt.BackgroundRole).color() == failed_cell_colour()
     assert model.data(model.index(0, 1), Qt.BackgroundRole) is None
     assert df["quantity"].dtype == float  # the data itself is unchanged
     app.processEvents()

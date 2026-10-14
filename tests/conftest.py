@@ -66,12 +66,13 @@ def quality_df(quality_csv: Path) -> pd.DataFrame:
 
 @pytest.fixture(autouse=True)
 def isolated_layout_memory(tmp_path: Path, monkeypatch) -> Path:
-    """Keep layout_memory.json and recent_files.json out of the real user data folder."""
+    """Keep layout_memory.json, recent_files.json and settings.json out of the real user data folder."""
     import app.data.layout_memory as layout_memory
     import app.data.recent_files as recent_files
+    import app.settings as settings
 
     folder = tmp_path / "user_data"
     folder.mkdir()
-    monkeypatch.setattr(layout_memory, "user_data_dir", lambda: folder)
-    monkeypatch.setattr(recent_files, "user_data_dir", lambda: folder)
+    for module in (layout_memory, recent_files, settings):
+        monkeypatch.setattr(module, "user_data_dir", lambda: folder)
     return folder
