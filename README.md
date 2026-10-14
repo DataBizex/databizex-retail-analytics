@@ -317,7 +317,6 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 - No free-form SQL editor; only the predefined queries run.
 - Executables are not code-signed, so Windows SmartScreen may warn on first launch from a
   download.
-- No CI: the tests run locally and in `build_windows.bat`, not automatically on each push.
 - Legacy `.xls` files are not supported (save as `.xlsx` or `.csv`), and only the first
   sheet of an Excel file is read.
 - Dates must be `YYYY-MM-DD`, `DD.MM.YYYY`, `DD/MM/YYYY` or `MM/DD/YYYY` (or real Excel
@@ -339,7 +338,6 @@ The same guide and data dictionary are in [powerbi/](powerbi/).
 
 - Remember column mappings and import options per file layout.
 - Removing duplicates by key columns (detection already works via `unique` rules).
-- Continuous integration running the test suite on each push.
 - Read-only custom SQL editor with a SELECT-only guard.
 - Background thread for loading very large files.
 - Windows installer with Inno Setup once the build is stable.
