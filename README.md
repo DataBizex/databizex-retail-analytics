@@ -1,4 +1,4 @@
-﻿# DataBizex — Retail Analytics & Data Quality
+# DataBizex — Retail Analytics & Data Quality
 
 A Windows desktop tool that checks retail sales exports for quality problems,
 calculates business KPIs with SQL, and prepares clean data for Power BI.
